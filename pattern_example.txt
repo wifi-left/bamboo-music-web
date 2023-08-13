@@ -1,0 +1,30 @@
+<li songid="0" songname="Minecraft" singer="C418" singerid="0" album="Minecraft" albumid="0" releasedata="2023-6-30">
+    <div class="left-part">
+        <img class="list-left-img" src="../localmusicmanager/apis/cover.php?id=494" />
+    </div>
+    <div class="right-part">
+        <div class="list-line-ele"><b>歌曲名：</b><span class="song-name">Minecraft</span></div>
+        <div class="list-line-ele"><b>歌手：</b><span class="singer-name">C418</span></div>
+        <div class="list-line-ele"><b>专辑：</b><span class="album-name">Minecraft</span></div>
+        <div class="list-line-ele"><b>出版时间：</b><span class="release-date">2023-6-30</span>
+        </div>
+        <div class="list-line-ele"><b>附加信息：</b><span class="adition-msg">听我说谢谢你，因为有你，感恩了四季！我我我我我我我我我我我我我文。</span>
+        </div>
+        <div class="action-bar">
+            <button title="播放" class="button btn-play fa fa-play-circle"></button>
+            <button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle"></button>
+            <button title="分享" class="button btn-add-list fa fa-share"></button>
+        </div>
+</li>
+
+
+<li songid="0" songname="Minecraft" singer="C418" singerid="0" album="Minecraft" albumid="0" releasedata="2023-6-30">
+    <div class="right-part">
+        <div class="list-line-ele"><b class="song-name">Minecraft</b></div>
+        <div class="list-line-ele"><span class="singer-name">C418</div>
+        <div class="list-line-ele"><b>简介：</b><span class="adition-msg">听我说谢谢你，因为有你，感恩了四季！我我我我我我我我我我我我我文。</span>
+        </div>
+        <div class="list-line-ele small-gray-text"><b>合集：</b><span
+                class="album-name">Minecraft</span><br /><b>时间：</b><span class="release-date">2023-6-30</span></div>
+
+</li>

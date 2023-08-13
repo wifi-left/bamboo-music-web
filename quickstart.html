@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bamboo Music 竹子音乐</title>
+    <script src="./static/js/checkie.js"></script>
+    <link href="./static/css/element_style.css" rel="stylesheet" />
+    <style>
+        .app-root {
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            background-color: rgb(30, 30, 30);
+            color: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 16px 16px 16px 16px;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .content {
+            user-select: text;
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            position: absolute;
+            top: 100px;
+            left: 32px;
+            overflow: auto;
+            height: calc(100% - 192px);
+            width: calc(100% - 72px);
+        }
+
+        .buttonbar {
+            bottom: 0;
+            right: 0;
+            padding-right: 32px;
+            padding-bottom: 32px;
+            position: absolute;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="app-root">
+        <h1>快速开始</h1>
+        <div class="content">
+            <ul style="list-style:decimal;">
+                <li>
+                    <input type="checkbox" id="Skuroshiro" name="kuroshiro" class="s-c" />
+                    <label for="Skuroshiro"><b>启用
+                            Kuroshiro</b></label><br />这是一个罗马音标记工具，启用后可以标注罗马音、平假名、片假名。但启用会导致一定的加载延迟。
+                </li>
+            </ul>
+        </div>
+        <div class="buttonbar">
+            <button class="button-green" onclick="saveAndContinue();">保存并继续</button>
+        </div>
+
+    </div>
+    <script>
+        let hasReadme = localStorage.getItem("hasReadme");
+        if (hasReadme != "true") {
+            location = "./readme.html";
+        }
+        function saveAndContinue() {
+            var eles = document.getElementsByClassName("s-c");
+            for (let i = 0; i < eles.length; i++) {
+                let sn = eles[i].getAttribute("name");
+                let enable = eles[i].checked + "";
+                localStorage.setItem(sn, enable);
+            }
+            let url = "./index.html";
+            url = getQueryString("return");
+            if(url == null) url = "./index.html";
+            location = url;
+        }
+        function getQueryString(name, url = window.location.search) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = url.substring(1).match(reg);
+            if (r != null) return decodeURIComponent(r[2]); return null;
+        }
+    </script>
+</body>
+
+</html>

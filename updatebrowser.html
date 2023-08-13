@@ -1,0 +1,141 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Gamom's Website</title>
+    <style>
+        #loading {
+            background-color: aquamarine;
+            /* color: azure; */
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        
+        * {
+            transition: 0.5s;
+            overflow-y: none;
+            overflow-x: none;
+            user-select: none;
+        }
+        
+        .center-title {
+            /* color: white; */
+            font-family: "console";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateY(-50%) translateX(-50%);
+        }
+        
+        #topicon {
+            position: absolute;
+            left: 16px;
+            top: 6px;
+            height: 48px;
+            width: 48px;
+            background-image: url("img/icon.png");
+            background-size: 100%;
+        }
+        
+        #topbar {
+            padding-left: 2em;
+            background-color: rgb(220, 252, 241);
+            width: calc(100% - 2em);
+            height: 60px;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        /* #centerlog {
+            width: 200px;
+            height: 200px;
+            background-image: url("img/icon.png");
+            background-size: 100%;
+            text-align: center;
+        } */
+        
+        #index {
+            padding: 2em 2em 2em 2em;
+            background-image: linear-gradient(135deg, rgb(220, 252, 241), aquamarine);
+            width: calc(100% - 4em);
+            height: calc(100% - 4em);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        #cltext {
+            color: #333;
+        }
+        
+        #cltext:hover {
+            color: rgb(104, 104, 104);
+        }
+        
+        #textarea {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            padding: 4em 4em 4em 4em;
+            width: calc(100% - 8em);
+            height: auto;
+        }
+        
+        .button-o {
+            color: #333;
+            font-weight: bold;
+            font-family: "console";
+            font-size: 26px;
+            outline: none;
+            border: none;
+            border-bottom: 4px solid #333;
+            width: 180px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            line-height: 60px;
+        }
+        
+        .button-o:hover,
+        .button-o:active {
+            color: #b6b6b6;
+            border-bottom: 4px solid #b6b6b6;
+        }
+        
+        .windows {
+            background: rgba(10, 10, 10, 0.8);
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body bgcolor="azure">
+    <div id="index">
+        <div class="center-title" style="text-align:center;">
+            <h1 class="title" id="cltext">您的浏览器已经过时！</h1><br/>
+            <b id="detext">我们的网站对您当前的浏览器不太兼容。请更新您的浏览器！</b>
+        </div>
+
+    </div>
+
+</body>
+<script>
+eval("()=>{}");
+eval("let a = \"111\"");
+eval("var a = `111`");
+document.getElementById("cltext").innerText = "出现了一点错误";
+document.getElementById("detext").innerText = "您不应该会被重定向到此页面，这个页面只有在您的浏览器不兼容时才会出现！但经过检测，您的浏览器是符合要求的！";
+</script>
+
+</html>

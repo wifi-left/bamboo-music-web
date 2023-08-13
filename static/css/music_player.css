@@ -1,0 +1,560 @@
+:root {
+    /* 设置变量 */
+    --norlrccolor: rgb(209, 209, 209);
+    --sellrccolor: rgb(23, 236, 148);
+    --norlineheight: 28px;
+    --sellineheight: 40px;
+    --norfontsize: 16px;
+    --selfontsize: 24px;
+    --lrc-client-height: 0px;
+    --lrc-client-width: 0px;
+}
+
+.lrc-line-show {
+    line-height: var(--norlineheight);
+    color: var(--norlrccolor);
+    font-size: var(--norfontsize);
+    /* line-height: var(--norlineheight); */
+    overflow: hidden;
+    width: 100%;
+    pointer-events: none;
+    display: inline-block;
+}
+
+.lrc-line-sel-show {
+    line-height: var(--sellineheight);
+    color: var(--sellrccolor);
+    display: inline-block;
+    font-size: var(--selfontsize);
+    pointer-events: none;
+    width: 100%;
+    overflow: hidden;
+    width: 100%;
+    /* line-height: var(--norlineheight); */
+}
+
+#pane-last-music {
+    position: absolute;
+    left: 24px;
+    bottom: 56px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    /* pointer-events: none; */
+    color: white;
+    text-align: center;
+}
+
+#pane-pause-music {
+    position: absolute;
+    left: 72px;
+    bottom: 48px;
+    width: 48px;
+    height: 48px;
+}
+
+#pane-next-music {
+    position: absolute;
+    left: 136px;
+    bottom: 56px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    /* border: none; */
+    color: white;
+    text-align: center;
+}
+
+.small-music-control {
+    right: 16px;
+    bottom: 16px;
+    padding: 4px 4px 4px 4px;
+    width: auto;
+    height: 88px;
+    background: none;
+    z-index: 99;
+    position: fixed;
+}
+
+#mute-volume {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    bottom: 56px;
+    padding: 0;
+    right: 120px;
+}
+
+
+#playing-lrc-area {
+    /* position: absolute; */
+    /* width:100%; */
+    /* top:0; */
+    left: 0;
+    text-align: center;
+    height: calc(100% - 188px);
+}
+
+.musicpane-control {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    height: 120px;
+    /* background-color: rgba(255, 255, 255, 0.5); */
+}
+
+#play-progress {
+    /* width: calc(100% - 520px); */
+    width: calc(100% - 392px);
+    position: absolute;
+    left: 184px;
+    top: 50px;
+}
+
+#player-time-current {
+    position: absolute;
+    top: 32px;
+    width: 40px;
+    display: inline-block;
+    text-align: center;
+    color: #dfdfdf;
+    font-size: 14px;
+    right: 260px;
+}
+
+#player-time-xie {
+    position: absolute;
+    top: 32px;
+    font-size: 14px;
+    right: 250px;
+    width: 12px;
+    color: #dfdfdf;
+    display: inline-block;
+    text-align: center;
+}
+
+#player-time-total {
+    position: absolute;
+    font-size: 14px;
+    color: #dfdfdf;
+    width: 40px;
+    display: inline-block;
+    text-align: center;
+    top: 32px;
+    right: 212px;
+}
+
+#volume-set {
+    width: 84px;
+    position: absolute;
+    right: 24px;
+    display: inline-block;
+    top: 38px;
+}
+
+#repeat-mode {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    bottom: 56px;
+    padding: 0;
+    right: 160px;
+}
+
+#pane-change-lrc {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    bottom: 56px;
+    padding: 0;
+    right: 112px;
+}
+
+input[type=range] {
+    margin-top: 8px;
+    /*上部分的填充值*/
+    outline: none;
+    -webkit-appearance: none;
+    /*清除系统默认样式*/
+    appearance: none;
+    width: 100%;
+    background: linear-gradient(#ffffff, #e7e7e7) no-repeat, rgba(182, 182, 182, 0.5);
+    /*背景颜色，俩个颜色分别对应上下*/
+    background-size: 0% 100%;
+    /*设置左右宽度比例*/
+    height: 4px;
+    border-radius: 0px;
+}
+
+.pane-music-name {
+    position: absolute;
+    display: inline-block;
+    width: calc(100% - 500px);
+    top: 28px;
+    left: 192px;
+    text-align: left;
+}
+
+#pane-music-info-singer {
+    font-size: 14px;
+    color: #a3a3a3;
+    overflow: hidden;
+    word-break: break-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    /* max-width: calc(400px); */
+    max-width: calc(50% - 8px);
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+#pane-music-info-singer:before {
+    content: ' - ';
+}
+
+.page-info-singer-href {
+    font-size: 12px;
+    cursor: pointer;
+    /* font-weight: bold; */
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+#pane-music-info-name {
+    word-break: break-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    /* max-width: calc(60% - 392px); */
+    max-width: calc(50% - 16px);
+    overflow: hidden;
+    display: inline-block;
+    font-size: 16px;
+    vertical-align: middle;
+    color: white;
+    font-weight: bold;
+}
+
+.player-range {
+    display: inline-block;
+    position: relative;
+    top: -4px;
+    vertical-align: middle;
+}
+
+/*拖动块的样式*/
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    /*清除系统默认样式*/
+    height: 16px;
+    /*拖动块高度*/
+    width: 16px;
+    /*拖动块宽度*/
+    background: #ffffff;
+    /*拖动块背景*/
+    border-radius: 50%;
+    /*外观设置为圆形*/
+    border: solid 1px #ffffff;
+    /*设置边框*/
+}
+
+/* 
+input[type=range]::-webkit-slider-thumb:hover {
+    background: #cfcfcf;
+    border: solid 1px #b4b4b4;
+}
+
+input[type=range]::-webkit-slider-thumb:active {
+    background: #a3a3a3;
+    border: solid 1px #aaaaaa;
+} */
+#xc-next-music {
+    position: absolute;
+    right: 60px;
+    bottom: 4px;
+}
+
+#xc-last-music {
+    position: absolute;
+    right: 172px;
+    bottom: 4px;
+}
+
+#xc-pause-music {
+    position: absolute;
+    right: 116px;
+    bottom: 4px;
+}
+
+#xc-show-player-pane {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+}
+
+#show-other-control {
+    display: inline-block;
+}
+
+#music-lrc-info-text-name {
+    font-weight: bold;
+    /* cursor: pointer; */
+    font-size: 22px;
+    display: inline-block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#music-lrc-info-text-singer {
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-block;
+    /* width:100%; */
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: middle;
+    max-width:calc(100% - 80px);
+    text-overflow: ellipsis;
+}
+
+#music-lrc-info-text-album {
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-block;
+    /* width:100%; */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    max-width:calc(100% - 48px);
+}
+
+#music-lrc-info-tv {
+    display: none;
+}
+
+#playing-lrc-area .lrc-left-part {
+    width: calc(40% - 4px);
+    /* max-width: 600px; */
+    position: absolute;
+    top: 0;
+    left: 4px;
+    height: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+#lrc-show-root {
+    letter-spacing: -0.5em;
+    transition: 200ms;
+    line-height: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    height: 100%;
+    padding-top: calc(var(--lrc-client-height) / 2);
+    padding-bottom: calc(var(--lrc-client-height) / 2);
+    overflow: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+#lrc-show-root .lrc {
+    transition: 200ms;
+    letter-spacing: 0;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    width: 100%;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    height: var(--norlineheight);
+    line-height: var(--norlineheight);
+    font-size: var(--norfontsize);
+    color: var(--norlrccolor);
+
+}
+
+.lrc-text {
+    cursor: pointer;
+}
+
+#lrc-show-root .lrc-active {
+    /* transition: 250ms; */
+    line-height: var(--sellineheight);
+    font-size: var(--selfontsize);
+    color: var(--sellrccolor);
+    word-break: normal;
+    white-space: normal;
+    overflow: hidden;
+    height: auto;
+}
+
+.music-player-info-root {
+    height: auto;
+    width: 100%;
+}
+
+#music-lrc-info-pic {
+    /* width:80%; */
+    width: 240px;
+    height: 240px;
+
+}
+
+#playing-lrc-area .lrc-right-part {
+    width: calc(60% - 4px);
+    height: 100%;
+    /* max-width: 600px; */
+    position: absolute;
+    top: 0;
+    left: 40%;
+}
+
+.music-lrc-info-text-root {
+    width: 100%;
+    height: 160px;
+    margin-top: 8px;
+}
+
+.music-lrc-info-control {
+    margin-top: 8px;
+}
+
+.music-info-control-button {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+}
+
+@media only screen and (min-width: 1200px) {
+    #music-lrc-info-pic {
+        /* width:80%; */
+        width: 320px;
+        height: 320px;
+    }
+}
+
+@media only screen and (min-width: 1600px) {
+    .lrc-left-part {
+        /* width: calc(40% - 4px); */
+        width: 560px;
+    }
+
+    .lrc-right-part {
+        width: calc(100% - 568px);
+        top: 0;
+        left: 560px;
+    }
+
+    #music-lrc-info-pic {
+        /* width:80%; */
+        width: 400px;
+        height: 400px;
+
+    }
+}
+
+
+/* 给移动设备做适配 */
+@media only screen and (max-width: 948px) {
+
+    #playing-lrc-area .lrc-left-part {
+        /* width: calc(40% - 4px); */
+        /* width: 560px;
+         */
+        display: none;
+    }
+
+    #playing-lrc-area .lrc-right-part {
+        width: calc(100% - 16px);
+        top: 0;
+        left: 12px;
+    }
+
+    #pane-last-music {
+
+        left: calc(50% - 80px);
+        bottom: 32px;
+    }
+
+    #show-other-control {
+        display: inline-block;
+    }
+
+    #pane-pause-music {
+        position: absolute;
+        /* left: 72px; */
+        left: calc(50% - 24px);
+
+        bottom: 24px;
+    }
+
+    #mute-volume {
+        right: 48px;
+        bottom: 32px;
+    }
+
+    #play-progress {
+        left: 48px;
+        top: 16px;
+        width: calc(100% - 104px);
+    }
+
+    #player-time-current {
+        left: 4px;
+        top: 16px;
+    }
+
+    #player-time-xie {
+        /* right:94px; */
+        /* top:56px; */
+        display: none;
+    }
+
+    #player-time-total {
+        right: 4px;
+        top: 16px;
+    }
+
+    .pane-music-name {
+        display: none;
+    }
+
+    #repeat-mode {
+        left: 48px;
+        bottom: 32px;
+    }
+
+    #volume-set {
+        display: none;
+    }
+
+    #pane-next-music {
+        position: absolute;
+        /* left: 128px; */
+        left: calc(50% + 48px);
+        bottom: 32px;
+    }
+}

@@ -1,0 +1,180 @@
+button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.button {
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    height: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border: 1px solid rgb(113, 113, 113);
+    background-color: rgba(0, 0, 0, 0);
+
+}
+
+
+.button:hover {
+    border: 1px solid rgb(141, 141, 141);
+    background-color: rgb(92, 92, 92);
+}
+
+.button:active {
+    border: 1px solid rgb(255, 255, 255);
+    background-color: rgb(81, 81, 81);
+}
+
+.button:focus {
+    border: 1px solid rgb(255, 255, 255);
+    /* background-color: rgb(81, 81, 81); */
+}
+
+.input:disabled {
+    color: rgb(109, 109, 109);
+    border: 1px solid rgb(113, 113, 113);
+}
+
+.button-o {
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    height: 48px;
+    width: 48px;
+    /* padding-left: 16px; */
+    text-align: center;
+    border-radius: 12px;
+    /* padding-right: 16px; */
+    border: 1px solid rgb(113, 113, 113);
+    background-color: rgba(30, 30, 30);
+
+}
+
+.button-o:disabled {
+    color: rgb(109, 109, 109);
+    border: 1px solid rgb(113, 113, 113);
+}
+
+.button-o:hover {
+    border: 1px solid rgb(141, 141, 141);
+    background-color: rgb(92, 92, 92);
+}
+
+.button-o:active {
+    border: 1px solid rgb(255, 255, 255);
+    background-color: rgb(81, 81, 81);
+}
+
+.button-o:focus {
+    border: 1px solid rgb(255, 255, 255);
+    /* background-color: rgb(81, 81, 81); */
+}
+
+.button:disabled {
+    color: rgb(109, 109, 109);
+    border: 1px solid rgb(113, 113, 113);
+}
+
+.button-green {
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    height: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border: 1px solid rgb(0, 133, 66);
+    background-color: rgb(0, 133, 66);
+}
+
+.button-green:hover {
+    background-color: rgb(13, 209, 102);
+}
+
+.button-green:active {
+    background-color: rgb(0, 100, 49);
+    border: 1px solid white;
+}
+
+.button-green:disabled {
+    color: rgb(0, 73, 35);
+    ;
+    border: 1px solid rgb(167, 167, 167);
+}
+
+.button-green:focus {
+    border: 1px solid white;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.unable-sel {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.input[type=color] {
+    vertical-align: middle;
+}
+
+.input {
+    vertical-align: middle;
+    cursor: text;
+    font-weight: bold;
+    color: white;
+    height: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border: 1px solid rgb(113, 113, 113);
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
+    outline: none;
+}
+.setting-input{
+    margin-top:4px;
+    margin-bottom:4px;
+}
+
+.input:hover {
+    border: 1px solid rgb(141, 141, 141);
+    /* background-color: rgb(92, 92, 92); */
+}
+
+.input:active {
+    border: 1px solid rgb(255, 255, 255);
+    background-color: rgb(81, 81, 81);
+}
+
+.input:focus {
+    border: 1px solid rgb(255, 255, 255);
+    /* background-color: rgb(81, 81, 81); */
+}
+
+.div-middle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.text-middle {
+    text-align: center;
+}
+
+.url {
+    text-decoration: none;
+    border-bottom: 1px solid #0072C9;
+    color: #0072C9;
+}
+
+.url:hover {
+    border: none;
+    text-decoration: none;
+    border-bottom: 1px solid #0072C9;
+    color: #0094C9;
+}

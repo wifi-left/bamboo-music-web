@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bamboo Music 竹子音乐</title>
+    <script src="./static/js/checkie.js"></script>
+    <link href="./static/css/element_style.css" rel="stylesheet" />
+    <style>
+        .app-root {
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            background-color: rgb(30, 30, 30);
+            color: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 16px 16px 16px 16px;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .content {
+            user-select: text;
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            position: absolute;
+            top: 100px;
+            left: 32px;
+            overflow: auto;
+            height: calc(100% - 192px);
+            width: calc(100% - 72px);
+        }
+
+        .buttonbar {
+            bottom: 0;
+            right: 0;
+            padding-right: 32px;
+            padding-bottom: 32px;
+            position: absolute;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="app-root">
+        <h1>使用须知</h1>
+        <div class="content">
+
+            作为本网站使用者，您将允许我们使用以下权限：
+            <ul style="list-style:decimal;">
+                <li><b>本地存储</b><br />我们需要此权限来保存您所使用的数据，以及您的收藏等。</li>
+                <li><b>Cookie</b><br />我们需要此权限来进行身份验证。</li>
+                <li><b>媒体访问</b><br />我们需要此权限来播放音乐。</li>
+                <li><b>网络访问</b><br />我们需要此权限来进行网络搜索。</li>
+            </ul>
+            本站仅提供试听、试看，一切由访问者造成的不良后果本站不予承担！<br />
+            若有问题请联系站主。<br />
+            站点源码作者：Bamboo丶Gamom，<a class="url" href="https://space.bilibili.com/521673619">B站主页链接</a>，<a class="url"
+                href="https://github.com/wifi-left">GitHub 主页链接</a>。<br />
+        </div>
+        <div class="buttonbar">
+            <button class="button-green" onclick="allowReadme();" id="allowbutton" disabled>同意并继续 (6s)</button>
+        </div>
+
+    </div>
+    <script>
+        function allowReadme() {
+            localStorage.setItem("hasReadme", "true");
+            location = "./quickstart.html" + location.search;
+        }
+        let btn = document.getElementById("allowbutton");
+        let countdown = 6;
+        let inter = setInterval(function () {
+            countdown -= 1;
+            if (countdown == 0) {
+                clearInterval(inter);
+                btn.removeAttribute("disabled");
+                btn.innerText = "同意并继续";
+            } else {
+                btn.innerText = "同意并继续 (" + countdown + "s)";
+            }
+
+        }, 1000);
+    </script>
+</body>
+
+</html>
