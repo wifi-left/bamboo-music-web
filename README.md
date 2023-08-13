@@ -45,11 +45,12 @@ const search_types = [
 3. `type` 为类型，貌似不是必须的？
 4. 如果您没有新的API，可以修改为：
    ```JavaScript
-const search_types = [
-    { "name": "音频", "id": "audio", "type": "audio" },
-    { "name": "专辑", "id": "album", "type": "playlist" }
-]
+   const search_types = [
+       { "name": "音频", "id": "audio", "type": "audio" },
+       { "name": "专辑", "id": "album", "type": "playlist" }
+   ]
    ```
+
 ### 环境搭建
 #### 服务器
 本人在本地测试使用的IIS，您可以自己选择其他工具。
@@ -129,68 +130,68 @@ lrc 请尽量使用 `GB2312` 或者是 `UTF-8`
    ```
 4. 返回内容如果是普通数据，数据必须包含 `id` `artist` `name` `album`，剩下的 `albumid` `artistid` `pic` `releaseDate` `addition` 是可选项目。如：
    ```JSON
-{
-  "data": {
-    "total": 5,
-    "list": [
-      {
-        "id": 1898,
-        "addition": "",
-        "artist": "莫文蔚",
-        "name": "外面的世界",
-        "album": "其他音乐",
-        "albumid": 1592,
-        "pic": "",
-        "artistid": "6I6r5paH6JSa",
-        "releaseDate": null
-      },
-      {
-        "id": 1899,
-        "addition": "",
-        "artist": "莫文蔚",
-        "name": "如果没有你",
-        "album": "其他音乐",
-        "albumid": 1592,
-        "pic": "",
-        "artistid": "6I6r5paH6JSa",
-        "releaseDate": null
-      },
-      {
-        "id": 1900,
-        "addition": "",
-        "artist": "莫文蔚",
-        "name": "盛夏的果实",
-        "album": "其他音乐",
-        "albumid": 1592,
-        "pic": "",
-        "artistid": "6I6r5paH6JSa",
-        "releaseDate": null
-      },
-      {
-        "id": 1901,
-        "addition": "",
-        "artist": "莫文蔚",
-        "name": "这世界那么多人",
-        "album": "其他音乐",
-        "albumid": 1592,
-        "pic": "",
-        "artistid": "6I6r5paH6JSa",
-        "releaseDate": null
-      },
-      {
-        "id": 1952,
-        "addition": "",
-        "artist": "黄品源&莫文蔚",
-        "name": "那么爱你为什么",
-        "album": "其他音乐",
-        "albumid": 1592,
-        "pic": "",
-        "artistid": "6buE5ZOB5rqQJuiOq+aWh+iUmg==",
-        "releaseDate": null
-      }
-    ]
-  }
-}
+   {
+     "data": {
+       "total": 5,
+       "list": [
+         {
+           "id": 1898,
+           "addition": "",
+           "artist": "莫文蔚",
+           "name": "外面的世界",
+           "album": "其他音乐",
+           "albumid": 1592,
+           "pic": "",
+           "artistid": "6I6r5paH6JSa",
+           "releaseDate": null
+         },
+         {
+           "id": 1899,
+           "addition": "",
+           "artist": "莫文蔚",
+           "name": "如果没有你",
+           "album": "其他音乐",
+           "albumid": 1592,
+           "pic": "",
+           "artistid": "6I6r5paH6JSa",
+           "releaseDate": null
+         },
+         {
+           "id": 1900,
+           "addition": "",
+           "artist": "莫文蔚",
+           "name": "盛夏的果实",
+           "album": "其他音乐",
+           "albumid": 1592,
+           "pic": "",
+           "artistid": "6I6r5paH6JSa",
+           "releaseDate": null
+         },
+         {
+           "id": 1901,
+           "addition": "",
+           "artist": "莫文蔚",
+           "name": "这世界那么多人",
+           "album": "其他音乐",
+           "albumid": 1592,
+           "pic": "",
+           "artistid": "6I6r5paH6JSa",
+           "releaseDate": null
+         },
+         {
+           "id": 1952,
+           "addition": "",
+           "artist": "黄品源&莫文蔚",
+           "name": "那么爱你为什么",
+           "album": "其他音乐",
+           "albumid": 1592,
+           "pic": "",
+           "artistid": "6buE5ZOB5rqQJuiOq+aWh+iUmg==",
+           "releaseDate": null
+         }
+       ]
+     }
+   }
    ```
    解释：
    1. `id`：音乐播放ID，必须
@@ -206,10 +207,10 @@ lrc 请尽量使用 `GB2312` 或者是 `UTF-8`
    11. `hasAudio`：是否有音频，可选，默认为 `1` 或 `true`。
 5. 提示词返回数据格式应类似于：
    ```JSON
-{
-  "data": [
-    "莫文蔚",
-    "黄品源&莫文蔚"
-  ]
-}
+   {
+     "data": [
+       "莫文蔚",
+       "黄品源&莫文蔚"
+     ]
+   }
    ```
