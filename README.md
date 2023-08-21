@@ -233,3 +233,4 @@ lrc 请尽量使用 `GB2312` 或者是 `UTF-8`
     }
   }
   ```
+7. 如果要兼容 [MC Bamboo Music 插件（AllMusic Fork）](https://gitlab.com/wifi-left/mcbamboomusic)，还需要当访问参数`type=status`时，response code为200（内容任意）
