@@ -474,3 +474,12 @@ function saveLrcConfig() {
     localStorage.setItem("lrc_settings", JSON.stringify(m));
     set_globle_css_var();
 };
+// kuroshiro
+function enableKuromaji(flag) {
+    if (flag == true) {
+        localStorage.setItem("kuroshiro", true);
+        alert("您需要重新刷新才能生效");
+    } else {
+        localStorage.setItem("kuroshiro", false);
+    }
+}

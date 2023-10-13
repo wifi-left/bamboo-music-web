@@ -1,6 +1,5 @@
 <?php
 include("./listfiles.php");
-include("./filesaver.php");
 // reflushLocalCache();
 // echo '{"code":200,"msg":"文件列表刷新成功！"}';
 $action = 0;
@@ -60,21 +59,17 @@ switch ($action) {
         echo '{"code":"200","msg":"操作成功。"}';
         break;
     case 4: //刷新缓存
-        searchHost();
+        reflushLocalCache();
         echo '{"code":"200","msg":"操作成功。"}';
         break;
     case 5: //获取所有目录列表
+        readFilesList();
         $result = array();
-        $output = json_decode('{"code":"200","data":[]}');
-
-        // echo json_encode($id_lists);
-        foreach ($filelist as $id => $value) {
-            if ($value['type'] == 'l') {
-                //是目录
-                $result[] = $value['path'];
-            }
-            # code...
+        foreach ($GLOBALS['filelist'] as $key => $value) {
+            $id = substr($key, 1);
+            $result[] = getSongPath($id);
         }
+        $output = json_decode('{"code":"200","data":[]}');
         $output->data = $result;
         echo json_encode($output);
         break;
@@ -87,7 +82,7 @@ switch ($action) {
     case 2: //设置目录别名列表
         $POSTP = file_get_contents("php://input");
         // echo $POSTP;
-        if (empty($POSTP)) {
+        if(empty($POSTP)){
             echo '{"code":"402","msg":"缺少参数。"}';
             break;
         }

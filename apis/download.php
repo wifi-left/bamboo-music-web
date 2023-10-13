@@ -14,27 +14,7 @@ $url = base64_decode($_GET['url']);
 // echo $url;
 $flag = true;
 $filename = urldecode(base64_decode($_GET['filename']));
-if(substr($url,0,1) == '.'){
-    $url = '.' . $url;
-    $flag = false;
-} else if (gettype(strpos($url, "http://")) == "boolean" && gettype(strpos($url, "https://")) == "boolean") {
-    echo "<h1>无法下载：不支持的URL！(C2)</h1>$url";
-    return;
-}
 
-if (!(gettype(strpos($url, "kuwo.cn/")) == "boolean")) {
-    $flag = false;
-}
-if (!(gettype(strpos($url, "music.126.net/")) == "boolean")) {
-    $flag = false;
-}
-if (!(gettype(strpos($url, "music.163.net/")) == "boolean")) {
-    $flag = false;
-}
-if ($flag) {
-    echo "<h1>无法下载：不支持的URL！(C3)</h1>$url";
-    return;
-}
 // return;
 ?>
 <h1 style="-webkit-user-select: none; -moz-user-select: none; user-select: none;">名称：</h1>

@@ -54,9 +54,22 @@ $result = json_decode('{}');
 if (substr($value, 0, 6) == 'MUSIC_') {
     $value = substr($value, 6);
 }
-function fileListToData()
+function searchSong($value)
 {
-    $result = json_decode('{"data":{"total":30,"list":[]}}');
+    $result = json_decode('{"data":{"total":0,"list":[]}}');
+    $file = fopen("../cache/location.txt.bamboomusic", "r");
+    $keyword = $value;
+    //检测指正是否到达文件的未端
+
+    while (!feof($file)) {
+        $path = fgets($file);
+        // echo "<h1>$path</h1>";
+        scanAllFile(trim($path), $keyword);
+    }
+    // saveId();
+
+    fclose($file);
+    // echo json_encode($files);
     foreach ($GLOBALS['files'] as $valued) {
         // $line->data[] = $value->filename;
         $res = $valued->path;
@@ -98,20 +111,9 @@ function fileListToData()
         $result->data->list[] = $line;
         // echo json_encode($line);
     }
-    return $result;
-}
-function searchSong($value)
-{
-    //检测指正是否到达文件的未端
-    searchFileByName($value, $GLOBALS['limit'], $GLOBALS['offset'], false);
-    $data = fileListToData();
-    $data->data->total = $GLOBALS['total'];
-    return $data;
-    // echo json_encode($files);
-    // 
-    // // $result->data->lrclist = $lrc;
-    // $result->data->total = $GLOBALS['total'];
-    // $GLOBALS['result'] = $result;
+    // $result->data->lrclist = $lrc;
+    $result->data->total = $GLOBALS['total'];
+    $GLOBALS['result'] = $result;
 }
 $seed = 1;
 if (!empty($_GET['seed'])) $seed = $_GET['seed'];
@@ -127,7 +129,7 @@ switch ($type) {
         $result->seed = $seed;
         $count = $value;
         // echo $value == null;
-        $tmp = $id_lists;
+        $tmp = $idcaches->all_ids;
         if (count($tmp) <= 0) {
             $result->total = count($tmp);
             echo (json_encode($result));
@@ -144,18 +146,15 @@ switch ($type) {
             // echo json_encode($idcaches_OBJ);
             // return;
             if (!is_numeric($resid)) echo $resid;
-            $ress = getInfo($resid);
+            $res = getSongPath($resid);
             // $res = getSongPath($value);
-            $res = $ress['path'];
-            if ($ress != false && $res != "") {
+            if ($res != false && $res != "") {
                 $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null}');
                 $filewithoutext = substr($res, 0, strrpos($res, "."));
                 $mvres = $filewithoutext . '.mp4';
                 if (is_file($mvres)) {
                     $line->hasMv = 1;
                 }
-                if ($ress['cover'] != -1)
-                    $line->pic = './apis/local/cover.php?id=' . $ress['cover'];
                 $filebasename = basename($filewithoutext);
                 $filepath = dirname($res);
                 $musicid = $resid;
@@ -189,6 +188,16 @@ switch ($type) {
         // $result->data-
         $result->data->total = ($offset) * $count + 1;
         $html = json_encode($result);
+        break;
+    case 'getid':
+        $html = getSongPath($value);
+        if ($html == false) {
+            $html = json_decode('{"code":404,"msg":"404 - 此歌曲不存在"}');
+            $html->msg = "404 - $value 不存在！";
+            echo json_encode($html);
+            http_response_code(200);
+            return;
+        }
         break;
     case 'info':
         $result = json_decode('{"data":{"info":{}}}');
@@ -278,13 +287,19 @@ switch ($type) {
         $html = json_encode($result);
         break;
     case 'suggestKey':
+
+        $file = fopen("../cache/location.txt.bamboomusic", "r");
         $line = json_decode('{"code":200,"data":[]}');
         $keyword = $value;
         //检测指正是否到达文件的未端
         $limit = 12;
         $page = 0;
-        searchFileByName($keyword, $limit, 1);
-
+        while (!feof($file)) {
+            $path = fgets($file);
+            // echo "<h1>$path</h1>";
+            scanAllFile(trim($path), $keyword, false, true);
+        }
+        fclose($file);
         $suggests = array();
         $count = 0;
         foreach ($files as $value) {
@@ -311,6 +326,10 @@ switch ($type) {
         echo json_encode($line);
         break;
     case 'album':
+        $result = json_decode('{"total":0,"list":[]}');
+        $file = fopen("../cache/location.txt.bamboomusic", "r");
+        $keyword = "";
+        //检测指正是否到达文件的未端
         $path = getSongPath($value);
         if ($path == false) {
             echo '{"code":404,"msg":"404 - 此专辑不存在"}';
@@ -319,17 +338,58 @@ switch ($type) {
         }
         // $page += 1;
         // $offset;
-        searchForFolder(trim($path), $limit, $offset);
-        $albumname = getDirAlName($path);
+        scanAllFile(trim($path), $keyword);
+        fclose($file);
+        $albumname = "";
         // echo json_encode($files);
-
+        foreach ($files as $valued) {
+            // $line->data[] = $value->filename;
+            $res = $valued->path;
+            $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","albumpic":"","artistid":"","releaseDate":null,"pic":null}');
+            $filewithoutext = $valued->filename;
+            $filebasename = basename($filewithoutext);
+            $filepath = dirname($res);
+            $musicid = $valued->id;
+            $pathid = getId($filepath);
+            $cover = -1;
+            $mvres = $filepath . '\\' . $filewithoutext . '.mp4';
+            if (is_file($mvres)) {
+                $line->hasMv = 1;
+            }
+            $cover = $valued->cover;
+            if ($cover != -1) {
+                $line->pic = "./apis/local/cover.php?id=" . $cover;
+            }
+            $singer = substr($filebasename, 0, strpos($filebasename, " - "));
+            if (strpos($filebasename, " - ") != false)
+                $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
+            else $songname = $filebasename;
+            // echo strpos($res, " - ");
+            if (!empty($songname)) {
+                $line->name = $songname;
+            }
+            if (!empty($musicid)) {
+                $line->id = $musicid;
+            }
+            if (!empty($singer)) {
+                $line->artist = $singer;
+                $line->artistid = base64_encode($singer);
+            }
+            if (!empty($pathid)) {
+                $line->album = getDirAlName($filepath);
+                $albumname = $line->album;
+                $line->albumid = $pathid;
+            }
+            // $result->data->songinfo = $line;
+            $result->list[] = $line;
+            // echo json_encode($line);
+        }
         // saveId();
         // $result->data->lrclist = $lrc;
-        $resu = fileListToData();
-        $resu->total = $total;
-        $resu->data->total = $total;
-        $resu->data->name = $albumname;
-        $resu->name = $albumname;
+        $result->total = $total;
+        $result->name = $albumname;
+        $resu = json_decode('{"data":{}}');
+        $resu->data = $result;
         $html = json_encode($resu);
         // http_response_code(200);
         break;
@@ -452,9 +512,11 @@ switch ($type) {
         $valued = base64_decode(str_replace(" ", "+", $value));
         if ($valued != false) {
             $value = $valued;
-            $resu = searchSong($value);
+            searchSong($value);
             $resu->data->name = ($value);
-            $resu->data->total = $GLOBALS['total'];
+            $resu->data->list = $result->data->list;
+            $resu->data->total = $result->data->total;
+
             $html = json_encode($resu);
         } else {
             $html = json_encode($resu);
@@ -464,7 +526,7 @@ switch ($type) {
 
         break;
     case 'search':
-        $result = searchSong($value);
+        searchSong($value);
         $html = json_encode($result);
         // saveId();
 

@@ -64,7 +64,7 @@
                     <span class="fa fa-gears"></span>
                     <span class="left-btn-title">设置</span>
                 </button>
-                <span id="version-show">v1.0</span>
+                <span id="version-show">v1.1</span>
             </div>
 
         </div>
@@ -246,7 +246,10 @@
 
             <div id="win-setting" class="app-content-window">
                 <h1>设置</h1>
-                <h2>播放页</h2>
+                <h2>歌词注音</h2>
+                <button class="button" onclick="enableKuromaji(1)">开启罗马音标注</button>
+                <button class="button" onclick="enableKuromaji(0)">关闭罗马音标注（推荐）</button>
+                <h2>播放页样式</h2>
                 <span>普通歌词颜色：</span><input class="input setting-input" id='norlrccolor' type='text' /><input
                     type="color" class="input"
                     onchange="document.getElementById('norlrccolor').value = this.value;" /><br />
@@ -269,6 +272,7 @@
                 <p>当关闭页面时：</p>
                 <button class="button" onclick="enableListSave(1)">保存记录</button>
                 <button class="button" onclick="enableListSave(0)">不保存记录</button>
+                
             </div>
         </div>
     </div>

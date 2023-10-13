@@ -106,13 +106,13 @@ function play_idx_music(target_idx = 0, openGUI = false) {
     }
 
 }
-function highlight_playing_list_ele(){
+function highlight_playing_list_ele() {
     let ele = document.querySelectorAll("#playing-list-head .playing");
-    for(var i=0;i<ele.length;i++){
+    for (var i = 0; i < ele.length; i++) {
         ele[i].classList.remove("playing");
     }
-    ele = document.querySelector("#playing-list-"+playing_idx);
-    if(ele!=undefined){
+    ele = document.querySelector("#playing-list-" + playing_idx);
+    if (ele != undefined) {
         ele.classList.add("playing");
     }
 }
@@ -245,6 +245,15 @@ function init_lrc_pane() {
         let textele = document.createElement("span");
         textele.classList.add("lrc-text");
         textele.innerText = oLRC.ms[i].c;
+        let hasRomaji = oLRC.ms[i].tkuro;
+        let romajiLRC = null;
+        if (hasRomaji) {
+            romajiLRC = oLRC.ms[i].tc;
+            let romajiele = document.createElement("span");
+            romajiele.classList.add("lrc-romaji");
+            romajiele.innerText = romajiLRC;
+            ele.appendChild(romajiele);
+        }
         if (oLRC.ms[i].c == "") textele.innerHTML = "&nbsp;";
         textele.setAttribute("time", oLRC.ms[i].t);
         textele.onclick = function () {

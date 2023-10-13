@@ -14,8 +14,10 @@ class localfileinfo
 }
 $files = array();
 $limit = 30;
-$page = 0;
+$offset = 1;
 $count = 0;
+$total = 0;
+$totalcount = 0;
 
 function send_error($error)
 {
@@ -23,7 +25,12 @@ function send_error($error)
     http_response_code(500);
     exit(0);
 }
-$filelist = null;
+
+
+$id_finder = null;
+$filelist = [];
+$id_lists = [];
+
 if (!is_dir("../cache")) {
     mkdir("../cache");
     if (!is_dir("../cache")) {
@@ -31,76 +38,135 @@ if (!is_dir("../cache")) {
     }
 }
 $hasLoadedFileList = false;
-function readFilesList()
+loadLists();
+// echo json_encode($filelist);
+function loadLists()
+{
+    if (!is_file("../cache/list.txt.bamboomusic")) {
+        // send_error("请在配置中刷新缓存。");
+        return;
+    }
+    $file = fopen("../cache/list.txt.bamboomusic", "r") or send_error("无法读取文件列表。");
+    //检测指正是否到达文件的未端
+    $flist = array();
+    $id_finder = [];
+    $ids = [];
+    while (!feof($file)) {
+        /*
+        文件结构：
+
+        >id
+        |文件地址
+        /名字
+        ,封面
+        .类型
+        <
+
+        */
+        $line = fgets($file);
+        $id = substr($line, 1, strlen($line) - 3);
+        if (substr($line, 0, 1) != '>') {
+            continue;
+        }
+        $ftype = 0;
+        $fpath = "";
+        $fname = "";
+        $fcover = 0;
+        $linea = [];
+        while (!feof($file)) {
+
+            $nline = fgets($file);
+            $content = substr($nline, 1, strlen($nline) - 3);
+            $ntype = substr($nline, 0, 1);
+            if ($ntype == '|') {
+                //文件地址
+                $fpath = $content;
+            } else if ($ntype == ',') {
+                //封面
+                $fcover = $content;
+            } else if ($ntype == '/') {
+                //名字
+                $fname = $content;
+            } else if ($ntype == '.') {
+                //类型
+                $ftype = $content;
+            } else {
+                break;
+            }
+        }
+        $linea['type'] = $ftype;
+        $linea['name'] = $fname;
+        $linea['path'] = $fpath;
+        $linea['cover'] = $fcover;
+        $flist[$id] = $linea;
+        $id_finder[$fpath] = $id;
+        if ($ftype == 'f')
+            $ids[] = $id;
+    }
+    $GLOBALS['id_lists'] = $ids;
+    $GLOBALS['filelist'] = $flist;
+    $GLOBALS['id_finder'] = $id_finder;
+}
+function searchForFolder($folder, $limit, $offset)
 {
     $GLOBALS['hasLoadedFileList'] = true;
-    if (is_file("../cache/list.json.bamboomusic")) {
-        $myfile = fopen("../cache/list.json.bamboomusic", "r") or send_error("无法读取文件列表。");
-        $flength = filesize("../cache/list.json.bamboomusic");
-        if ($flength > 0) {
-            $contentF = fread($myfile, $flength);
-        } else {
-            $contentF = '[]';
+    $flist = $GLOBALS['filelist'];
+    $filecount = 0;
+    $count = 0;
+    $id_lists = $GLOBALS['id_lists'];
+    $res = [];
+    
+    for ($i = 0; $i < count($id_lists); $i++) {
+        $cid = $id_lists[$i];
+        if ($flist[$cid]['type'] == 'f') {
+            // l for folder;
+            // i for image;
+            // f for file;
+            if ($count >= $limit) {
+                $count++;
+                break;
+            }
+            // echo $flist[$cid]['path'] . "\r\n";
+            if (stripos($flist[$cid]['path'], $folder) !== false) {
+                $filecount++;
+                if ($filecount <= ($offset - 1) * $limit) continue;
+                $count++;
+                $finfo = new fileinfo();
+                $finfo->path = $flist[$cid]['path'];
+                $value = $flist[$cid]['name'];
+                // $value = str_replace(strrchr($value, "."), "", $value);
+                // $finfo->filename = substr($value, strrpos($value, '/') + 1);
+                $finfo->filename = $value;
+                $finfo->id = $cid;
+                $finfo->cover = $flist[$cid]['cover'];
+                $res[] = $finfo;
+            }
         }
-        fclose($myfile);
-    } else {
-        $contentF = '[]';
     }
-    $GLOBALS['filelist'] = json_decode($contentF);
-}
-if (is_file("../cache/idcache.json.bamboomusic")) {
-    $myfile = fopen("../cache/idcache.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
-    $flength = filesize("../cache/idcache.json.bamboomusic");
-    if ($flength > 0) {
-        $content = fread($myfile, $flength);
-    } else {
-        $content = '{"idx":0,"all_ids":[],"cache":{"##TEMP##":-1}}';
-    }
-    fclose($myfile);
-} else {
-    $content = '{"idx":0,"all_ids":[],"cache":{"##TEMP##":-1}}';
-}
-// echo $content;
-// return;
-$idcaches = json_decode($content);
-if (empty($idcaches->cache)) {
-    $idcaches = json_decode('{"idx":0,"all_ids":[],"cache":{}}');
-    // http_response_code(500);
-    // return;
-}
-if (empty($idcaches->idx)) {
-    // http_response_code(500);
-    // echo json_encode($idcaches);
-    // echo $idcaches->idx;
-    // $idcaches = json_decode('{"idx":0,"cache":{}}');
-    // return;
-    $idcaches->idx = 0;
-}
-$idcache = json_decode("{}");
-// $idcaches_OBJ = (array) json_decode(json_encode($idcaches->cache), true, 512, JSON_OBJECT_AS_ARRAY);
 
-$idcache = $idcaches->cache;
-if (empty($idcache)) {
-    $idcache = json_decode("{}");
+    $GLOBALS['total'] = $limit * ($offset - 1) + $count;
+    $GLOBALS['files'] = $res;
 }
-$total = 0;
-
-function getId($file, $type = 0)
+function getId($file)
+{ // Return the id of the file. false for undefined
+    if (empty($GLOBALS['id_finder'][$file]))
+        return false;
+    $id = $GLOBALS['id_finder'][$file];
+    return $id;
+}
+function getInfo($id)
+{ // Return the info of the provided id. false for undefined
+    if (empty($GLOBALS['filelist'][$id]))
+        return false;
+    return $GLOBALS['filelist'][$id];
+}
+function getSongPath($id)
 {
-    if (empty($GLOBALS['idcache']->$file)) {
-        $idx = $GLOBALS['idcaches']->idx + 1;
-        $GLOBALS['idcaches']->idx = $idx;
-        if ($type == 2) {
-            $GLOBALS['idcaches']->all_ids[] = $idx;
-        }
-        // if($GLOBALS['idcache']->$file == null)
-        $GLOBALS['idcache']->$file = $idx;
-        $GLOBALS['idcache']->$idx = $file;
-        return $GLOBALS['idcaches']->idx;
-    } else {
-        return $GLOBALS['idcache']->$file;
-    }
+    if (empty($GLOBALS['filelist'][$id]))
+        return false;
+    return $GLOBALS['filelist'][$id]['path'];
 }
+
 $pathnames = null;
 function loadPathNames()
 {
@@ -138,216 +204,50 @@ function getDirAlName($dir)
     }
     return ($dir);
 }
-
-function getSongPath($id)
+function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
 {
-
-    if (empty($GLOBALS['idcache']->$id)) {
-        // echo json_encode($GLOBALS['idcache']);
-        return false;
-    } else {
-        return $GLOBALS['idcache']->$id;
-    }
-}
-function saveId()
-{
-    $GLOBALS['idcaches']->cache = $GLOBALS['idcache'];
-    $mywritefile = fopen("../cache/idcache.json.bamboomusic", "w") or send_error("无法写入ID缓存列表。");
-    fwrite($mywritefile, json_encode($GLOBALS['idcaches']));
-    fclose($mywritefile);
-}
-
-function randomFile($path, $filter = "*.*", $deepth = 0)
-{
-    if (!is_dir($path)) {
-        // send_error("Unable to scan " . $path);
-        return getId($path);
-    }
-    $result_tmp = array();
-    $arr = scandir($path);
-    foreach ($arr as $value) {
-        //过滤掉当前目录和上级目录
-        if ($value !== "." && $value !== "..") {
-            //判断是否是文件夹
-            $line = json_decode('{"name":"","type":"d"}');
-            $line->name = $path . '\\' . $value;
-            if (is_dir($path . '\\' . $value)) {
-                //getId($path . '\\' . $value, 0);
-                $line->type = "d";
-                $result_tmp[] = $line;
-                //scanAllFile($path . '\\' . $value, $filter, $needtotal, $suggestMode); //继续遍历
-            } else {
-                if (fnmatch("*.mp3", $value)) if (stristr($value, $filter) != false) if (is_file($path . '\\' . $value)) {
-                    $line->type = "f";
-                    $result_tmp[] = $line;
-                    // $GLOBALS['count'] = $GLOBALS['count'] + 1;
-                }
-            }
+    $GLOBALS['total'] = $limit * ($offset - 1);
+    $count = 0;
+    if ($suggestMode) $offset = 1;
+    if ($offset <= 0) $offset = 1;
+    for ($i = 0; $i < count($GLOBALS['id_lists']); $i++) {
+        // echo $count;
+        if ($count >= $limit) {
+            $GLOBALS['total']++;
+            return;
         }
-    }
-    if ($GLOBALS['seed'] != 0) mt_srand($GLOBALS['seed'] + $deepth * $deepth);
-
-    $rdnum = mt_rand(0, count($result_tmp) - 1);
-    $path = $result_tmp[$rdnum];
-    $sname = $path->name;
-    if ($sname == "" | $sname == null) return 0;
-    if ($path->type == "d") {
-        return randomFile($sname, $filter, $deepth + 1);
-    } else {
-        return getId($sname, 2);
-    }
-}
-$local_files = array();
-function scanAllFile_cache($path)
-{
-    // 初始化文件列表
-    if (!is_dir($path)) {
-        // send_error("Unable to scan " . $path);
-        return;
-    }
-    $result = array();
-    $arr = scandir($path);
-    $cover = -1;
-    if (file_exists($path . '\\cover.jpg')) {
-        $cover = getId($path . '\\cover.jpg', 1);
-    } else if (file_exists($path . '\\cover.png')) {
-        $cover = getId($path . '\\cover.png', 1);
-    }
-    foreach ($arr as $value) {
-        //过滤掉当前目录和上级目录
-        if ($value !== "." && $value !== "..") {
-            //判断是否是文件夹
-            if (is_dir($path . '\\' . $value)) {
-                getId($path . '\\' . $value, 0);
-                $tresult = scanAllFile_cache($path . '\\' . $value); //继续遍历
-                $pid = 's' . getId(trim($path . '\\' . $value));
-                $GLOBALS['result_tmp']->$pid =  $tresult;
-                $file = new localfileinfo();
-                $file->path = $value;
-                $file->type = 1;
-                $result[] = $file;
-            } else {
-                $flag = false;
-                if (fnmatch("*.mp3", $path . '\\' . $value)) $flag = true;
-                // if (!$flag) if (fnmatch("*.mp4", $path . '\\' . $value)) $flag = true;
-                if (!$flag)
-                    continue;
-                getId($path . '\\' . $value, 2);
-                $file = new localfileinfo();
-                $file->path = $value;
-                $file->type = 0;
-                $file->cover = $cover;
-                $result[] = $file;
-            }
-        }
-    }
-    return $result;
-}
-$result_tmp = null;
-function reflushLocalCache()
-{
-    $GLOBALS['result_tmp'] = json_decode('{}');
-    $GLOBALS['idcaches'] = json_decode('{"idx":0,"all_ids":[],"cache":{}}');
-    $GLOBALS['idcaches']->cache = json_decode('{}');
-    $GLOBALS['idcache'] = json_decode('{}');
-    $file = fopen("../cache/location.txt.bamboomusic", "r");
-    while (!feof($file)) {
-        $GLOBALS['local_files'] = array();
-        $path = fgets($file);
-        $tpath = trim($path);
-
-        if (is_dir(trim($tpath))) {
-            $pid = 's' . getId(trim($tpath));
-            $GLOBALS['result_tmp']->$pid = scanAllFile_cache(trim($tpath));
-        }
-    }
-    fclose($file);
-    saveId();
-    $mywritefile = fopen("../cache/list.json.bamboomusic", "w") or send_error("无法写入文件缓存列表。");
-    fwrite($mywritefile, json_encode($GLOBALS['result_tmp']));
-    fclose($mywritefile);
-}
-function scanDirI($pathid)
-{
-    if (!$GLOBALS['hasLoadedFileList']) {
-        readFilesList();
-    }
-    $pathids = 's' . $pathid;
-    if(empty($GLOBALS['filelist']->$pathids)){
-        return array();
-    }
-    return $GLOBALS['filelist']->$pathids;
-}
-function scanAllFile($spath, $filter = "*.*", $needtotal = true, $suggestMode = false)
-{
-    if ($GLOBALS['count'] > ($GLOBALS['page'] + 1) * ($GLOBALS['limit'])) {
+        $cid = $GLOBALS['id_lists'][$i];
+        $info = $GLOBALS['filelist'][$cid];
+        $flag = false;
+        // echo json_encode($info);
         // return;
-        return;
-    }
-    if (!is_dir($spath)) {
-        // send_error("Unable to scan " . $path);
-        return;
-    }
-    $tpath = getSongPath($spath);
-    $arr = scanDirI($tpath);
-    for ($sidx = 0; $sidx < count($arr); $sidx++) {
-        //过滤掉当前目录和上级目录
-        $nowp = $arr[$sidx];
-        $type = $nowp->type;
-        $cover = $nowp->cover;
-        $path = $spath;
-        $value = $nowp->path;
-        if ($value !== "." && $value !== "..") {
-            //判断是否是文件夹
-            if ($GLOBALS['count'] > ($GLOBALS['page'] + 1) * ($GLOBALS['limit']))
-                return;
-            if ($type == 1) {
-                // getId($path . '\\' . $value, 0);
-                scanAllFile($path . '\\' . $value, $filter, $needtotal, $suggestMode); //继续遍历
-            } else {
-                // getDirAlName
-                $flag = false;
-                if (fnmatch("*.mp3", $value)) $flag = true;
-                if ($flag) {
-                    if (stristr($value, $filter) != false) {
-                        if (searchSuba($path, $value, $cover)) {
-                            return;
-                        };
-                    } else if (stristr(basename($path), $filter) != false) {
-                        if (searchSuba($path, $value, $cover)) {
-                            return;
-                        };
-                    } else if (stristr(getDirAlName(dirname($path . '\\' . $value)), $filter) != false) {
-                        if (searchSuba($path, $value, $cover)) {
-                            return;
-                        };
-                    }
-                }
+        // echo $info['name'];
+        if ($value == "") $flag = true;
+        // echo $info['name'];
+        if (stripos($info['name'], $value) !== false) $flag = true;
+        if (!$flag) if (($cid === $value)) $flag = true;
+        // echo getDirAlName(dirname($info['path']));
+        if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $value) !== false) $flag = true;
+        // echo $value;
+        if ($flag) {
+            // echo getDirAlName(dirname($info['path']));
+            // echo "gg";
+            $GLOBALS['totalcount']++;
+            if ($GLOBALS['totalcount'] <= ($offset - 1) * $limit) {
+                continue;
             }
+
+            $finfo = new fileinfo();
+            $finfo->path = $info['path'];
+            $svalue = $info['name'];
+            $finfo->filename = $svalue;
+            $finfo->id = $cid;
+            $finfo->cover = $info['cover'];
+            $GLOBALS['files'][] = $finfo;
+            $count++;
+            $GLOBALS['total']++;
+            // echo " | " . $info['name'] . " " . $count;
         }
     }
-}
-function searchSuba($path, $value, $cover = -1)
-{
-    if (is_file($path . '\\' . $value)) {
-        $GLOBALS['total'] += 1;
-        $GLOBALS['count'] += 1;
-        if ($GLOBALS['count'] > ($GLOBALS['page'] + 1) * ($GLOBALS['limit'])) {
-            return true;
-        } else if ($GLOBALS['count'] <= ($GLOBALS['page']) * ($GLOBALS['limit'])) {
-            // echo $GLOBALS['count'] . '|' . ($GLOBALS['page'] + 1) * ($GLOBALS['limit']) . '<br/>';
-            // getId($path . '\\' . $value, 2);
-            return false;
-        }
-        // echo $value . '<br/>';
-        $file = new fileinfo();
-        $filename = str_replace(strrchr($value, "."), "", $value);
-        $file->filename = $filename;
-        $file->path = $path . '\\' . $value;
-        $file->cover = $cover;
-        $file->id = getId($path . '\\' . $value, 2);
-        $GLOBALS['files'][] = $file;
-        // $GLOBALS['count'] = $GLOBALS['count'] + 1;
-    }
-    return false;
+    $GLOBALS['count'] = $count;
 }

@@ -13,6 +13,7 @@ const search_types = [
     { "name": "音频", "id": "audio", "type": "audio" },
     { "name": "专辑", "id": "album", "type": "playlist" },
     { "name": "视频", "id": "video", "type": "video" },
+    { "name": "在线A", "id": "onlinea", "type": "audio" },
     { "name": "在线B", "id": "onlineb", "type": "audio" }
 ]
 
@@ -26,7 +27,7 @@ function get_api_suggest_key(type) {
         case 'video':
             return videoUrlRoot + "video.php?type=suggestKey&value=${KEY}";
         case 'onlinea':
-            return onlineAUrlRoot + "suggest.php?value=${KEY}"
+            return onlineBUrlRoot + "main.php?type=suggestKey&value=${KEY}"
         case 'onlineb':
             return onlineBUrlRoot + "main.php?type=suggestKey&value=${KEY}"
     }
@@ -46,7 +47,7 @@ function get_api_url(key, typeid, page) {
     } else if (typeid == 'album') {
         return localUrlRoot + `local.php?type=searchAlarm&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     } else if (typeid == 'onlinea') {
-        return onlineAUrlRoot + `search.php?value=${key}&offset=${page}&limit=${PAGESIZE}`;
+        return onlineAUrlRoot + `onlinea.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     } else if (typeid == 'onlineb') {
         return onlineBUrlRoot + `main.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     }
@@ -60,7 +61,7 @@ function get_api_play_url(id, type) {
             case 'A_':
                 switch (type) {
                     case 'music':
-                        return (`${onlineAUrlRoot}url.php?type=url&value=${id}`);
+                        return (`${onlineAUrlRoot}onlinea.php?type=url&value=${id}`);
                     case 'video':
                         return (`${onlineAUrlRoot}videourl.php?type=mv&value=${id}`);
                 }
@@ -90,7 +91,7 @@ function get_api_info(id, type) {
         id = "" + id;
         switch (id.substring(0, 2)) {
             case 'A_':
-                return (`${onlineAUrlRoot}info.php?type=info&value=${id}`);
+                return (`${onlineAUrlRoot}onlinea.php?type=info&value=${id}`);
             case 'B_':
                 return (`${onlineBUrlRoot}main.php?type=info&value=${id}`);
             case 'V_':

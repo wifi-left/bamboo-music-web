@@ -47,36 +47,42 @@
     height: 32px;
     display: inline-block;
 }
+
 #playing-list-head li.playing {
     background-color: rgba(4, 161, 88, 0.726);
 }
+
 #playing-list-head .action-bar .button {
     width: 32px;
     height: 32px;
     margin: 0;
     padding: 0;
 }
-#win-home{
+
+#win-home {
     z-index: 67;
 }
-.playing-list-close{
+
+.playing-list-close {
     position: absolute;
     z-index: 3;
-    right:4px;
-    top:20px;
-    width:32px;
-    height:32px;
-    padding:0;
+    right: 4px;
+    top: 20px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
 }
-.playing-list-removeall{
+
+.playing-list-removeall {
     position: absolute;
     z-index: 3;
-    left:4px;
-    top:20px;
-    width:32px;
-    height:32px;
-    padding:0;
+    left: 4px;
+    top: 20px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
 }
+
 #playing-list-head .action-bar {
     /* position: absolute; */
     margin: 0;
@@ -93,13 +99,16 @@
     max-width: 50%;
     display: inline-block;
 }
+
 .playing-list-text-root .singername {
     color: rgb(192, 192, 192);
     max-width: 30%;
 }
+
 .playing-list-text-root .singername::before {
-    content:' - ';
+    content: ' - ';
 }
+
 .playing-list-text-root {
     width: calc(100% - 65px);
     margin: 0;
@@ -137,24 +146,29 @@
     vertical-align: middle;
     display: inline-block;
 }
-.playing-list-text-root:hover{
-    background-color:rgba(0, 99, 53, 0.726);
-    cursor:pointer;
+
+.playing-list-text-root:hover {
+    background-color: rgba(0, 99, 53, 0.726);
+    cursor: pointer;
     /* transition: ; */
 }
-#music-lrc-info-text-name{
+
+#music-lrc-info-text-name {
     user-select: text;
     -moz-user-select: text;
     -webkit-user-select: text;
 }
-.width-72{
+
+.width-72 {
     display: inline-block;
-    width:72px;
+    width: 72px;
 }
-.width-40{
+
+.width-40 {
     display: inline-block;
-    width:40px;
+    width: 40px;
 }
+
 input,
 button,
 select,
@@ -1353,4 +1367,28 @@ body {
         left: 112px;
         width: calc(100% - 156px);
     }
+}
+
+.lrc-romaji {
+    position: absolute;
+    left: 50%;
+    /* top: 1px; */
+    transform: translateY(calc(0px - var(--norfontsize) / 2)) translateX(-50%);
+    font-size: 10px;
+    /* height: 20px; */
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+    line-height: 20px;
+    word-break: break-all;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: calc(100% - 8px);
+}
+
+.lrc-active .lrc-romaji {
+    transform: translateY(calc(0px - var(--sellineheight) / 2)) translateX(-50%);
+    word-break: break-word;
+    white-space: normal;
+    line-height: var(--sellineheight);
 }

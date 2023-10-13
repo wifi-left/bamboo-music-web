@@ -54,6 +54,60 @@ if (allow_Kuroshiro) {
         });
     }
 }
+//检测语言
+function checkLanguage(name) {
+    var result = 0; //未知 / 英文
+    var reg = /[\u4E00-\u9FA5\uF900-\uFA2D]/;
+    if (name.search(reg) != -1) {
+        result = 1; //中文
+    }
+
+    var reg = /[\u3040-\u309F\u30A0-\u30FF]/;
+    if (name.search(reg) != -1) {
+        result = 2; //日文
+    }
+
+    var reg = /[\uac00-\ud7ff]/;
+    if (name.search(reg) != -1) {
+        result = 3; //韩文
+    }
+
+    var reg = /[а-яА-Я]/;
+    if (name.search(reg) != -1) {
+        result = 4; //俄语
+    }
+
+    return result;
+}
+// 罗马音翻译
+function romajiTranslate(texts, resultFunc) {
+    KURO.convert(texts,
+        { to: "romaji", "mode": "spaced", "romajiSystem": "passport" }).then(data => {
+            resultFunc(data);
+            // console.log(this.ele.id);
+        });
+}
+
+// 歌词罗马音转换
+function lrcRomaji(refunc) {
+    let texts = "";
+    for (let i = 0; i < oLRC['ms'].length; i++) {
+        if (checkLanguage(oLRC.ms[i].c) === 2) {
+            oLRC['ms'][i].tkuro = true;
+            texts += (texts === "" ? "" : "\r\n") + oLRC['ms'][i].c;
+        };
+    }
+    romajiTranslate(texts, function (data) {
+        let j = 0;
+        let texts = data.split("\r\n");
+        for (let i = 0; i < oLRC['ms'].length; i++) {
+            if (oLRC['ms'][i].tkuro == true) {
+                oLRC['ms'][i].tc = texts[j++];
+            };
+        }
+        refunc();
+    });
+}
 
 // 自动搜索
 function auto_search(key) {
@@ -157,7 +211,11 @@ function play_music_id(songid, openGUI = false) {
             if (lrc != undefined) {
                 createLrcObj(lrc);
             }
+            
             init_lrc_pane();
+            lrcRomaji(()=>{
+                init_lrc_pane();
+            });
             let name = info['name'];
             let singer = info['artist'];
             let singerid = info['artistid'];
@@ -204,6 +262,9 @@ function play_music_id_toList(songid, openGUI = false) {
                 createLrcObj(lrc);
             }
             init_lrc_pane();
+            lrcRomaji(()=>{
+                init_lrc_pane();
+            });
             let name = info['name'];
             let singer = info['artist'];
             let singerid = info['artistid'];
@@ -299,9 +360,9 @@ function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) 
         }
         let line = document.createElement("div");
         line.classList.add("playing-list-text-root");
-        line.setAttribute("idx",i);
+        line.setAttribute("idx", i);
         line.onclick = function () {
-            if(this.getAttribute("idx") == playing_idx) {
+            if (this.getAttribute("idx") == playing_idx) {
                 showHideMusicPlayerPane(true);
                 return;
             }
