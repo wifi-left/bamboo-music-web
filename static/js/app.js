@@ -39,10 +39,21 @@ var mp = null;
 
 // 判断是否已经读过用户已读
 let hasReadme = localStorage.getItem("hasReadme");
+let backgroundImage = localStorage.getItem("backgroundImage");
+if (backgroundImage == null) backgroundImage = "on";
 if (hasReadme != "true") {
     location = "./readme.html?return=" + encodeURIComponent(location.href);
 }
-
+document.getElementById("setting-background-image").value = backgroundImage;
+if (backgroundImage != "") {
+    if (backgroundImage != "on") {
+        document.getElementById("win-playing").style.background = (backgroundImage);
+        document.getElementById("win-playing-host").classList.remove("color");
+    }
+} else {
+    document.getElementById("win-playing").style.backgroundImage = "#333";
+    document.getElementById("win-playing-host").classList.add("color");
+}
 // 初始化 kuroshiro
 const KURO = new Kuroshiro.default();
 if (allow_Kuroshiro) {
@@ -211,9 +222,9 @@ function play_music_id(songid, openGUI = false) {
             if (lrc != undefined) {
                 createLrcObj(lrc);
             }
-            
+
             init_lrc_pane();
-            lrcRomaji(()=>{
+            lrcRomaji(() => {
                 init_lrc_pane();
             });
             let name = info['name'];
@@ -262,7 +273,7 @@ function play_music_id_toList(songid, openGUI = false) {
                 createLrcObj(lrc);
             }
             init_lrc_pane();
-            lrcRomaji(()=>{
+            lrcRomaji(() => {
                 init_lrc_pane();
             });
             let name = info['name'];

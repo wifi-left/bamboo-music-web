@@ -8,6 +8,16 @@ const totalTimeObj = document.getElementById("player-time-total");
 const videoPlayerObj = document.getElementById("mui-player");
 const pauseMusicBTNObj = document.getElementById("pane-pause-music");
 
+let isIphone = false;
+isIphone = function () {
+    //获取浏览器navigator对象的userAgent属性（浏览器用于HTTP请求的用户代理头的值）
+    var info = navigator.userAgent;
+    //通过正则表达式的test方法判断是否包含“Mobile”字符串
+    var isPhone = /mobile/i.test(info);
+    //如果包含“Mobile”（是手机设备）则返回true
+    return isPhone;
+}();
+
 // let muted = false;
 let volm = parseFloat(localStorage.getItem("mvolume"));
 let vol = parseFloat(localStorage.getItem("avolume"));
@@ -144,14 +154,20 @@ musicPlayerObj.ontimeupdate = function () {
     if (mplayer.trackEvents) {
         let value = parseFloat(this.currentTime / this.duration * 1000);
         if (!isNaN(value)) {
+            let width = parseFloat(this.currentTime / this.duration * 100) + "%";
+            document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
             playerobj.value = value;
-            playerobj.style.backgroundSize = parseFloat(this.currentTime / this.duration * 100) + "% 100%";
+            playerobj.style.backgroundSize = width + " 100%";
             changePos(playerobj);
             // currentTimeObj.innerText = secondToTime_int(this.currentTime);
         }
     } else {
         if (!isNaN(this.currentTime)) {
-            playerobj.style.backgroundSize = parseFloat(this.currentTime / this.duration * 100) + "% 100%";
+            let width = parseFloat(this.currentTime / this.duration * 100) + "%";
+            document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
+            playerobj.style.backgroundSize = width + " 100%";
+            // document.getElementById("player-progress-displayer").width = width;
+
         }
     }
     choose_lrc(musicPlayerObj.currentTime);
@@ -177,15 +193,10 @@ musicPlayerObj.onended = function () {
 }
 
 function changePauseBtnStatus(paused) {
-    let ass = document.getElementById("xc-pause-music");
     if (paused) {
-        ass.classList.remove("fa-pause");
-        ass.classList.add("fa-play");
         pauseMusicBTNObj.classList.remove("fa-pause");
         pauseMusicBTNObj.classList.add("fa-play");
     } else {
-        ass.classList.remove("fa-play");
-        ass.classList.add("fa-pause");
         pauseMusicBTNObj.classList.add("fa-pause");
         pauseMusicBTNObj.classList.remove("fa-play");
     }
@@ -201,7 +212,8 @@ function updateTime() {
 function changePos(ele) {
     let Nvalue = parseInt(ele.value);
     let Nmax = parseInt(ele.max);
-    ele.style.backgroundSize = parseFloat(Nvalue / Nmax * 100) + "% 100%";
+    let width = parseFloat(Nvalue / Nmax * 100) + "%";
+    ele.style.backgroundSize = width + " 100%";
 }
 
 playerobj.onchange = function () {
@@ -311,7 +323,18 @@ function hilightlrc(idx, push = false) {
 }
 
 var timer = 0;
-function ScrolltoEx(ele, x) {
+function ScrolltoEx(ele, y) {
+    if (isIphone) {
+        ele.scroll({
+            top: y,
+            behavior: "smooth"
+        });
+    } else {
+        ScrolltoEx_JS(ele, y);
+    }
+
+}
+function ScrolltoEx_JS(ele, x) {
     if (ele.scrollHeight == undefined) {
         ele.scrollTop = x;
         return;
@@ -356,7 +379,6 @@ function ScrolltoEx(ele, x) {
     } catch (e) {
         ele.scrollTop = x;
     }
-
 }
 function change_music(title, singer, url = "", play = true, info = {}, openGUI = false) {
     document.getElementById("page-info-name").innerText = title;
@@ -380,7 +402,9 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
             pic = "./static/img/default_cd_old_.png";
         }
         document.getElementById("music-lrc-info-pic").src = pic;
-
+        if(backgroundImage == "on"){
+            document.getElementById("win-playing").style.backgroundImage = "url(" + encodeURI(pic) + ")";
+        }
         // console.log(info);
         if (hasmv) {
             document.getElementById("music-lrc-info-tv").style.display = "inline-block";
@@ -415,10 +439,10 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
             let singerobj = document.createElement("a");
             singerobj.innerText = singer;
             singerobj.classList.add("page-info-singer-href");
-            singerobj.onclick = function () {
-                showHideMusicPlayerPane(false);
-                list_singer_gui(singer, singerid, true);
-            }
+            // singerobj.onclick = function () {
+            //     showHideMusicPlayerPane(false);
+            //     list_singer_gui(singer, singerid, true);
+            // }
             document.getElementById("page-info-singer").innerHTML = "";
             document.getElementById("page-info-singer").appendChild(singerobj);
         }

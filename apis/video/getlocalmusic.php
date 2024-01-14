@@ -4,7 +4,7 @@ if (empty($_GET['id'])) {
     http_response_code(403);
     return;
 }
-$type = "music";
+$type = "video";
 if (!empty($_GET['type'])) {
     $type = $_GET['type'];
 }
@@ -23,11 +23,12 @@ $filename = $res;
 
 // 文件路径
 $location = $res;
-if ($type != 'music') {
+if ($type == 'music') $type = "mp3";
+if ($type != 'video') {
     $filewithoutext = substr($res, 0, strrpos($res, "."));
     $location = $filewithoutext . '.' . $type;
     if (!is_file($location)) {
-        $type = "mp3";
+        $type = "mp4";
         $location = $filewithoutext . '.' . $type;
     }
 }

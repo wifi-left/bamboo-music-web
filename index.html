@@ -24,57 +24,132 @@
 <body>
     <audio id="music-player-audio" style="display:none;"></audio>
     <div class="app-root">
-        <div class="small-music-control">
+        <!-- <div class="small-music-control">
             <button id="xc-last-music" onclick="play_last_music();" class="button-o fa fa-step-backward"></button>
             <button id="xc-pause-music" onclick="pause_music();" class="button-o fa fa-play"></button>
             <button id="xc-next-music" onclick="play_next_music();" class="button-o fa fa-step-forward"></button>
             <button id="xc-show-player-pane" onclick="showHideMusicPlayerPane(true);"
                 class="button-o fa fa-list"></button>
-        </div>
+        </div> -->
         <div class="promptBlock"><span id="prompt-content"></span></div>
         <!-- Small screen -->
-        <div class="top-bar" id="top-bar">
-            <span class="top-title" id="top-title">竹子音乐</span>
-            <button onclick="show_or_hide_the_menubar();" class="fa fa-list-alt btn-show-menu-bar"
-                title="显示或者隐藏菜单"></button>
-        </div>
+        
         <!-- Big screen -->
-
+        <div class="phone-bottom-bar">
+            <button onclick="changeWindow('search',true,this);" id="btn-search-bottom" class="bottom-btn">
+                <span class="fa fa-search"></span>
+                <span class="bottom-btn-title">探索</span>
+            </button>
+            <button onclick="changeWindow('account',true,this);" id="btn-account-bottom" class="bottom-btn">
+                <span class="fa fa-user-circle"></span>
+                <span class="bottom-btn-title">个人中心</span>
+            </button>
+            <button onclick="changeWindow('setting',true,this);" id="btn-setting-bottom" class="bottom-btn">
+                <span class="fa fa-gears"></span>
+                <span class="bottom-btn-title">设置</span>
+            </button>
+        </div>
         <div class="root-left-part">
             <div id="left-sel-display-bar"></div>
             <div class="mainpage-btn">
                 <span class="mainpage-title">竹子音乐</span>
             </div>
 
-            <button onclick="changeWindow('search');" id="btn-search" class="left-btn">
+            <button onclick="changeWindow('search',true,this);" id="btn-search" class="left-btn">
                 <span class="fa fa-search"></span>
                 <span class="left-btn-title">探索</span>
             </button>
-            <button onclick="changeWindow('home');" id="btn-home" class="left-btn">
-                <span class="fa fa-list-alt"></span>
-                <span class="left-btn-title">播放列表</span>
-            </button>
 
             <div class="left-btn-bottom">
-                <button onclick="changeWindow('account');" id="btn-account" class="left-btn">
+                <button onclick="changeWindow('account',true,this);" id="btn-account" class="left-btn">
                     <span class="fa fa-user-circle"></span>
                     <span class="left-btn-title">个人中心</span>
                 </button>
-                <button onclick="changeWindow('setting');" id="btn-setting" class="left-btn">
+                <button onclick="changeWindow('setting',true,this);" id="btn-setting" class="left-btn">
                     <span class="fa fa-gears"></span>
                     <span class="left-btn-title">设置</span>
                 </button>
-                <span id="version-show">v1.1</span>
+                <span class="version-show" id="version-show">加载版本号中...</span>
             </div>
 
         </div>
-        <div class="app-content">
+        <div class="musicpane-control">
+            <span class="pane-music-name"><span id="pane-music-info-name">无内容播放</span><span
+                    id="pane-music-info-singer">无内容播放</span></span>
+            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward"></button>
+            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play"></button>
+            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward"></button>
 
-            <div id="win-home" class="app-content-window">
+            <input type="range" class="player-range" id="play-progress" max="1000" min="0" step="1" value="0"
+                onmousedown="cancelTrack()" onmouseup="startTrack()" ontouchstart="cancelTrack()"
+                ontouchend="startTrack()" />
+            <span id="player-time-current">00:00</span>
+            <span id="player-time-xie">/</span>
+            <span id="player-time-total">00:00</span>
+            <button id="mute-volume" class="button player-control fa fa-volume-up" onclick="muteVolume(this)"></button>
+            <input type="range" class="player-range" id="volume-set" step="1" max="100" value="0" min="0" />
+            <button id="music-detail-btn" class="button player-control fa fa-info-circle"
+                onclick="showHideMusicPlayerPane(!MusicPlayerPaneState)"></button>
+            <button id="music-playlist-btn" class="button player-control fa fa-list-ul"
+                onclick="showPlayList(!PlayListPaneState)"></button>
+            <div id="player-progress-displayer"></div>
+        </div>
+        <div id="win-playing" class="app-content-window">
+            <div id="win-playing-host"><div class="page-head-music-player">
+                <div class="page-head-musicinfo">
+                    <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
+                </div>
+                <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
+                    class="button fa fa-close"></button>
+                <button id="close-playing-page2" onclick="showHideMusicPlayerPane(false);"
+                    class="button fa fa-level-up"></button>
+                <button id="show-playing-other-control" class="button fa fa-info-circle"
+                    onclick="showPlayingMenu(null);"></button>
+            </div>
+            <div class="page-content" id="playing-lrc-area">
+                <div class="lrc-left-part">
+                    <div class="div-middle music-player-info-root">
+                        <img id="music-lrc-info-pic" src="./static/img/default_cd_old_.png" />
+                        <div></div>
+                        <div class="music-lrc-info-text-root">
+                            <span class="list-line-ele"><b id="music-lrc-info-text-name">这里是歌名</b></span>
+                            <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
+                                    class="small-gray-text width-80">相关人员：</span><b
+                                    id="music-lrc-info-text-singer">这里是歌手</b></span>
+                            <span class="list-line-ele" id="music-lrc-info-text-album-root"><span
+                                    class="small-gray-text width-40">专辑：</span><b
+                                    id="music-lrc-info-text-album">这里是专辑</b></span>
+                            <div class="music-lrc-info-control">
+                                <!-- 收藏 -->
+                                <button class="button music-info-control-button fa fa-star"></button>
+                                <!-- 视频 -->
+                                <button class="button music-info-control-button fa fa-tv"
+                                    id="music-lrc-info-tv"></button>
+                                <!-- 分享 -->
+                                <button class="button music-info-control-button fa fa-share"></button>
+                                <!-- 下载 -->
+                                <button id="pane-download-music"
+                                    class="button music-info-control-button fa fa-download"></button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lrc-right-part">
+                    <ul id="lrc-show-root">
+
+                    </ul>
+                </div>
+            </div></div>
+            
+
+        </div>
+        <div id="win-playlist" class="app-content-window" onclick="showPlayList(false);">
+            <div id="playlist-root" onclick="preventPopUp(event)">
                 <div class="page-head-home"><span>播放列表</span></div>
                 <!-- <button onclick="changeWindow('infos');" class="button-green">下载APP</button> -->
                 <!-- <div class="loader"></div> -->
-                <button class="fa fa-close button playing-list-close" onclick="changeWindow('search');"></button>
+                <button class="fa fa-close button playing-list-close" onclick="showPlayList(false);"></button>
                 <button class="fa fa-trash button playing-list-removeall" onclick="clear_playing_list();"></button>
                 <div class="playing-list-father">
                     <ul id="playing-list-head">
@@ -82,6 +157,10 @@
                     </ul>
                 </div>
             </div>
+
+        </div>
+        <div class="app-content">
+            
             <div id="win-search" class="app-content-window">
                 <div id="video-musicplayer-loading-pane" class="loading-pane">
                     <div class="loading-pane-middle">
@@ -171,85 +250,24 @@
                 </div>
             </div>
             <div id="win-account" class="app-content-window">
-                <h1>个人中心</h1>
+                <h1 class="fa fa-address-card win-fronter">个人中心</h1>
             </div>
             <div id="win-love" class="app-content-window">
-                <h1>我喜欢</h1>
-            </div>
-            <div id="win-playing" class="app-content-window">
-                <div class="page-head-music-player">
-                    <div class="page-head-musicinfo">
-                        <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
-                    </div>
-                    <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
-                        class="button fa fa-close"></button>
-                    <button id="show-other-control" class="button fa fa-list-ul"
-                        onclick="changeWindow('home',true);showHideMusicPlayerPane(false);"></button>
-                </div>
-                <div class="page-content" id="playing-lrc-area">
-                    <div class="lrc-left-part">
-                        <div class="div-middle music-player-info-root">
-                            <img id="music-lrc-info-pic" src="./static/img/default_cd_old_.png" />
-                            <div></div>
-                            <div class="music-lrc-info-text-root">
-                                <span class="list-line-ele"><b id="music-lrc-info-text-name">这里是歌名</b></span>
-                                <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
-                                        class="small-gray-text width-80">相关人员：</span><b
-                                        id="music-lrc-info-text-singer">这里是歌手</b></span>
-                                <span class="list-line-ele" id="music-lrc-info-text-album-root"><span
-                                        class="small-gray-text width-40">专辑：</span><b
-                                        id="music-lrc-info-text-album">这里是专辑</b></span>
-                                <div class="music-lrc-info-control">
-                                    <!-- 收藏 -->
-                                    <button class="button music-info-control-button fa fa-star"></button>
-                                    <!-- 视频 -->
-                                    <button class="button music-info-control-button fa fa-tv"
-                                        id="music-lrc-info-tv"></button>
-                                    <!-- 分享 -->
-                                    <button class="button music-info-control-button fa fa-share"></button>
-                                    <!-- 下载 -->
-                                    <button id="pane-download-music" class="button music-info-control-button fa fa-download"></button>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="lrc-right-part">
-                        <ul id="lrc-show-root">
-
-                        </ul>
-                    </div>
-                </div>
-                <div class="musicpane-control">
-                    <span class="pane-music-name"><span id="pane-music-info-name">无内容播放</span><span
-                            id="pane-music-info-singer">无内容播放</span></span>
-                    <button id="pane-last-music" onclick="play_last_music();"
-                        class="button fa fa-step-backward"></button>
-                    <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play"></button>
-                    <button id="pane-next-music" onclick="play_next_music();"
-                        class="button fa fa-step-forward"></button>
-
-                    <input type="range" class="player-range" id="play-progress" max="1000" min="0" step="1" value="0"
-                        onmousedown="cancelTrack()" onmouseup="startTrack()" ontouchstart="cancelTrack()"
-                        ontouchend="startTrack()" />
-                    <span id="player-time-current">00:00</span>
-                    <span id="player-time-xie">/</span>
-                    <span id="player-time-total">00:00</span>
-                    <button id="mute-volume" class="button player-control fa fa-volume-up"
-                        onclick="muteVolume(this)"></button>
-                    <button id="repeat-mode" class="button player-control fa fa-repeat"
-                        onclick="changeRepeatMode()"></button>
-                    <input type="range" class="player-range" id="volume-set" step="1" max="100" value="0" min="0" />
-                </div>
+                <h1 class="fa fa-heart win-fronter">我喜欢</h1>
             </div>
 
 
             <div id="win-setting" class="app-content-window">
-                <h1>设置</h1>
+                <h1 class="fa fa-gears win-fronter">设置</h1>
                 <h2>歌词注音</h2>
                 <button class="button" onclick="enableKuromaji(1)">开启罗马音标注</button>
                 <button class="button" onclick="enableKuromaji(0)">关闭罗马音标注（推荐）</button>
                 <h2>播放页样式</h2>
+                <h3>背景</h3>
+                <span>支持CSS语法（Background）</span>
+                <input  class="input setting-input" id="setting-background-image" /><button class="button" onclick="saveBackgroundImage()">保存</button><br/>
+                <span>预设：</span><button class="button" onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button class="button" onclick="saveBackgroundImageSample('')">无背景</button><br/>
+                <h3>歌词</h3>
                 <span>普通歌词颜色：</span><input class="input setting-input" id='norlrccolor' type='text' /><input
                     type="color" class="input"
                     onchange="document.getElementById('norlrccolor').value = this.value;" /><br />
@@ -272,7 +290,11 @@
                 <p>当关闭页面时：</p>
                 <button class="button" onclick="enableListSave(1)">保存记录</button>
                 <button class="button" onclick="enableListSave(0)">不保存记录</button>
-                
+                <div class="hr"></div>
+                <h2>制作信息</h2>
+                <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
+                <b>前端版本：</b><span class="version-show">加载版本号中...</span><br/>
+                <span class="final-ele">仅提供技术支持</span>
             </div>
         </div>
     </div>

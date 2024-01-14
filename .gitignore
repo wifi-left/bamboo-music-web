@@ -2,6 +2,8 @@
 /apis/onlinea_disabled
 /apis/onlinea
 /apis/onlineb
-/apis/video
 /apis/local/testapi.php
+/apis/localbackup
+/static/img/sakuratree.jpg
 /games
+/tools

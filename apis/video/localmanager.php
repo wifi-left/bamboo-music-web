@@ -4,16 +4,16 @@ include("./listfiles.php");
 // echo '{"code":200,"msg":"文件列表刷新成功！"}';
 $action = 0;
 if (empty($_GET['action'])) {
-    http_response_code(403);
-    // include('../../ErrorPages/404.html');
-    exit(0);
+    http_response_code(404);
+    include('../ErrorPages/404.html');
+    exit(1);
 }
 $action = $_GET['action'];
 
 if (empty($_GET['psw'])) {
-    http_response_code(403);
-    // include('../../ErrorPages/404.html');
-    exit(0);
+    http_response_code(404);
+    include('../ErrorPages/404.html');
+    exit(1);
 }
 $config = null;
 if (is_file("../cache/config.json.bamboomusic")) {
@@ -91,7 +91,7 @@ switch ($action) {
             echo '{"code":"402","msg":"缺少参数。"}';
             break;
         }
-        $mywritefile = fopen("../cache/names.json.bamboomusic", "w") or send_error("无法写入文件。");
+        $mywritefile = fopen("../cache/vnames.json.bamboomusic", "w") or send_error("无法写入文件。");
         fwrite($mywritefile, $value);
         fclose($mywritefile);
         echo '{"code":"200","msg":"操作成功。"}';

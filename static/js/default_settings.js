@@ -1,5 +1,8 @@
 const default_page = "search";
 const PAGESIZE = 20;
+const BAMBOOMUSIC = {
+    version: "v1.1"
+}
 // audio: 普通
 // playlist: 播放列表（比如专辑） 
 // video: 视频

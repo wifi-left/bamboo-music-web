@@ -24,9 +24,9 @@ function send_error($error)
     exit(0);
 }
 $filelist = null;
-if (!is_dir("../cache")) {
-    mkdir("../cache");
-    if (!is_dir("../cache")) {
+if (!is_dir("cache")) {
+    mkdir("cache");
+    if (!is_dir("cache")) {
         send_error("无法创建缓存目录。");
     }
 }
@@ -34,9 +34,9 @@ $hasLoadedFileList = false;
 function readFilesList()
 {
     $GLOBALS['hasLoadedFileList'] = true;
-    if (is_file("../cache/list.json.bamboomusic")) {
-        $myfile = fopen("../cache/list.json.bamboomusic", "r") or send_error("无法读取文件列表。");
-        $flength = filesize("../cache/list.json.bamboomusic");
+    if (is_file("../cache/vlist.json.bamboomusic")) {
+        $myfile = fopen("../cache/vlist.json.bamboomusic", "r") or send_error("无法读取文件列表。");
+        $flength = filesize("../cache/vlist.json.bamboomusic");
         if ($flength > 0) {
             $contentF = fread($myfile, $flength);
         } else {
@@ -48,9 +48,9 @@ function readFilesList()
     }
     $GLOBALS['filelist'] = json_decode($contentF);
 }
-if (is_file("../cache/idcache.json.bamboomusic")) {
-    $myfile = fopen("../cache/idcache.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
-    $flength = filesize("../cache/idcache.json.bamboomusic");
+if (is_file("../cache/vidcache.json.bamboomusic")) {
+    $myfile = fopen("../cache/vidcache.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
+    $flength = filesize("../cache/vidcache.json.bamboomusic");
     if ($flength > 0) {
         $content = fread($myfile, $flength);
     } else {
@@ -104,9 +104,9 @@ function getId($file, $type = 0)
 $pathnames = null;
 function loadPathNames()
 {
-    if (is_file("../cache/names.json.bamboomusic")) {
-        $myfile = fopen("../cache/names.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
-        $flength = filesize("../cache/names.json.bamboomusic");
+    if (is_file("../cache/vnames.json.bamboomusic")) {
+        $myfile = fopen("../cache/vnames.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
+        $flength = filesize("../cache/vnames.json.bamboomusic");
         if ($flength > 0) {
             $content = fread($myfile, $flength);
         } else {
@@ -152,7 +152,7 @@ function getSongPath($id)
 function saveId()
 {
     $GLOBALS['idcaches']->cache = $GLOBALS['idcache'];
-    $mywritefile = fopen("../cache/idcache.json.bamboomusic", "w") or send_error("无法写入ID缓存列表。");
+    $mywritefile = fopen("../cache/vidcache.json.bamboomusic", "w") or send_error("无法写入ID缓存列表。");
     fwrite($mywritefile, json_encode($GLOBALS['idcaches']));
     fclose($mywritefile);
 }
@@ -228,7 +228,9 @@ function scanAllFile_cache($path)
                 $result[] = $file;
             } else {
                 $flag = false;
-                if (fnmatch("*.mp3", $path . '\\' . $value)) $flag = true;
+                if (fnmatch("*.mp4", $path . '\\' . $value)) $flag = true;
+                if (fnmatch("*.flv", $path . '\\' . $value)) $flag = true;
+                if (fnmatch("*.m3u8", $path . '\\' . $value)) $flag = true;
                 // if (!$flag) if (fnmatch("*.mp4", $path . '\\' . $value)) $flag = true;
                 if (!$flag)
                     continue;
@@ -250,7 +252,7 @@ function reflushLocalCache()
     $GLOBALS['idcaches'] = json_decode('{"idx":0,"all_ids":[],"cache":{}}');
     $GLOBALS['idcaches']->cache = json_decode('{}');
     $GLOBALS['idcache'] = json_decode('{}');
-    $file = fopen("../cache/location.txt.bamboomusic", "r");
+    $file = fopen("../cache/vlocation.txt.bamboomusic", "r");
     while (!feof($file)) {
         $GLOBALS['local_files'] = array();
         $path = fgets($file);
@@ -263,7 +265,7 @@ function reflushLocalCache()
     }
     fclose($file);
     saveId();
-    $mywritefile = fopen("../cache/list.json.bamboomusic", "w") or send_error("无法写入文件缓存列表。");
+    $mywritefile = fopen("../cache/vlist.json.bamboomusic", "w") or send_error("无法写入文件缓存列表。");
     fwrite($mywritefile, json_encode($GLOBALS['result_tmp']));
     fclose($mywritefile);
 }
@@ -307,7 +309,9 @@ function scanAllFile($spath, $filter = "*.*", $needtotal = true, $suggestMode = 
             } else {
                 // getDirAlName
                 $flag = false;
-                if (fnmatch("*.mp3", $value)) $flag = true;
+                if (fnmatch("*.mp4", $value)) $flag = true;
+                if (fnmatch("*.flv", $value)) $flag = true;
+                if (fnmatch("*.m3u8", $value)) $flag = true;
                 if ($flag) {
                     if (stristr($value, $filter) != false) {
                         if (searchSuba($path, $value, $cover)) {

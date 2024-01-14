@@ -113,13 +113,13 @@ function deal_data_search_playlist(data, clean = true) {
                 listRootObj.appendChild(ele);
             }
 
-        }
-        if (s_page * PAGESIZE >= s_total) {
-            let ele = document.createElement("div");
-            ele.classList.add("list-no-more");
-            ele.innerHTML = "<span>没有更多了。</span>"
-            listRootObj.appendChild(ele);
-        }
+        } else
+            if (s_page * PAGESIZE >= s_total) {
+                let ele = document.createElement("div");
+                ele.classList.add("list-no-more");
+                ele.innerHTML = "<span>没有更多了。</span>"
+                listRootObj.appendChild(ele);
+            }
         // console.log(keys)
     } catch (e) {
         var errele = document.createElement("div");
@@ -296,13 +296,13 @@ function deal_data_search(data, clean = true, nomore = false) {
                 listRootObj.appendChild(ele);
             }
 
-        }
-        if (s_page * PAGESIZE >= s_total) {
-            let ele = document.createElement("div");
-            ele.classList.add("list-no-more");
-            ele.innerHTML = "<span>没有更多了。</span>"
-            listRootObj.appendChild(ele);
-        }
+        } else
+            if (s_page * PAGESIZE >= s_total) {
+                let ele = document.createElement("div");
+                ele.classList.add("list-no-more");
+                ele.innerHTML = "<span>没有更多了。</span>"
+                listRootObj.appendChild(ele);
+            }
         // console.log(keys)
     } catch (e) {
         var errele = document.createElement("div");
@@ -553,44 +553,44 @@ function deal_data_suggest_video(data, clean = true) {
                 listRootObj.appendChild(ele);
             }
 
-        }
-        if (v_page * PAGESIZE >= v_total) {
-            let ele = document.createElement("div");
-            ele.classList.add("list-no-more");
-            // console.log(v_page * PAGESIZE, v_total);
-            ele.innerHTML = "<span>没有更多了。</span>"
-            listRootObj.appendChild(ele);
-        } else {
-            if (addcount < PAGESIZE / 2) {
-                try {
-                    v_cooldown = true;
-                    v_page = v_page + 1;
-                    let url = get_api_suggest_url(v_vid, v_playlistid, "video", v_page);
-                    if (url == undefined) {
-                        document.getElementById("video-player-suggest-list").innerHTML = `<span class="small-gray-text">无推荐内容</span>`;
-                        return;
-                    }
-                    var loading_todeal = document.createElement("div");
-                    loading_todeal.classList.add("loading_todeal");
-                    loading_todeal.innerHTML = `<div class="loader" style="width:12px;height:12px;"></div><b class="unable-sel" style="margin-left:16px;font-size:16px;">正在缓冲中...</b>`
-                    document.getElementById("video-player-suggest-list").appendChild(loading_todeal);
-                    $.fetch(url, "json").then(data => {
-                        deal_data_suggest_video(data, false);
-                        v_cooldown = false;
-                    }).catch(e => {
+        } else
+            if (v_page * PAGESIZE >= v_total) {
+                let ele = document.createElement("div");
+                ele.classList.add("list-no-more");
+                // console.log(v_page * PAGESIZE, v_total);
+                ele.innerHTML = "<span>没有更多了。</span>"
+                listRootObj.appendChild(ele);
+            } else {
+                if (addcount < PAGESIZE / 2) {
+                    try {
+                        v_cooldown = true;
+                        v_page = v_page + 1;
+                        let url = get_api_suggest_url(v_vid, v_playlistid, "video", v_page);
+                        if (url == undefined) {
+                            document.getElementById("video-player-suggest-list").innerHTML = `<span class="small-gray-text">无推荐内容</span>`;
+                            return;
+                        }
+                        var loading_todeal = document.createElement("div");
+                        loading_todeal.classList.add("loading_todeal");
+                        loading_todeal.innerHTML = `<div class="loader" style="width:12px;height:12px;"></div><b class="unable-sel" style="margin-left:16px;font-size:16px;">正在缓冲中...</b>`
+                        document.getElementById("video-player-suggest-list").appendChild(loading_todeal);
+                        $.fetch(url, "json").then(data => {
+                            deal_data_suggest_video(data, false);
+                            v_cooldown = false;
+                        }).catch(e => {
+                            console.error(e);
+                            document.getElementById("video-player-suggest-list").innerHTML = `<li class="small-gray-text">出现错误：${e.message}</li>`;
+                            v_cooldown = false;
+                            return;
+                        });
+                    } catch (e) {
                         console.error(e);
                         document.getElementById("video-player-suggest-list").innerHTML = `<li class="small-gray-text">出现错误：${e.message}</li>`;
                         v_cooldown = false;
                         return;
-                    });
-                } catch (e) {
-                    console.error(e);
-                    document.getElementById("video-player-suggest-list").innerHTML = `<li class="small-gray-text">出现错误：${e.message}</li>`;
-                    v_cooldown = false;
-                    return;
+                    }
                 }
             }
-        }
         // console.log(keys)
     } catch (e) {
         var errele = document.createElement("div");
@@ -860,13 +860,13 @@ function deal_data_playlist_content(data, clean = true) {
                 listRootObj.appendChild(ele);
             }
 
-        }
-        if (l_page * PAGESIZE >= l_total) {
-            let ele = document.createElement("div");
-            ele.classList.add("list-no-more");
-            ele.innerHTML = "<span>没有更多了。</span>"
-            listRootObj.appendChild(ele);
-        }
+        } else
+            if (l_page * PAGESIZE >= l_total) {
+                let ele = document.createElement("div");
+                ele.classList.add("list-no-more");
+                ele.innerHTML = "<span>没有更多了。</span>"
+                listRootObj.appendChild(ele);
+            }
         // console.log(keys)
     } catch (e) {
         var errele = document.createElement("div");

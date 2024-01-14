@@ -293,6 +293,7 @@ a:hover {
 }
 
 .input {
+    vertical-align: middle;
     border: 1px solid #CECECE;
     background: #F7F7F7;
     height: 32px;
@@ -347,6 +348,7 @@ a:hover {
     flex-shrink: 1;
     flex-basis: 0%;
     box-sizing: border-box;
+    vertical-align: middle;
 }
 
 .button:hover {

@@ -1,5 +1,9 @@
 
+var SlideDownTimeoutFunc = 0;
 // 获取固定的 HTML 对象
+document.querySelectorAll(".version-show").forEach((ele) => {
+    ele.innerText = BAMBOOMUSIC.version;
+});
 const searchTypeSelector = document.getElementById("search-selector");
 const searchBoxObj = document.getElementById("music-searchbox");
 const searchButtonObj = document.getElementById("search-music-page");
@@ -8,6 +12,7 @@ const promptBlockObj = document.querySelector(".promptBlock");
 const promptBlockTitleObj = document.getElementById("prompt-content");
 const autoFillObj = document.getElementById("fillinfo");
 const suggestKeyRootObj = document.querySelector(".suggestKeyRoot");
+const playListPaneObj = document.querySelector("#win-playlist");
 const musicPaneObj = document.querySelector("#win-playing");
 const smallMusicControlPaneObj = document.querySelector(".small-music-control");
 const musicPlayerObj = document.getElementById("music-player-audio");
@@ -60,24 +65,37 @@ function showWindow(winname, closeold = false) {
     let winele = document.getElementById(wid);
     winele.style.display = "inline-block";
 }
-function changeWindow(winname, closeold = true) {
+function changeWindow(winname, closeold = true, _element) {
     showHideMusicPlayerPane(false);
     let wid = "win-" + winname;
     nowWindow = winname;
     let winele = document.getElementById(wid);
     let allwins = document.getElementsByClassName("app-content-window");
     let winbtn = document.getElementById("btn-" + winname);
+    let winbtn2 = null;
+    try {
+        winbtn2 = document.getElementById("btn-" + winname + "-bottom");
+    } catch (e) {
+        console.error(e);
+    }
     if (winbtn == undefined) winbtn = { id: undefined };
-    let allbtns = document.querySelector(".active");
+    let allbtns = document.querySelectorAll(".active");
+    if (_element != null) {
+        if (_element.classList.contains("active")) {
+            return;
+        }
+    }
     if (allbtns != undefined && closeold) {
-        if (winbtn.id == allbtns.id) return;
-        allbtns.classList.remove("active");
+        for (let i = 0; i < allbtns.length; i++) {
+            allbtns[i].classList.remove("active");
+        }
     }
     if (winbtn.id != undefined) {
         let dsTop = winbtn.getBoundingClientRect().top + 22;
 
         document.getElementById("left-sel-display-bar").style.top = dsTop + "px";
         winbtn.classList.add("active")
+        winbtn2.classList.add("active")
     }
     if (closeold) {
         for (var i = 0; i < allwins.length; i++) {
@@ -97,10 +115,12 @@ function hideWindow(ele) {
 }
 function slideDownWindow(ele) {
     // $(ele).an;
+    // clearInterval(SlideDownTimeoutFunc);
     ele.style.top = "100%";
     // $("#top-bar").show();
 }
 function slideUpWindow(ele) {
+    // clearInterval(SlideDownTimeoutFunc);
     // $(ele).an;
     ele.style.top = "0%";
     // $("#top-bar").hide();
@@ -226,7 +246,21 @@ searchBoxObj.onkeydown = (ev => {
         case 27:
             suggestKeyRootObj.style.display = "none";
             break;
+        case 9:  //如果是其它键，换上相应在ascii 码即可。
+            if (nowsel >= 0) {
+                let ele = document.querySelector(".li-sel");
+                // searchBoxObj.value = ele.innerText;
+                if (ele.onclick != undefined)
+                    searchBoxObj.value = ele.innerText;
+                else {
+                    break;
+                }
+                displayNowSelSuggest();
+                return false;
+            }
+
     }
+    // console.log(ev.keyCode)
     //38 up 40 down 13 enter 27 esc
 })
 
@@ -383,15 +417,39 @@ function btn_addtoList(ele, openGUI = false, isRootNode = false) {
     show_msg("已添加【" + songname + "】到播放列表", 1000);
     // console.log(songname)
 }
-function showHideMusicPlayerPane(show_or_hide) {
+var PlayListPaneState = false;
+function showPlayList(show_or_hide) {
+    PlayListPaneState = show_or_hide;
+
     if (show_or_hide) {
-        slideUpWindow_name("playing");
-        smallMusicControlPaneObj.style.display = "none";
+        playListPaneObj.style.display = "inline-block";
+
+    } else {
+        (playListPaneObj.style.display = "none");
+        // smallMusicControlPaneObj.style.display = "inline-block";
+    }
+}
+var MusicPlayerPaneState = false;
+function preventPopUp(e) {
+    e.stopPropagation();
+}
+function showHideMusicPlayerPane(show_or_hide) {
+    MusicPlayerPaneState = show_or_hide;
+    let ass = document.querySelector(".musicpane-control");
+
+    if (PlayListPaneState) showPlayList(false);
+    if (show_or_hide) {
+        ass.classList.add("playing-display")
+        // showPlayList(false)
+        // slideUpWindow_name("playing");
+        musicPaneObj.style.display = "inline-block";
+        // smallMusicControlPaneObj.style.display = "none";
         windowsOnResize();
 
     } else {
-        slideDownWindow(musicPaneObj);
-        smallMusicControlPaneObj.style.display = "inline-block";
+        ass.classList.remove("playing-display")
+        musicPaneObj.style.display = "none";
+        // smallMusicControlPaneObj.style.display = "inline-block";
     }
 }
 //small-music-control
@@ -482,4 +540,49 @@ function enableKuromaji(flag) {
     } else {
         localStorage.setItem("kuroshiro", false);
     }
+}
+
+function showPlayingMenu(control) {
+    let eme = document.querySelector(".lrc-left-part")
+    if (control == null) {
+        // 切换模式
+        if (eme.classList.contains("active")) {
+            eme.classList.remove("active");
+        } else {
+            eme.classList.add("active");
+        }
+
+    } else {
+        if (control) {
+            eme.classList.add("active");
+        } else {
+            eme.classList.remove("active");
+        }
+    }
+}
+document.querySelector(".music-player-info-root").onclick = function (e) {
+    e.stopPropagation();
+}
+document.querySelector(".lrc-left-part").onclick = function () {
+    showPlayingMenu(false);
+}
+
+function saveBackgroundImage(){
+    let ele = document.getElementById("setting-background-image");
+    localStorage.setItem("backgroundImage",ele.value);
+    backgroundImage = ele.value;
+    if(backgroundImage != ""){
+        if(backgroundImage != "on"){
+            document.getElementById("win-playing").style.background = (backgroundImage);
+        }
+        document.getElementById("win-playing-host").classList.remove("color");
+    }else{
+        document.getElementById("win-playing").style.background = "#333";
+        document.getElementById("win-playing-host").classList.add("color");
+    }
+}
+function saveBackgroundImageSample(value){
+    let ele = document.getElementById("setting-background-image");
+    ele.value = value;
+    saveBackgroundImage();
 }
