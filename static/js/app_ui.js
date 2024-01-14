@@ -544,12 +544,15 @@ function enableKuromaji(flag) {
 
 function showPlayingMenu(control) {
     let eme = document.querySelector(".lrc-left-part")
+    let eme2 = document.querySelector(".lrc-right-part")
     if (control == null) {
         // 切换模式
         if (eme.classList.contains("active")) {
             eme.classList.remove("active");
+            eme2.classList.remove("active");
         } else {
             eme.classList.add("active");
+            eme2.classList.add("active");
         }
 
     } else {

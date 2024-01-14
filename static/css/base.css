@@ -1327,11 +1327,11 @@ body {
     }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 948px) {
     .app-content-window {
         height: calc(100% - 68px);
     }
-
+    
     .root-left-part {
         display: none;
     }
