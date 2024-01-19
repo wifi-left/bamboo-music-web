@@ -151,12 +151,12 @@ function getQueryString(name, url = window.location.search) {
 }
 // 页面加载完后...
 window.onload = function () {
+    changeWindow(default_page);
 
     if (playing_list.length > 0) {
         playing_idx = -1;
-        changeWindow("home");
-    } else {
-        changeWindow(default_page);
+        // changeWindow("home");
+        showPlayList(true)
     }
 
     let plid = getQueryString("musicid");
@@ -496,7 +496,7 @@ function loadLrcConfig() {
         }
     }
     let m = localStorage.getItem("lrc_settings");
-    if (m != "") {
+    if (m != "" && m != null) {
         try {
             m = JSON.parse(m);
             lrc_normal_line_color = m['normal-line-color'];
