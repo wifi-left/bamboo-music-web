@@ -155,17 +155,21 @@ musicPlayerObj.ontimeupdate = function () {
         let value = parseFloat(this.currentTime / this.duration * 1000);
         if (!isNaN(value)) {
             let width = parseFloat(this.currentTime / this.duration * 100) + "%";
-            document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
+            document.documentElement.style.setProperty(`--playing-progress`, width);
+
+            // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
             playerobj.value = value;
-            playerobj.style.backgroundSize = width + " 100%";
+            // playerobj.style.backgroundSize = width + " 100%";
             changePos(playerobj);
             // currentTimeObj.innerText = secondToTime_int(this.currentTime);
         }
     } else {
         if (!isNaN(this.currentTime)) {
             let width = parseFloat(this.currentTime / this.duration * 100) + "%";
-            document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
-            playerobj.style.backgroundSize = width + " 100%";
+            document.documentElement.style.setProperty(`--playing-progress`, width);
+
+            // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
+            // playerobj.style.backgroundSize = width + " 100%";
             // document.getElementById("player-progress-displayer").width = width;
 
         }
@@ -213,11 +217,14 @@ function changePos(ele) {
     let Nvalue = parseInt(ele.value);
     let Nmax = parseInt(ele.max);
     let width = parseFloat(Nvalue / Nmax * 100) + "%";
+    // document.documentElement.style.setProperty(`--playing-progress`, width);
+
     ele.style.backgroundSize = width + " 100%";
 }
 
 playerobj.onchange = function () {
-    changePos(this);
+    // changePos(this);
+
     let time = parseInt(playerobj.value) / 1000 * musicPlayerObj.duration;
     if (!isNaN(time))
         musicPlayerObj.currentTime = time;
@@ -402,7 +409,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
             pic = "./static/img/default_cd_old_.png";
         }
         document.getElementById("music-lrc-info-pic").src = pic;
-        if(backgroundImage == "on"){
+        if (backgroundImage == "on") {
             document.getElementById("win-playing").style.backgroundImage = "url(" + encodeURI(pic) + ")";
         }
         // console.log(info);

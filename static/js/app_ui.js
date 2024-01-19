@@ -433,7 +433,16 @@ var MusicPlayerPaneState = false;
 function preventPopUp(e) {
     e.stopPropagation();
 }
-function showHideMusicPlayerPane(show_or_hide) {
+
+function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false) {
+
+    if (isFullScreen()) {
+        document.exitFullscreen()
+    }
+
+    if (exit_fullscreen) {
+        return;
+    }
     MusicPlayerPaneState = show_or_hide;
     let ass = document.querySelector(".musicpane-control");
 
@@ -570,22 +579,25 @@ document.querySelector(".lrc-left-part").onclick = function () {
     showPlayingMenu(false);
 }
 
-function saveBackgroundImage(){
+function saveBackgroundImage() {
     let ele = document.getElementById("setting-background-image");
-    localStorage.setItem("backgroundImage",ele.value);
+    localStorage.setItem("backgroundImage", ele.value);
     backgroundImage = ele.value;
-    if(backgroundImage != ""){
-        if(backgroundImage != "on"){
+    if (backgroundImage != "") {
+        if (backgroundImage != "on") {
             document.getElementById("win-playing").style.background = (backgroundImage);
         }
         document.getElementById("win-playing-host").classList.remove("color");
-    }else{
+    } else {
         document.getElementById("win-playing").style.background = "#333";
         document.getElementById("win-playing-host").classList.add("color");
     }
 }
-function saveBackgroundImageSample(value){
+function saveBackgroundImageSample(value) {
     let ele = document.getElementById("setting-background-image");
     ele.value = value;
     saveBackgroundImage();
+}
+function GetFullscreen() {
+    document.querySelector("#win-playing").requestFullscreen();
 }

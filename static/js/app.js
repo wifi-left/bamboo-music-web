@@ -437,3 +437,12 @@ function saveUserLoves() {
     localStorage.setItem("user-loves", JSON.stringify(userLoves));
     localStorage.setItem("playing-list", JSON.stringify(playing_list));
 }
+
+function isFullScreen() {
+    return (
+        (document.fullscreenElement && document.fullscreenElement !== null) ||
+        (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+        (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+        (document.msFullscreenElement && document.msFullscreenElement !== null)
+    );
+}

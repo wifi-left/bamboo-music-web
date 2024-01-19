@@ -33,7 +33,7 @@
         </div> -->
         <div class="promptBlock"><span id="prompt-content"></span></div>
         <!-- Small screen -->
-        
+
         <!-- Big screen -->
         <div class="phone-bottom-bar">
             <button onclick="changeWindow('search',true,this);" id="btn-search-bottom" class="bottom-btn">
@@ -92,56 +92,62 @@
                 onclick="showHideMusicPlayerPane(!MusicPlayerPaneState)"></button>
             <button id="music-playlist-btn" class="button player-control fa fa-list-ul"
                 onclick="showPlayList(!PlayListPaneState)"></button>
-            <div id="player-progress-displayer"></div>
+            <div class="player-progress-displayer"></div>
         </div>
         <div id="win-playing" class="app-content-window">
-            <div id="win-playing-host"><div class="page-head-music-player">
-                <div class="page-head-musicinfo">
-                    <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
-                </div>
-                <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
-                    class="button fa fa-close"></button>
-                <button id="close-playing-page2" onclick="showHideMusicPlayerPane(false);"
-                    class="button fa fa-level-up"></button>
-                <button id="show-playing-other-control" class="button fa fa-info-circle"
-                    onclick="showPlayingMenu(null);"></button>
-            </div>
-            <div class="page-content" id="playing-lrc-area">
-                <div class="lrc-left-part">
-                    <div class="div-middle music-player-info-root">
-                        <img id="music-lrc-info-pic" src="./static/img/default_cd_old_.png" />
-                        <div></div>
-                        <div class="music-lrc-info-text-root">
-                            <span class="list-line-ele"><b id="music-lrc-info-text-name">这里是歌名</b></span>
-                            <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
-                                    class="small-gray-text width-80">相关人员：</span><b
-                                    id="music-lrc-info-text-singer">这里是歌手</b></span>
-                            <span class="list-line-ele" id="music-lrc-info-text-album-root"><span
-                                    class="small-gray-text width-40">专辑：</span><b
-                                    id="music-lrc-info-text-album">这里是专辑</b></span>
-                            <div class="music-lrc-info-control">
-                                <!-- 收藏 -->
-                                <button class="button music-info-control-button fa fa-star"></button>
-                                <!-- 视频 -->
-                                <button class="button music-info-control-button fa fa-tv"
-                                    id="music-lrc-info-tv"></button>
-                                <!-- 分享 -->
-                                <button class="button music-info-control-button fa fa-share"></button>
-                                <!-- 下载 -->
-                                <button id="pane-download-music"
-                                    class="button music-info-control-button fa fa-download"></button>
+            <div id="win-playing-host">
+                <div class="player-progress-displayer"></div>
 
+                <div class="page-head-music-player">
+                    <div class="page-head-musicinfo">
+                        <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
+                    </div>
+                    <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
+                        class="button fa fa-close"></button>
+                    <button id="close-playing-page2" onclick="showHideMusicPlayerPane(false,true);"
+                        class="button fa fa-level-up"></button>
+                    <button id="show-playing-other-control" class="button fa fa-info-circle"
+                        onclick="showPlayingMenu(null);"></button>
+                </div>
+                <div class="page-content" id="playing-lrc-area">
+                    <div class="lrc-left-part">
+                        <div class="div-middle music-player-info-root">
+                            <img id="music-lrc-info-pic" src="./static/img/default_cd_old_.png" />
+                            <div></div>
+                            <div class="music-lrc-info-text-root">
+                                <span class="list-line-ele"><b id="music-lrc-info-text-name">这里是歌名</b></span>
+                                <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
+                                        class="small-gray-text width-80">相关人员：</span><b
+                                        id="music-lrc-info-text-singer">这里是歌手</b></span>
+                                <span class="list-line-ele" id="music-lrc-info-text-album-root"><span
+                                        class="small-gray-text width-40">专辑：</span><b
+                                        id="music-lrc-info-text-album">这里是专辑</b></span>
+                                <div class="music-lrc-info-control">
+                                    <!-- 收藏 -->
+                                    <button class="button music-info-control-button fa fa-star"></button>
+                                    <!-- 视频 -->
+                                    <button class="button music-info-control-button fa fa-tv"
+                                        id="music-lrc-info-tv"></button>
+                                    <!-- 分享 -->
+                                    <button class="button music-info-control-button fa fa-share"></button>
+                                    <button class="button music-info-control-button fa fa-expand"
+                                        onclick="GetFullscreen()"></button>
+                                    <!-- 下载 -->
+                                    <button id="pane-download-music"
+                                        class="button music-info-control-button fa fa-download"></button>
+
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="lrc-right-part">
-                    <ul id="lrc-show-root">
+                    <div class="lrc-right-part">
+                        <ul id="lrc-show-root">
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div></div>
-            
+            </div>
+
 
         </div>
         <div id="win-playlist" class="app-content-window" onclick="showPlayList(false);">
@@ -160,7 +166,7 @@
 
         </div>
         <div class="app-content">
-            
+
             <div id="win-search" class="app-content-window">
                 <div id="video-musicplayer-loading-pane" class="loading-pane">
                     <div class="loading-pane-middle">
@@ -265,8 +271,10 @@
                 <h2>播放页样式</h2>
                 <h3>背景</h3>
                 <span>支持CSS语法（Background）</span>
-                <input  class="input setting-input" id="setting-background-image" /><button class="button" onclick="saveBackgroundImage()">保存</button><br/>
-                <span>预设：</span><button class="button" onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button class="button" onclick="saveBackgroundImageSample('')">无背景</button><br/>
+                <input class="input setting-input" id="setting-background-image" /><button class="button"
+                    onclick="saveBackgroundImage()">保存</button><br />
+                <span>预设：</span><button class="button" onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button
+                    class="button" onclick="saveBackgroundImageSample('')">无背景</button><br />
                 <h3>歌词</h3>
                 <span>普通歌词颜色：</span><input class="input setting-input" id='norlrccolor' type='text' /><input
                     type="color" class="input"
@@ -293,7 +301,7 @@
                 <div class="hr"></div>
                 <h2>制作信息</h2>
                 <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
-                <b>前端版本：</b><span class="version-show">加载版本号中...</span><br/>
+                <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
                 <span class="final-ele">仅提供技术支持</span>
             </div>
         </div>
