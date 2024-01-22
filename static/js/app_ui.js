@@ -103,6 +103,9 @@ function changeWindow(winname, closeold = true, _element) {
             allwins[i].style.display = "none";
         }
     }
+    if(winname == 'account'){
+        ReloadLoveListUI();
+    }
     $(winele).fadeIn(100);
     rootmenu.classList.remove("show");
     showHideMusicPlayerPane(false);
@@ -438,11 +441,12 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false) {
 
     if (isFullScreen()) {
         document.exitFullscreen()
+        if (exit_fullscreen) {
+            return;
+        }
     }
 
-    if (exit_fullscreen) {
-        return;
-    }
+
     MusicPlayerPaneState = show_or_hide;
     let ass = document.querySelector(".musicpane-control");
 
@@ -545,9 +549,11 @@ function saveLrcConfig() {
 function enableKuromaji(flag) {
     if (flag == true) {
         localStorage.setItem("kuroshiro", true);
+        Kuroshiro_state = true;
         alert("您需要重新刷新才能生效");
     } else {
         localStorage.setItem("kuroshiro", false);
+        Kuroshiro_state = false;
     }
 }
 
@@ -600,4 +606,39 @@ function saveBackgroundImageSample(value) {
 }
 function GetFullscreen() {
     document.querySelector("#win-playing").requestFullscreen();
+}
+
+function ReloadLoveListUI(){
+    let root = document.getElementById("lover-displayer");
+    root.innerHTML = "";
+    for (var i = 0; i < playing_list.length; i++) {
+        let linef = document.createElement("li");
+        linef.id = "star-list-" + i;
+        let line = document.createElement("div");
+        line.classList.add("star-list-text-root");
+        line.setAttribute("idx", i);
+        
+        let indexname = document.createElement("span");
+        indexname.innerText = (i + 1);
+        indexname.classList.add("l-idx")
+        let songname = document.createElement("b");
+        songname.onclick = function () {
+            show_star_detail(parseInt(this.parentNode.getAttribute("idx")), true);
+        }
+        songname.classList.add("songname");
+        songname.innerText = playing_list[i].name;
+        line.appendChild(indexname);
+        line.appendChild(songname);
+        let actionbar = document.createElement("div");
+        actionbar.classList.add("action-bar");
+
+        let actioncode = ``;
+        actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="addStarListToPlaying(${i});">`;
+        actioncode += `<button title="详情" class="button btn-info fa fa-info-circle" onclick="show_star_detail(${i});">`;
+        actioncode += `<button title="删除" class="button fa fa-remove" onclick="removeFromStarList(${i});"></button>`;
+        actionbar.innerHTML = actioncode;
+        linef.appendChild(line);
+        linef.appendChild(actionbar);
+        root.appendChild(linef);
+    }
 }

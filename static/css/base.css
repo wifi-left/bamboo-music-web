@@ -30,6 +30,77 @@
     display: inline-block;
 }
 
+#lover-displayer {
+    overflow: auto;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#lover-displayer .l-idx {
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    border-right: 1px solid #333;
+    font-weight: bold;
+}
+
+.star-list-text-root .songname {
+    color: white;
+    text-indent: 8px;
+    max-width: 50%;
+    overflow: hidden;
+    vertical-align: top;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
+
+.star-list-text-root {
+    width: calc(100% - 112px);
+    margin: 0;
+    display: inline-block;
+    padding: 0;
+    height: 32px;
+    vertical-align: middle;
+    line-height: 32px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+    white-space: nowrap;
+}
+
+#lover-displayer {
+    display: inline-block;
+    width: 100%;
+    border-top: 1px solid #b6b6b6;
+}
+
+#lover-displayer li {
+    width: calc(100% - 16px);
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    height: 48px;
+    border-bottom: 1px solid #333;
+    line-height: 48px;
+    /* text-indent: 8px; */
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+#lover-displayer .action-bar .button {
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+}
+
+#lover-displayer .action-bar {
+    display: inline-block;
+    width: 96px;
+}
+
 #playing-list-head {
     position: absolute;
     overflow: auto;
@@ -394,6 +465,15 @@ body {
 .win-fronter {
     font-size: 32px;
     font-weight: bold;
+}
+
+.win-subtitle {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.win-subtitle::before {
+    margin-right: 16px;
 }
 
 .win-fronter::before {
@@ -953,6 +1033,12 @@ body {
     transition: 0;
 }
 
+#win-account {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
 .page-head {
     position: absolute;
     top: 4px;
@@ -1331,7 +1417,7 @@ body {
     .app-content-window {
         height: calc(100% - 68px);
     }
-    
+
     .root-left-part {
         display: none;
     }

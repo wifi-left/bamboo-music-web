@@ -55,9 +55,10 @@ if (backgroundImage != "") {
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
+Kuroshiro_state = (localStorage.getItem("kuroshiro") == "true");
 const KURO = new Kuroshiro.default();
 if (allow_Kuroshiro) {
-    if (localStorage.getItem("kuroshiro") == "true") {
+    if (Kuroshiro_state) {
         KURO.init(new KuromojiAnalyzer({
             dictPath: Kuroshiro_lib_url
         })).then(function () {
@@ -224,9 +225,12 @@ function play_music_id(songid, openGUI = false) {
             }
 
             init_lrc_pane();
-            lrcRomaji(() => {
-                init_lrc_pane();
-            });
+            if (Kuroshiro_state) {
+                lrcRomaji(() => {
+                    init_lrc_pane();
+                });
+            }
+
             let name = info['name'];
             let singer = info['artist'];
             let singerid = info['artistid'];
@@ -445,4 +449,8 @@ function isFullScreen() {
         (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
         (document.msFullscreenElement && document.msFullscreenElement !== null)
     );
+}
+
+function addToUserLove() {
+
 }

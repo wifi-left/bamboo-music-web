@@ -40,6 +40,10 @@
                 <span class="fa fa-search"></span>
                 <span class="bottom-btn-title">探索</span>
             </button>
+            <!-- <button onclick="changeWindow('app',true,this);" id="btn-app-bottom" class="bottom-btn">
+                <span class="fa fa-cloud-download"></span>
+                <span class="bottom-btn-title">App</span>
+            </button> -->
             <button onclick="changeWindow('account',true,this);" id="btn-account-bottom" class="bottom-btn">
                 <span class="fa fa-user-circle"></span>
                 <span class="bottom-btn-title">个人中心</span>
@@ -59,7 +63,10 @@
                 <span class="fa fa-search"></span>
                 <span class="left-btn-title">探索</span>
             </button>
-
+            <!-- <button onclick="changeWindow('app',true,this);" id="btn-app" class="left-btn">
+                <span class="fa fa-cloud-download"></span>
+                <span class="left-btn-title">App</span>
+            </button> -->
             <div class="left-btn-bottom">
                 <button onclick="changeWindow('account',true,this);" id="btn-account" class="left-btn">
                     <span class="fa fa-user-circle"></span>
@@ -249,14 +256,21 @@
                 </div>
 
             </div>
-            <div id="win-infos" class="app-content-window">
+            <div id="win-app" class="app-content-window">
                 <div class="not-build-yet div-middle unable-sel text-middle">
                     <img src="./static/img/favicon.png" width="120" />
-                    <h1>下载 APP</h1><span>APP 正在努力研发中...</span>
+                    <h1>下载 APP</h1>
+                    <p>新版 APP 正在努力研发中...</p>
                 </div>
             </div>
             <div id="win-account" class="app-content-window">
-                <h1 class="fa fa-address-card win-fronter">个人中心</h1>
+                <h1 class="fa fa-address-card win-fronter">个人中心</h1><br/>
+                <h2 class="fa fa-star win-subtitle">收藏列表</h2><br/>
+                <ul id="lover-displayer">
+                    <div class="list-item">暂无项目</div>
+                    <div class="list-item">暂无项目</div>
+                    <div class="list-item">暂无项目</div>
+                </ul>
             </div>
             <div id="win-love" class="app-content-window">
                 <h1 class="fa fa-heart win-fronter">我喜欢</h1>
