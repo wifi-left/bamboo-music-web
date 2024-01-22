@@ -147,6 +147,23 @@
             margin-top: 4px;
             vertical-align: middle;
         }
+
+        .mainbutton {
+            width: 100%;
+            height: 48px;
+            margin-left: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            display: inline-block;
+            line-height:48px;
+            text-align: center;
+            max-width: 240px;
+        }
+
+        .main-button-host {
+            display: inline-block;
+            width: calc(100% - 16px);
+        }
     </style>
 </head>
 
@@ -162,9 +179,12 @@
             </div>
             <div id="Ds_MAIN" class="pane">
                 <h3>主页面</h3>
-                <button class="button" onclick="ChangePsw();">修改密码</button>
-                <button class="button" onclick="SetNames();">设置别名</button>
-                <button class="button" onclick="flushCache_P();">刷新缓存</button>
+                <div class="main-button-host">
+                    <button class="button mainbutton" onclick="ChangePsw();">修改密码</button>
+                    <button class="button mainbutton" onclick="SetNames();">设置别名</button>
+                    <button class="button mainbutton" onclick="flushCache_P();">刷新缓存</button>
+                </div>
+
             </div>
             <div id="D_CHANGEPSW" class="pane">
                 <h3>请输入管理密码：</h3>
@@ -259,7 +279,7 @@
 
     }
     function auto_name(name) {
-        if(name == null) return "";
+        if (name == null) return "";
         let arr = name.split("\\");
         if (arr.length == 0) {
             arr = name.split("/");
