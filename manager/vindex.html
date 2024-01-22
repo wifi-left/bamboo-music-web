@@ -5,27 +5,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Gamom's Website</title>
-    <link rel="stylesheet" type="text/css" href="../static/css/st_ga.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/element_style.css">
     <script src="../static/js/gquery.min.js"></script>
     <style>
-        ul{
+        body {
+            background-color: rgb(30, 30, 30);
+            color: white;
+        }
+
+        ul {
             padding: 0 0 0 0;
         }
+
         #loading {
-            background-color: aquamarine;
             /* color: azure; */
             width: 100%;
             height: 100%;
             position: fixed;
             left: 0;
             top: 0;
-        }
-
-        * {
-            transition: 0.5s;
-            overflow-y: none;
-            overflow-x: none;
-            user-select: none;
         }
 
         .center-title {
@@ -87,32 +85,9 @@
             position: absolute;
             top: 0px;
             left: 0;
-            padding: 4em 4em 4em 4em;
-            width: calc(100% - 8em);
+            padding: 12px 12px 12px 12px;
+            width: calc(100% - 24px);
             height: auto;
-        }
-
-        .button-o {
-            color: #333;
-            font-weight: bold;
-            font-family: "console";
-            font-size: 26px;
-            outline: none;
-            border: none;
-            border-bottom: 4px solid #333;
-            width: 180px;
-            height: 60px;
-            background: rgba(0, 0, 0, 0);
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            line-height: 60px;
-        }
-
-        .button-o:hover,
-        .button-o:active {
-            color: #b6b6b6;
-            border-bottom: 4px solid #b6b6b6;
         }
 
         .windows {
@@ -140,6 +115,10 @@
             user-select: text;
             -moz-user-select: text;
             -webkit-user-select: text;
+            height: 36px;
+            line-height: 36px;
+            border-top: 1px solid #333;
+            margin-top: 8px;
         }
 
         .path-list b {
@@ -153,48 +132,63 @@
             word-break: break-all;
             right: 0;
         }
+
+        .button {
+            margin-top: 4px;
+            vertical-align: middle;
+        }
+
+        .input {
+            margin-top: 4px;
+            vertical-align: middle;
+        }
+
+        .button-green {
+            margin-top: 4px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 
-<body bgcolor="azure">
+<body>
     <div id="textarea">
         <div>
             <h1>Local Bamboo Music Manager 管理员设置页</h1>
             <div id="D_checkPSW" class="pane" style="display:inline-block">
                 <h3>请输入管理密码：</h3>
-                <span>若未设置，默认为 <code>admin</code></span><br />
+                <span>若未设置，默认为 <code>admin</code></span><br /><br />
                 <input class="input" id="psw-enter" type="password" placeholder="请输入密码" />
-                <button class="button-blue" onclick="checkPSW();">提交</button>
+                <button class="button" onclick="checkPSW();">提交</button>
             </div>
             <div id="Ds_MAIN" class="pane">
                 <h3>主页面</h3>
-                <button class="button-o" onclick="ChangePsw();">修改密码</button>
-                <button class="button-o" onclick="SetNames();">设置别名</button>
-                <button class="button-o" onclick="flushCache_P();">刷新缓存</button>
+                <button class="button" onclick="ChangePsw();">修改密码</button>
+                <button class="button" onclick="SetNames();">设置别名</button>
+                <button class="button" onclick="flushCache_P();">刷新缓存</button>
             </div>
             <div id="D_CHANGEPSW" class="pane">
                 <h3>请输入管理密码：</h3>
                 <span>设置新的密码</span><br />
                 <input class="input" id="psw-change-enter" />
-                <button class="button-blue" onclick="changeNPSW();">提交</button>
+                <button class="button-green" onclick="changeNPSW();">提交</button>
                 <button class="button" onclick="backMain();">取消</button>
             </div>
             <div id="Ds_NAME" class="pane">
                 <h3>修改别名</h3>
-                <button class="button-blue" onclick="subNames();">提交</button>
+                <button class="button-green" onclick="subNames();">提交</button>
                 <button class="button" onclick="backMain();">取消</button>
                 <br />
                 <ul id="nameF">
 
                 </ul>
                 <br />
-                <button class="button-blue" onclick="subNames();">提交</button>
+                <button class="button-green" onclick="subNames();">提交</button>
                 <button class="button" onclick="backMain();">取消</button>
             </div>
             <div id="Ds_CACHE" class="pane">
                 <h3>刷新缓存</h3>
                 <span>此操作不可逆</span><br />
-                <button class="button-blue" onclick="flushCache();">继续</button>
+                <button class="button-green" onclick="flushCache();">继续</button>
                 <button class="button" onclick="backMain();">取消</button>
             </div>
             <div id="D_LOADING" class="pane">
@@ -246,6 +240,10 @@
             alert(data.msg);
             backMain();
 
+        }).error(err => {
+            alert("出错！" + err.msg);
+            console.error(err);
+            backMain();
         });
     }
     function js_H(data) {
@@ -260,6 +258,17 @@
         return d;
 
     }
+    function auto_name(name) {
+        if(name == null) return "";
+        let arr = name.split("\\");
+        if (arr.length == 0) {
+            arr = name.split("/");
+            if (arr.length == 0) {
+                arr = [name];
+            }
+        }
+        return name[name.length - 1];
+    }
     function showNameUI() {
         var code = `<h3>已命名</h3>`;
         let precode = `<h3>待命名</h3>`;
@@ -270,7 +279,7 @@
         for (var i in paths) {
             if (pathnamess[paths[i]] == undefined) {
                 pathnamess[paths[i]] = "";
-                precode += `<li><span class="path-list"><b>${paths[i]}</b><span></span></span><input x-content="${js_H(paths[i])}" class="input name-input" value="${js_H(pathnamess[paths[i]])}" placeholder="请输入名称" /></li>`
+                precode += `<li><span class="path-list"><b>${paths[i]}</b><span></span></span><input x-content="${js_H(paths[i])}" class="input name-input" value="${auto_name(paths[i])}" placeholder="请输入名称" /></li>`
             } else {
                 code += `<li><span class="path-list"><b>${paths[i]}</b><span></span></span><input x-content="${js_H(paths[i])}" class="input name-input" value="${js_H(pathnamess[paths[i]])}" placeholder="请输入名称" /></li>`
             }
@@ -302,6 +311,10 @@
                 Ds_NAME.style.display = "inline-block";
                 // D_checkPSW.style.display = "none";
                 // Ds_MAIN.style.display = "inline-block";
+            }).error(err => {
+                alert("出错！" + err.msg);
+                console.error(err);
+                backMain();
             });
             // D_checkPSW.style.display = "none";
             // Ds_MAIN.style.display = "inline-block";
@@ -340,7 +353,11 @@
             pswcache = pswcache1;
 
             backMain();
-        });
+        }).error(err => {
+            alert("出错！" + err.msg);
+            console.error(err);
+            backMain();
+        });;
     }
     function ChangePsw() {
         Ds_MAIN.style.display = "none";
@@ -370,7 +387,11 @@
             alert(data.msg);
             // D_checkPSW.style.display = "none";
             // Ds_MAIN.style.display = "inline-block";
-        });
+        }).error(err => {
+            alert("出错！" + err.msg);
+            console.error(err);
+            backMain();
+        });;
     };
     function checkPSW() {
         var psw = document.getElementById("psw-enter").value;
@@ -393,7 +414,11 @@
             }
             D_checkPSW.style.display = "none";
             Ds_MAIN.style.display = "inline-block";
-        });
+        }).error(err => {
+            alert("出错！" + err.msg);
+            console.error(err);
+            backMain();
+        });;
     }
     function ShowLoadingUI() {
         document.getElementById("D_LOADING").style.display = "inline-block";
