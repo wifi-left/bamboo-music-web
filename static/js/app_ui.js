@@ -103,7 +103,7 @@ function changeWindow(winname, closeold = true, _element) {
             allwins[i].style.display = "none";
         }
     }
-    if(winname == 'account'){
+    if (winname == 'account') {
         ReloadLoveListUI();
     }
     $(winele).fadeIn(100);
@@ -473,7 +473,8 @@ function windowsOnResize() {
     let w = LRC_root_obj.clientWidth;
     document.documentElement.style.setProperty(`--lrc-client-height`, h + 'px');
     document.documentElement.style.setProperty(`--lrc-client-width`, w + 'px');
-    choose_lrc(musicPlayerObj.currentTime, true);
+    if (choose_lrc)
+        choose_lrc(musicPlayerObj.currentTime, true);
 }
 function set_globle_css_var() {
     document.documentElement.style.setProperty(`--norlrccolor`, lrc_normal_line_color);
@@ -595,7 +596,7 @@ function saveBackgroundImage() {
         }
         document.getElementById("win-playing-host").classList.remove("color");
     } else {
-        document.getElementById("win-playing").style.background = "#333";
+        document.getElementById("win-playing").style.background = "rgb(30,30,30)";
         document.getElementById("win-playing-host").classList.add("color");
     }
 }
@@ -608,7 +609,7 @@ function GetFullscreen() {
     document.querySelector("#win-playing").requestFullscreen();
 }
 
-function ReloadLoveListUI(){
+function ReloadLoveListUI() {
     let root = document.getElementById("lover-displayer");
     root.innerHTML = "";
     for (var i = 0; i < playing_list.length; i++) {
@@ -617,7 +618,7 @@ function ReloadLoveListUI(){
         let line = document.createElement("div");
         line.classList.add("star-list-text-root");
         line.setAttribute("idx", i);
-        
+
         let indexname = document.createElement("span");
         indexname.innerText = (i + 1);
         indexname.classList.add("l-idx")

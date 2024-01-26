@@ -36,6 +36,10 @@ if (!empty($_GET['offset'])) {
 if (!empty($_GET['limit'])) {
     $limit = (int)$_GET['limit'];
 }
+$prefix = "";
+if (!empty($_GET['prefix'])) {
+    $prefix = $_GET['prefix'];
+}
 // $url = str_replace("\~", "%7E", $url);
 $headers = "";
 $value = urldecode($value);
@@ -51,12 +55,14 @@ $page = (int)$offset - 1;
 $offsets = ((int)$offset - 1) * ((int)$limit);
 $html = "";
 $result = json_decode('{}');
+
 if (substr($value, 0, 6) == 'MUSIC_') {
     $value = substr($value, 6);
 }
 function fileListToData()
 {
     $result = json_decode('{"data":{"total":30,"list":[]}}');
+    $prefix = $GLOBALS['prefix']; 
     foreach ($GLOBALS['files'] as $valued) {
         // $line->data[] = $value->filename;
         $res = $valued->path;
@@ -78,21 +84,21 @@ function fileListToData()
         else $songname = $filebasename;
         // echo strpos($res, " - ");
         if ($cover != -1) {
-            $line->pic = "./apis/local/cover.php?id=" . $cover;
+            $line->pic = dirname($GLOBALS['url']) . "/cover.php?id=" . $cover;
         }
         if (!empty($songname)) {
             $line->name = $songname;
         }
         if (!empty($musicid)) {
-            $line->id = $musicid;
+            $line->id = $prefix . $musicid;
         }
         if (!empty($singer)) {
             $line->artist = $singer;
-            $line->artistid = base64_encode($singer);
+            $line->artistid = $prefix . base64_encode($singer);
         }
         if (!empty($pathid)) {
             $line->album = getDirAlName($filepath);
-            $line->albumid = $pathid;
+            $line->albumid = $prefix . $pathid;
         }
         // $result->data->songinfo = $line;
         $result->data->list[] = $line;
@@ -117,6 +123,9 @@ $seed = 1;
 if (!empty($_GET['seed'])) $seed = $_GET['seed'];
 // echo strtotime("2022-17-12");
 $seed = strtotime(date('Y-m-d')) . $seed;
+$uri = $_SERVER['REQUEST_URI'];
+$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
 // echo $offsets;
 switch ($type) {
     case 'random':
@@ -154,8 +163,10 @@ switch ($type) {
                 if (is_file($mvres)) {
                     $line->hasMv = 1;
                 }
+
+                
                 if ($ress['cover'] != -1)
-                    $line->pic = './apis/local/cover.php?id=' . $ress['cover'];
+                    $line->pic = dirname($url) . '/local/cover.php?id=' . $ress['cover'];
                 $filebasename = basename($filewithoutext);
                 $filepath = dirname($res);
                 $musicid = $resid;
@@ -170,15 +181,15 @@ switch ($type) {
                     $line->name = $songname;
                 }
                 if (!empty($musicid)) {
-                    $line->id = $musicid;
+                    $line->id = $prefix . $musicid;
                 }
                 if (!empty($singer)) {
                     $line->artist = $singer;
-                    $line->artistid = base64_encode($singer);
+                    $line->artistid = $prefix . base64_encode($singer);
                 }
                 if (!empty($pathid)) {
                     $line->album = getDirAlName($filepath);
-                    $line->albumid = $pathid;
+                    $line->albumid = $prefix . $pathid;
                 }
                 // $result->data->songinfo = $line;
                 $result->data->list[] = $line;
@@ -250,26 +261,22 @@ switch ($type) {
         } else if (file_exists($filepath . "\\" . "cover.jpg")) {
             $cover = getId($filepath . "\\" . "cover.jpg");
         }
-        $uri = $_SERVER['REQUEST_URI'];
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
+
         if ($cover != -1)
             $line->pic = dirname($url) . "/cover.php?id=" . $cover;
-        else
-            $line->pic = dirname(dirname(dirname($url))) . "/static/img/default_cd_old_.png";
         if (!empty($songname)) {
             $line->name = $songname;
         }
         if (!empty($musicid)) {
-            $line->id = $musicid;
+            $line->id = $prefix . $musicid;
         }
         if (!empty($singer)) {
             $line->artist = $singer;
-            $line->artistid = base64_encode($singer);
+            $line->artistid = $prefix . base64_encode($singer);
         }
         if (!empty($pathid)) {
             $line->album = getDirAlName($filepath);
-            $line->albumid = $pathid;
+            $line->albumid = $prefix . $pathid;
         }
 
         $result->data->info = $line;
@@ -359,7 +366,7 @@ switch ($type) {
             $filepath = dirname($res);
             $cover = $valued->cover;
             if ($cover != -1) {
-                $line->pic = "./apis/local/cover.php?id=" . $cover;
+                $line->pic = dirname($url) . "/local/cover.php?id=" . $cover;
             }
             $musicid = $valued->id;
             $mvres = $filepath . '\\' . $filewithoutext . '.mp4';
@@ -377,15 +384,15 @@ switch ($type) {
                 $line->name = $songname;
             }
             if (!empty($musicid)) {
-                $line->id = $musicid;
+                $line->id = $prefix . $musicid;
             }
             if (!empty($singer)) {
                 $line->artist = $singer;
-                $line->artistid = base64_encode($singer);
+                $line->artistid = $prefix . base64_encode($singer);
             }
             if (!empty($pathid)) {
                 $line->album = getDirAlName($filepath);
-                $line->albumid = $pathid;
+                $line->albumid = $prefix . $pathid;
             }
             // $result->data->songinfo = $line;
             $result->data->list[] = $line;
@@ -417,7 +424,7 @@ switch ($type) {
                 return;
             }
         }
-        $html = "./apis/local/getlocalmusic.php?type=mp4&id=" . $value;
+        $html = dirname($url) . "/apis/local/getlocalmusic.php?type=mp4&id=" . $value;
         break;
     case 'url':
 
@@ -438,11 +445,7 @@ switch ($type) {
                 return;
             }
         }
-        $uri = $_SERVER['REQUEST_URI'];
 
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-
-        $url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
         $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&time=" . (int)(time() / 100);
         // echo $html;
         break;
@@ -453,7 +456,7 @@ switch ($type) {
         if ($valued != false) {
             $value = $valued;
             $resu = searchSong($value);
-            $resu->data->name = ($value);
+            $resu->data->name = $value;
             $resu->data->total = $GLOBALS['total'];
             $html = json_encode($resu);
         } else {
@@ -478,7 +481,7 @@ switch ($type) {
             // echo "<h1>$path</h1>";
             $line = json_decode('{"name":"","uname":"","userName":"","id":""}');
             $pathid = getId($path);
-            $line->id = $pathid;
+            $line->id = $prefix . $pathid;
             $line->name = getDirAlName(trim($path));
             $line->uname = "Local";
             $line->userName = "Local";
@@ -515,7 +518,7 @@ switch ($type) {
                 if ($skipcount_2 < ($offset - 1) * $limit + 1) continue;
 
                 $count++;
-                $line->id = $pid;
+                $line->id = $prefix . $pid;
                 $line->name = $ele->name;
                 $cover = 0;
                 $tpath = getSongPath($pid);
@@ -537,62 +540,6 @@ switch ($type) {
             $resu->type = "playlist";
         }
         echo json_encode($resu);
-        break;
-    case 'files':
-        $result = json_decode('{"data":{"total":0,"list":[]}}');
-        $file = fopen("../cache/location.txt.bamboomusic", "r");
-        $keyword = "";
-        //检测指正是否到达文件的未端
-
-        while (!feof($file)) {
-            $path = fgets($file);
-            // echo "<h1>$path</h1>";
-            scanAllFile(trim($path), $keyword);
-        }
-        // saveId();
-
-        fclose($file);
-        // echo json_encode($files);
-        foreach ($files as $valued) {
-            // $line->data[] = $value->filename;
-            $res = $valued->path;
-            $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null}');
-            $filewithoutext = $valued->filename;
-            $filebasename = basename($filewithoutext);
-            $filepath = dirname($res);
-            $musicid = $valued->id;
-            $pathid = getId($filepath);
-            $singer = substr($filebasename, 0, strpos($filebasename, " - "));
-            if (strpos($filebasename, " - ") != false)
-                $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
-            else $songname = $filebasename;
-            // echo strpos($res, " - ");
-            if (!empty($songname)) {
-                $line->name = $songname;
-                $line->songName = $songname;
-            }
-            if (!empty($musicid)) {
-                $line->id = $musicid;
-            }
-            if (!empty($singer)) {
-                $line->artist = $singer;
-                $line->artistid = base64_encode($singer);
-                $line->artistId = base64_encode($singer);
-            }
-            if (!empty($pathid)) {
-                $line->album = getDirAlName($filepath);
-                $line->albumid = $pathid;
-                $line->albumId = $pathid;
-            }
-            // $result->data->songinfo = $line;
-            $result->data->musicList[] = $line;
-            // echo json_encode($line);
-        }
-        // saveId();
-        // $result->data->lrclist = $lrc;
-        $result->data->total = $total;
-        $result->data->num = $total;
-        $html = json_encode($result);
         break;
     default:
         echo '{"success":"fail","code":404,"message":"未知的参数","code":1}';

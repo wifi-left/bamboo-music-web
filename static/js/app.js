@@ -3,6 +3,7 @@ var s_total = -1;
 var s_searchkey = "";
 var s_page = -1;
 var s_type = "random";
+var nowsel = -1;
 
 var v_total = -1;
 var v_playlistid = "";
@@ -51,7 +52,7 @@ if (backgroundImage != "") {
         document.getElementById("win-playing-host").classList.remove("color");
     }
 } else {
-    document.getElementById("win-playing").style.backgroundImage = "#333";
+    document.getElementById("win-playing").style.backgroundImage = "rgb(30,30,30)";
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
@@ -166,7 +167,6 @@ function setVideoUrl(title, url) {
     document.getElementById("mui-player").play();
 }
 var suggest_idx = 0;
-let nowsel = -1;
 
 function list_alarm_gui(singer, singerid, album, albumid, clean = true) {
     document.getElementById("list-album-name").innerText = "专辑：" + album;
@@ -244,7 +244,7 @@ function play_music_id(songid, openGUI = false) {
             try {
                 document.querySelector("#pane-download-music").onclick = function () {
                     localStorage.setItem("songlrc", JSON.stringify(oLRC));
-                    window.open(`./apis/download.php?url=${btoa(playurl)}&filename=${btoa(encodeURI(`${singer} - ${name}.mp3`))}`);
+                    window.open(`./apis/download.php?url=${btoa(playurl)}&filename=${btoa(encodeURI(`${singer} - ${name}`))}`);
                 }
             } catch (e) {
                 console.warn(e);

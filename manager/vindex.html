@@ -260,7 +260,7 @@
             alert(data.msg);
             backMain();
 
-        }).error(err => {
+        }).catch(err => {
             alert("出错！" + err.msg);
             console.error(err);
             backMain();
@@ -287,7 +287,7 @@
                 arr = [name];
             }
         }
-        return name[name.length - 1];
+        return arr[arr.length - 1];
     }
     function showNameUI() {
         var code = `<h3>已命名</h3>`;
@@ -331,7 +331,7 @@
                 Ds_NAME.style.display = "inline-block";
                 // D_checkPSW.style.display = "none";
                 // Ds_MAIN.style.display = "inline-block";
-            }).error(err => {
+            }).catch(err => {
                 alert("出错！" + err.msg);
                 console.error(err);
                 backMain();
@@ -373,7 +373,7 @@
             pswcache = pswcache1;
 
             backMain();
-        }).error(err => {
+        }).catch(err => {
             alert("出错！" + err.msg);
             console.error(err);
             backMain();
@@ -407,7 +407,7 @@
             alert(data.msg);
             // D_checkPSW.style.display = "none";
             // Ds_MAIN.style.display = "inline-block";
-        }).error(err => {
+        }).catch(err => {
             alert("出错！" + err.msg);
             console.error(err);
             backMain();
@@ -434,7 +434,7 @@
             }
             D_checkPSW.style.display = "none";
             Ds_MAIN.style.display = "inline-block";
-        }).error(err => {
+        }).catch(err => {
             alert("出错！" + err.msg);
             console.error(err);
             backMain();
