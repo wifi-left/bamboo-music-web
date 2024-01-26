@@ -49,7 +49,13 @@ var mplayer = {
 }
 function play_last_music(openGUI = false) {
     if (playing_list.length <= 0) {
-        enterAudioStation(false);
+        if (myAudioStation.length <= 1)
+            enterAudioStation(false);
+        else {
+            play_music_id(myAudioStation[myAudioStation.length - 2], openGUI);
+            myAudioStation.splice(myAudioStation.length - 1, 1);
+
+        }
         return;
     }
     let target_idx = playing_idx - 1;
@@ -76,7 +82,7 @@ function play_idx_music(target_idx = 0, openGUI = false) {
         enterAudioStation(true);
         return;
     }
-    if(location.hash === "#station") location.hash = "";
+    if (location.hash === "#station") location.hash = "";
 
     if (playing_idx == -1) {
 
@@ -402,9 +408,11 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         let pic = info.pic;
 
         if (pic == null) {
-            pic = "./static/img/default_cd_old_.png";
+            document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd_old_.png";
+            pic = FALLBACK_BACKGROUND;
+        } else {
+            document.getElementById("music-lrc-info-pic").src = pic;
         }
-        document.getElementById("music-lrc-info-pic").src = pic;
         if (backgroundImage == "on") {
             document.getElementById("win-playing").style.backgroundImage = "url(" + encodeURI(pic) + ")";
         }
@@ -458,8 +466,8 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         showHideMusicPlayerPane(true);
     }
     if (play) {
-        musicPlayerObj.play().catch(e => {
-            console.error(e);
+        musicPlayerObj.play().catch(reason => {
+            console.error(reason);
             if (reason.name == 'NotAllowedError') {
                 show_msg("根据浏览器播放规则，自动播放失败。请手动点击播放。", 5000);
             }

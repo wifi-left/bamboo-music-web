@@ -612,10 +612,14 @@ function enterAudioStation(openGUI = true) {
     random_Song(openGUI);
 }
 function random_Song(openGUI = false) {
+
     let seed = new Date().getTime() % 10000;
     let url = get_api_default_list(seed, 1);
     fetchi(url, "json", function (data) {
+
         let id = data.data.list[0].id;
+        if (myAudioStation.length >= 10) myAudioStation.splice(0, 1);
+        myAudioStation.push(id);
         play_music_id(id, openGUI);
     }, function (e) {
         show_msg("进入随机电台模式失败：" + e.message, 2000);
