@@ -4,6 +4,7 @@ var s_searchkey = "";
 var s_page = -1;
 var s_type = "random";
 var nowsel = -1;
+var myAudioStation = false;
 
 var v_total = -1;
 var v_playlistid = "";

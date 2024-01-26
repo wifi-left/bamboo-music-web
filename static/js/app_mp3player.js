@@ -49,10 +49,7 @@ var mplayer = {
 }
 function play_last_music(openGUI = false) {
     if (playing_list.length <= 0) {
-        musicPlayerObj.currentTime = 0;
-        musicPlayerObj.play();
-        // show_msg("没有歌曲可以播放",2000)
-        console.log("Repeat");
+        enterAudioStation(false);
         return;
     }
     let target_idx = playing_idx - 1;
@@ -63,10 +60,8 @@ function play_last_music(openGUI = false) {
 }
 function play_next_music(openGUI = false) {
     if (playing_list.length <= 0) {
-        musicPlayerObj.currentTime = 0;
-        musicPlayerObj.play();
-        // show_msg("没有歌曲可以播放",2000)
-        console.log("Repeat");
+
+        enterAudioStation(false);
         return;
     }
     let target_idx = playing_idx + 1;
@@ -79,10 +74,7 @@ function play_next_music(openGUI = false) {
 function play_idx_music(target_idx = 0, openGUI = false) {
 
     if (playing_list.length <= 0) {
-        musicPlayerObj.currentTime = 0;
-        musicPlayerObj.play();
-        // show_msg("没有歌曲可以播放",2000)
-
+        enterAudioStation(true);
         return;
     }
     if (playing_idx == -1) {
@@ -131,8 +123,11 @@ function pause_music() {
         if (playing_idx < 0 && playing_list.length > 0) {
             // playing_idx = 0;
             play_idx_music(0);
-        } else
+        } else if (playing_list.length <= 0) {
+            enterAudioStation();
+        } else {
             musicPlayerObj.play();
+        }
     } else {
         musicPlayerObj.pause();
     }

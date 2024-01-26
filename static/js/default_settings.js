@@ -179,6 +179,6 @@ function get_api_alarm_list(albumid, pageid, type = "playlist") {
     }
 }
 
-function get_api_default_list(page = 0) {
-    return `${localUrlRoot}local.php?type=random&value=${PAGESIZE}&seed=${page}&offset=${page}`;
+function get_api_default_list(page = 0, count = PAGESIZE) {
+    return `${localUrlRoot}local.php?type=random&value=${count}&seed=${page}&offset=${page}`;
 }

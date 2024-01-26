@@ -606,7 +606,20 @@ function deal_data_suggest_video(data, clean = true) {
     } catch (e) {
     }
 }
-
+function enterAudioStation(openGUI = true) {
+    show_msg("随机电台模式", 2000);
+    random_Song(openGUI);
+}
+function random_Song(openGUI = false) {
+    let seed = new Date().getTime() % 10000;
+    let url = get_api_default_list(seed, 1);
+    fetchi(url, "json", function (data) {
+        let id = data.data.list[0].id;
+        play_music_id(id, openGUI);
+    }, function (e) {
+        show_msg("进入随机电台模式失败：" + e.message, 2000);
+    });
+}
 function api_suggestKey(key, type = undefined) {
     suggest_idx++;
 
