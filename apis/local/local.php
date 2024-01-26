@@ -62,7 +62,7 @@ if (substr($value, 0, 6) == 'MUSIC_') {
 function fileListToData()
 {
     $result = json_decode('{"data":{"total":30,"list":[]}}');
-    $prefix = $GLOBALS['prefix']; 
+    $prefix = $GLOBALS['prefix'];
     foreach ($GLOBALS['files'] as $valued) {
         // $line->data[] = $value->filename;
         $res = $valued->path;
@@ -129,12 +129,14 @@ $url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
 // echo $offsets;
 switch ($type) {
     case 'random':
+
         // echo $seed;
         // return;
 
         $result = json_decode('{"seed":"","data":{"total":30,"list":[]}}');
         $result->seed = $seed;
         $count = $value;
+        if ($count <= 0 || $count >= 40) $count = 30;
         // echo $value == null;
         $tmp = $id_lists;
         if (count($tmp) <= 0) {
@@ -164,9 +166,9 @@ switch ($type) {
                     $line->hasMv = 1;
                 }
 
-                
+
                 if ($ress['cover'] != -1)
-                    $line->pic = dirname($url) . '/local/cover.php?id=' . $ress['cover'];
+                    $line->pic = dirname($url) . '/cover.php?id=' . $ress['cover'];
                 $filebasename = basename($filewithoutext);
                 $filepath = dirname($res);
                 $musicid = $resid;
