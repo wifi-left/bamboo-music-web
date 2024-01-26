@@ -124,7 +124,7 @@ function pause_music() {
         if (playing_idx < 0 && playing_list.length > 0) {
             // playing_idx = 0;
             play_idx_music(0);
-        } else if (playing_list.length <= 0) {
+        } else if (playing_list.length <= 0 && musicPlayerObj.src === "") {
             enterAudioStation();
         } else {
             musicPlayerObj.play();
