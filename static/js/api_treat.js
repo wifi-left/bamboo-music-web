@@ -608,6 +608,7 @@ function deal_data_suggest_video(data, clean = true) {
 }
 function enterAudioStation(openGUI = true) {
     show_msg("随机电台模式", 2000);
+    location.hash = "station";
     random_Song(openGUI);
 }
 function random_Song(openGUI = false) {

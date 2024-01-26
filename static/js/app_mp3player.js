@@ -72,11 +72,12 @@ function play_next_music(openGUI = false) {
 
 }
 function play_idx_music(target_idx = 0, openGUI = false) {
-
     if (playing_list.length <= 0) {
         enterAudioStation(true);
         return;
     }
+    if(location.hash === "#station") location.hash = "";
+
     if (playing_idx == -1) {
 
     } else {

@@ -162,6 +162,11 @@ window.onload = function () {
         showPlayList(true)
     }
 
+    if (location.hash === "#station") {
+        enterAudioStation();
+        return;
+    }
+
     let plid = getQueryString("musicid");
     if (plid == null) {
         plid = getQueryString("musicid", location.hash);
