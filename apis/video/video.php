@@ -33,11 +33,15 @@ if (empty($_GET['value'])) {
 $type = $_GET['type'];
 $offset = 0;
 $limit = 10;
+$prefix = "V_";
 if (!empty($_GET['offset'])) {
     $offset = (int)$_GET['offset'];
 }
 if (!empty($_GET['limit'])) {
     $limit = (int)$_GET['limit'];
+}
+if (!empty($_GET['prefix'])) {
+    $prefix = $_GET['prefix'];
 }
 // $limit = 10;
 // $url = str_replace("\~", "%7E", $url);
@@ -55,7 +59,7 @@ $page = (int)$offset - 1;
 $offsets = ((int)$offset - 1) * ((int)$limit);
 $html = "";
 $result = json_decode('{}');
-if (substr($value, 0, 2) == 'V_') {
+if (substr($value, 0, 2) == $prefix) {
     $value = substr($value, 2);
 }
 function searchSong($value)
@@ -73,6 +77,7 @@ function searchSong($value)
     // saveId();
 
     fclose($file);
+    $prefix = $GLOBALS['prefix'];
     // echo json_encode($files);
     foreach ($GLOBALS['files'] as $valued) {
         // $line->data[] = $value->filename;
@@ -101,15 +106,15 @@ function searchSong($value)
             $line->name = $songname;
         }
         if (!empty($musicid)) {
-            $line->id = 'V_' . $musicid;
+            $line->id = $prefix . $musicid;
         }
         if (!empty($singer)) {
             $line->artist = $singer;
-            $line->artistid = 'V_' . base64_encode($singer);
+            $line->artistid = $prefix . base64_encode($singer);
         }
         if (!empty($pathid)) {
             $line->album = getDirAlName($filepath);
-            $line->albumid = 'V_' . $pathid;
+            $line->albumid = $prefix . $pathid;
         }
         // $result->data->songinfo = $line;
         $result->data->list[] = $line;
@@ -173,15 +178,15 @@ switch ($type) {
                     $line->name = $songname;
                 }
                 if (!empty($musicid)) {
-                    $line->id = 'V_' . $musicid;
+                    $line->id = $prefix . $musicid;
                 }
                 if (!empty($singer)) {
                     $line->artist = $singer;
-                    $line->artistid = 'V_' . base64_encode($singer);
+                    $line->artistid = $prefix . base64_encode($singer);
                 }
                 if (!empty($pathid)) {
                     $line->album = getDirAlName($filepath);
-                    $line->albumid = 'V_' . $pathid;
+                    $line->albumid = $prefix . $pathid;
                 }
                 // $result->data->songinfo = $line;
                 $result->data->list[] = $line;
@@ -270,15 +275,15 @@ switch ($type) {
             $line->name = $songname;
         }
         if (!empty($musicid)) {
-            $line->id = 'V_' . $musicid;
+            $line->id = $prefix . $musicid;
         }
         if (!empty($singer)) {
             $line->artist = $singer;
-            $line->artistid = 'V_' . base64_encode($singer);
+            $line->artistid = $prefix . base64_encode($singer);
         }
         if (!empty($pathid)) {
             $line->album = getDirAlName($filepath);
-            $line->albumid = 'V_' . $pathid;
+            $line->albumid = $prefix . $pathid;
         }
 
         $result->data->info = $line;
@@ -358,15 +363,15 @@ switch ($type) {
                 $line->name = $songname;
             }
             if (!empty($musicid)) {
-                $line->id = 'V_' . $musicid;
+                $line->id = $prefix . $musicid;
             }
             if (!empty($singer)) {
                 $line->artist = $singer;
-                $line->artistid = 'V_' .  base64_encode($singer);
+                $line->artistid = $prefix .  base64_encode($singer);
             }
             if (!empty($pathid)) {
                 $line->album = getDirAlName($filepath);
-                $line->albumid = 'V_' . $pathid;
+                $line->albumid = $prefix . $pathid;
             }
             // $result->data->songinfo = $line;
             $result->list[] = $line;
@@ -400,6 +405,7 @@ switch ($type) {
         $html = "./apis/video/getlocalmusic.php?type=music&id=" . $value;
         break;
     case 'url':
+    case 'mv':
 
         $res = getSongPath($value);
         if ($res == false) {
@@ -448,7 +454,7 @@ switch ($type) {
             // echo "<h1>$path</h1>";
             $line = json_decode('{"name":"","uname":"","userName":"","id":""}');
             $pathid = getId($path);
-            $line->id = 'V_' . $pathid;
+            $line->id = $prefix . $pathid;
             $line->name = getDirAlName(trim($path));
             $line->uname = "Local";
             $line->userName = "Local";
@@ -481,7 +487,7 @@ switch ($type) {
                 if ($ele->name == "") $ele->name = dirname($pps);
                 $pid = getId($pps);
                 if (stristr($ele->name, $value) == false && $pid != $value) continue;
-                $line->id = 'V_' . $pid;
+                $line->id = $prefix . $pid;
                 $line->name = $ele->name;
                 $cover = 0;
                 $tpath = getSongPath($pid);
@@ -538,15 +544,15 @@ switch ($type) {
                 $line->songName = $songname;
             }
             if (!empty($musicid)) {
-                $line->id = 'V_' . $musicid;
+                $line->id = $prefix . $musicid;
             }
             if (!empty($singer)) {
                 $line->artist = $singer;
-                $line->artistid = 'V_' . base64_encode($singer);
+                $line->artistid = $prefix . base64_encode($singer);
             }
             if (!empty($pathid)) {
                 $line->album = getDirAlName($filepath);
-                $line->albumid = 'V_' . $pathid;
+                $line->albumid = $prefix . $pathid;
             }
             // $result->data->songinfo = $line;
             $result->data->list[] = $line;
