@@ -11,7 +11,7 @@ const localUrlRoot = "./apis/local/";
 const videoUrlRoot = "./apis/video/";
 const onlineAUrlRoot = "./apis/onlinea/";
 const onlineBUrlRoot = "./apis/onlineb/";
-const FALLBACK_BACKGROUND = "./static/img/default_cd_old_.png";
+const FALLBACK_BACKGROUND = "./static/img/default.jpg";
 const search_types = [
     { "name": "音频", "id": "audio", "type": "audio" },
     { "name": "专辑", "id": "album", "type": "playlist" },

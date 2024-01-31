@@ -246,12 +246,16 @@ switch ($type) {
             $line->hasMv = 1;
         }
         $filebasename = basename($filewithoutext);
+
         $filepath = dirname($res);
         $musicid = getId($res);
         $pathid = getId($filepath);
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
         if ($singer == "") {
             $singer = "匿名";
+        }
+        if ($lrc == "") {
+            $lrc = "[00:00.00]歌曲：" . $filebasename . "\r\n[00:02.00]专辑：" . getDirAlName($filepath) . "\r\n[00:04.00]歌手：" . $singer . "\r\n[00:06.00]本歌曲暂无歌词";
         }
         if (strpos($filebasename, " - ") != false)
             $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
