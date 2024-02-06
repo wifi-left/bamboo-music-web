@@ -99,28 +99,32 @@ function romajiTranslate(texts, resultFunc) {
         { to: "romaji", "mode": "spaced", "romajiSystem": "passport" }).then(data => {
             resultFunc(data);
             // console.log(this.ele.id);
+        }).catch(e=>{
+            console.warn(e);
+            resultFunc();
         });
 }
 
 // 歌词罗马音转换
+var toRomajiCount = 0, nowRomajiCount = 0;
 function lrcRomaji(refunc) {
-    let texts = "";
+    toRomajiCount = 0, nowRomajiCount = 0;
     for (let i = 0; i < oLRC['ms'].length; i++) {
         if (checkLanguage(oLRC.ms[i].c) === 2) {
             oLRC['ms'][i].tkuro = true;
-            texts += (texts === "" ? "" : "\r\n") + oLRC['ms'][i].c;
+            toRomajiCount++;
+            // texts += (texts === "" ? "" : "\r\n") + oLRC['ms'][i].c;
+            let idx = i;
+            romajiTranslate(oLRC['ms'][idx].c, function (data) {
+                if(data == null){
+                    oLRC['ms'][i].tkuro = false;
+                }
+                oLRC['ms'][idx].tc = data;
+                nowRomajiCount++;
+                if(nowRomajiCount >= toRomajiCount) refunc();
+            })
         };
     }
-    romajiTranslate(texts, function (data) {
-        let j = 0;
-        let texts = data.split("\r\n");
-        for (let i = 0; i < oLRC['ms'].length; i++) {
-            if (oLRC['ms'][i].tkuro == true) {
-                oLRC['ms'][i].tc = texts[j++];
-            };
-        }
-        refunc();
-    });
 }
 
 // 自动搜索
