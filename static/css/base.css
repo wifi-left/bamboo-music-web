@@ -1475,9 +1475,9 @@ body {
     }
 
     #list-item-head .left-part {
-        width: calc(100%);
+        /* width: calc(100%); */
         /* padding-left: 8px; */
-        display: inline-block;
+        display: none;
         vertical-align: middle;
     }
 
