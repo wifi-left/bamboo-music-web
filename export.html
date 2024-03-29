@@ -1,0 +1,31 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
+    <title>导入、导出播放列表</title>
+</head>
+
+<body>
+    <h1 style="-webkit-user-select: none; -moz-user-select: none; user-select: none;">导入、导出播放列表</h1>
+
+    <textarea style="width: 100%; height:400px;" id="lrcshow"></textarea>
+    <button onclick="saveplaylist()">保存</button>
+    <script>
+
+        var lrc = localStorage.getItem("playing-list");
+
+        if (lrc == undefined) {
+            lrc = "";
+        }
+        document.getElementById("lrcshow").value = lrc;
+        saveplaylist = function () {
+            if (confirm("确认继续？") != true) return;
+            localStorage.setItem("playing-list",document.getElementById("lrcshow").value);
+            alert("处理成功！")
+        }
+    </script>
+</body>
+
+</html>
