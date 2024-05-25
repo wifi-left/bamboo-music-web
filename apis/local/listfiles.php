@@ -206,6 +206,8 @@ function getDirAlName($dir)
 }
 function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
 {
+    $enforceReal = false;
+    if($suggestMode) $enforceReal = true;
     $GLOBALS['total'] = $limit * ($offset - 1);
     $count = 0;
     if ($suggestMode) $offset = 1;
@@ -219,15 +221,32 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
         $cid = $GLOBALS['id_lists'][$i];
         $info = $GLOBALS['filelist'][$cid];
         $flag = false;
+        $flagcount = 0;
         // echo json_encode($info);
         // return;
         // echo $info['name'];
         if ($value == "") $flag = true;
         // echo $info['name'];
-        if (stripos($info['name'], $value) !== false) $flag = true;
-        if (!$flag) if (($cid === $value)) $flag = true;
-        // echo getDirAlName(dirname($info['path']));
-        if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $value) !== false) $flag = true;
+        $vv = array($value);
+        if (!$enforceReal) {
+            $vv = explode("|", $value, 4);
+        }
+        for ($j = 0; $j < count($vv); $j++) {
+            if (stripos($info['name'], $vv[$j]) !== false) $flag = true;
+            if (!$flag) if (($cid === $vv[$j])) $flag = true;
+            // echo getDirAlName(dirname($info['path']));
+            if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $vv[$j]) !== false) $flag = true;
+            if ($flag) {
+                $flagcount++;
+                $flag=false;
+                continue;
+            };
+        }
+        if ($flagcount >= count($vv)) {
+            $flag = true;
+        } else {
+            $flag = false;
+        }
         // echo $value;
         if ($flag) {
             // echo getDirAlName(dirname($info['path']));
