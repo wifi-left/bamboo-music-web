@@ -33,6 +33,8 @@ var lrc_selected_font_size = 24;
 var lrc_normal_line_color = "rgb(209, 209, 209)";
 var lrc_selected_line_color = "rgb(23, 236, 148)";
 
+var updateRate = 0.2;
+
 var enableListSaving = true;
 
 var userLoves = [];
@@ -53,7 +55,7 @@ if (backgroundImage != "") {
         document.getElementById("win-playing-host").classList.remove("color");
     }
 } else {
-    document.getElementById("win-playing").style.backgroundImage = "rgb(30,30,30)";
+    document.getElementById("win-playing").style.background = "rgb(30,30,30)";
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro

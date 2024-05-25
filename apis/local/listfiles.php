@@ -115,7 +115,7 @@ function searchForFolder($folder, $limit, $offset)
     $count = 0;
     $id_lists = $GLOBALS['id_lists'];
     $res = [];
-    
+
     for ($i = 0; $i < count($id_lists); $i++) {
         $cid = $id_lists[$i];
         if ($flist[$cid]['type'] == 'f') {

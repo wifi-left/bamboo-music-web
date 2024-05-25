@@ -13,7 +13,7 @@ function deal_data_search_playlist(data, clean = true) {
             let name = linedata['name'];
             let singer = linedata['artist'];
             let singerid = linedata['artistid'];
-            let releasedata = linedata['releaseData'];
+            let releasedata = linedata['releaseDate'];
             let addition = linedata['addition'];
             if (singer == undefined) {
                 singer = "未知";
@@ -161,7 +161,7 @@ function deal_data_search(data, clean = true, nomore = false) {
             let singerid = linedata['artistid'];
             let album = linedata['album'];
             let albumid = linedata['albumid'];
-            let releasedata = linedata['releaseData'];
+            let releasedata = linedata['releaseDate'];
             let hasaudio = linedata['hasAudio'];
             if (hasaudio == undefined) hasaudio = true;
             let hasmv = linedata['hasMv'];
@@ -473,7 +473,7 @@ function deal_data_suggest_video(data, clean = true) {
             let singerid = linedata['artistid'];
             let album = linedata['album'];
             let albumid = linedata['albumid'];
-            let releasedata = linedata['releaseData'];
+            let releasedata = linedata['releaseDate'];
             let addition = linedata['addition'];
 
             let pic = linedata['pic'];
@@ -615,8 +615,14 @@ function random_Song(openGUI = false) {
 
     let seed = new Date().getTime() % 10000;
     let url = get_api_default_list(seed, 1);
-    fetchi(url, "json", function (data) {
-
+    fetchi(url, "text", function (text) {
+        let data = {};
+        try{
+            data = JSON.parse(text);
+        }catch(e){
+            console.error(e);
+            throw e;
+        }
         let id = data.data.list[0].id;
         if (myAudioStation.length >= 10) myAudioStation.splice(0, 1);
         myAudioStation.push(id);
@@ -747,7 +753,7 @@ function deal_data_playlist_content(data, clean = true) {
             let singerid = linedata['artistid'];
             let album = linedata['album'];
             let albumid = linedata['albumid'];
-            let releasedata = linedata['releaseData'];
+            let releasedata = linedata['releaseDate'];
             let hasaudio = linedata['hasAudio'];
             if (hasaudio == undefined) hasaudio = true;
             let hasmv = linedata['hasMv'];

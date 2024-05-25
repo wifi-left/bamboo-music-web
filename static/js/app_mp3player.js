@@ -149,6 +149,13 @@ function startTrack() {
 }
 // musicPlayerObj.onre
 // musicPlayerObj.one
+let storedWidth = 0;
+function updateWebProgress(width){
+    if(Math.abs(width - storedWidth)>=updateRate){
+        document.documentElement.style.setProperty(`--playing-progress`, width + "%");
+        storedWidth = width;
+    }
+}
 musicPlayerObj.ontimeupdate = function () {
     //TODO: LRC
     // console.log(114)
@@ -156,9 +163,8 @@ musicPlayerObj.ontimeupdate = function () {
     if (mplayer.trackEvents) {
         let value = parseFloat(this.currentTime / this.duration * 1000);
         if (!isNaN(value)) {
-            let width = parseFloat(this.currentTime / this.duration * 100) + "%";
-            document.documentElement.style.setProperty(`--playing-progress`, width);
-
+            let width = parseFloat(this.currentTime / this.duration * 100);
+            updateWebProgress(width);
             // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
             playerobj.value = value;
             // playerobj.style.backgroundSize = width + " 100%";
@@ -167,8 +173,8 @@ musicPlayerObj.ontimeupdate = function () {
         }
     } else {
         if (!isNaN(this.currentTime)) {
-            let width = parseFloat(this.currentTime / this.duration * 100) + "%";
-            document.documentElement.style.setProperty(`--playing-progress`, width);
+            let width = parseFloat(this.currentTime / this.duration * 100);
+            updateWebProgress(width);
 
             // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
             // playerobj.style.backgroundSize = width + " 100%";

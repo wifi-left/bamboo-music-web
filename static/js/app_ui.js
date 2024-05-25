@@ -519,6 +519,14 @@ function loadLrcConfig() {
             console.error(e);
         }
     }
+    let rate = parseFloat(localStorage.getItem("update-rate"));
+    if(rate=="" || rate ==null || isNaN(rate)){
+        rate = 0.2;
+    }
+    if(rate <= 0) rate = 0;
+    updateRate = rate;
+    document.getElementById("setting-rateInput").value = updateRate;
+
     document.getElementById("norlrccolor").value = lrc_normal_line_color;
     document.getElementById("norlineheight").value = lrc_normal_line_height;
     document.getElementById("norfontsize").value = lrc_normal_font_size;
@@ -531,6 +539,14 @@ function loadLrcConfig() {
 function enableListSave(flag) {
     enableListSaving = flag;
     localStorage.setItem("enableListSaving", (flag));
+}
+function saveRate(){
+    updateRate = parseFloat(document.getElementById("setting-rateInput").value);
+    if(isNaN(updateRate)){
+        updateRate = 0.2;
+        document.getElementById("setting-rateInput").value = updateRate;
+    }
+    localStorage.setItem("update-rate", updateRate);
 }
 function saveLrcConfig() {
     lrc_normal_line_color = document.getElementById("norlrccolor").value;
@@ -548,6 +564,7 @@ function saveLrcConfig() {
         'normal-font-size': lrc_normal_font_size,
         'selected-font-size': lrc_selected_font_size
     }
+    
     localStorage.setItem("lrc_settings", JSON.stringify(m));
     set_globle_css_var();
 };

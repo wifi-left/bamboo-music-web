@@ -44,17 +44,17 @@ const Kuroshiro_lib_url = "/kuromoji";
 function get_api_url(key, typeid, page) {
     key = encodeURIComponent(key);
     if (typeid == 'audio') {
-        return localUrlRoot + `local.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
+        return localUrlRoot + `local.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}&show_match=false`;
     } else if (typeid == 'video') {
-        return videoUrlRoot + `video.php?type=searchAlarm&value=${key}&offset=${page}&limit=${PAGESIZE}`;
+        return videoUrlRoot + `video.php?type=searchAlbum&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     } else if (typeid == 'album') {
-        return localUrlRoot + `local.php?type=searchAlarm&value=${key}&offset=${page}&limit=${PAGESIZE}`;
+        return localUrlRoot + `local.php?type=searchAlbum&value=${key}&offset=${page}&limit=${PAGESIZE}&show_match=false`;
     } else if (typeid == 'onlinea') {
         return onlineAUrlRoot + `onlinea.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     } else if (typeid == 'onlineb') {
         return onlineBUrlRoot + `main.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     }
-    return localUrlRoot + `local.php?type=searchAlarm&value=&offset=${page}&limit=${PAGESIZE}`;
+    return localUrlRoot + `local.php?type=searchAlbum&value=&offset=${page}&limit=${PAGESIZE}`;
 }
 
 function get_api_play_url(id, type) {

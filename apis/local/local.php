@@ -18,6 +18,7 @@ function loadPath2Url()
     }
     return json_decode($contentF);
 }
+
 if (empty($_GET['type'])) {
     echo '{"success":"fail","code":404,"message":"缺少请求参数。","code":1}';
     return;
@@ -28,6 +29,10 @@ if (empty($_GET['value'])) {
     $value = $_GET['value'];
 }
 $type = $_GET['type'];
+$show_match = false;
+if (!empty($_GET['show_match'])) {
+    $show_match = $_GET['show_match'] == 'true';
+}
 $offset = 0;
 $limit = 30;
 if (!empty($_GET['offset'])) {
@@ -59,7 +64,7 @@ $result = json_decode('{}');
 if (substr($value, 0, 6) == 'MUSIC_') {
     $value = substr($value, 6);
 }
-function fileListToData()
+function fileListToData($searchValue, $show_match=false)
 {
     $result = json_decode('{"data":{"total":30,"list":[]}}');
     $prefix = $GLOBALS['prefix'];
@@ -75,13 +80,28 @@ function fileListToData()
         $filebasename = basename($filewithoutext);
         $filepath = dirname($res);
         $musicid = $valued->id;
+        
+        
         $cover = $valued->cover;
         $pathid = getId($filepath);
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
+
+        
+
         if ($singer == "") $singer = "匿名";
+
+        if($show_match){
+            $singer = str_replace($searchValue,"<em>$searchValue</em>",$singer);
+        }
+        
         if (strpos($filebasename, " - ") != false)
             $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
         else $songname = $filebasename;
+
+        if($show_match){
+            $songname = str_replace($searchValue,"<em>$searchValue</em>",$songname);
+        }
+
         // echo strpos($res, " - ");
         if ($cover != -1) {
             $line->pic = dirname($GLOBALS['url']) . "/cover.php?id=" . $cover;
@@ -110,7 +130,7 @@ function searchSong($value)
 {
     //检测指正是否到达文件的未端
     searchFileByName($value, $GLOBALS['limit'], $GLOBALS['offset'], false);
-    $data = fileListToData();
+    $data = fileListToData($value, $GLOBALS['show_match']);
     $data->data->total = $GLOBALS['total'];
     return $data;
     // echo json_encode($files);
@@ -154,7 +174,6 @@ switch ($type) {
             // return;
             // echo json_encode($idcaches_OBJ);
             // return;
-            if (!is_numeric($resid)) echo $resid;
             $ress = getInfo($resid);
             // $res = getSongPath($value);
             $res = $ress['path'];
@@ -338,7 +357,7 @@ switch ($type) {
 
         // saveId();
         // $result->data->lrclist = $lrc;
-        $resu = fileListToData();
+        $resu = fileListToData($value, $show_match);
         $resu->total = $total;
         $resu->data->total = $total;
         $resu->data->name = $albumname;
@@ -501,6 +520,7 @@ switch ($type) {
         // saveId();
         break;
     case 'searchAlarm':
+    case 'searchAlbum':
         $resu = json_decode('{"data":{"list":[],"total":0,"pic":null}}');
         loadPathNames();
         $list = array();
@@ -519,6 +539,7 @@ switch ($type) {
 
                 if ($ele->name == "") $ele->name = dirname($pps);
                 $pid = getId($pps);
+                if($pid == ""||$pid == null) continue;
                 if (stristr($ele->name, $value) == false && $pid != $value) continue;
                 $skipcount_2++;
                 if ($skipcount_2 < ($offset - 1) * $limit + 1) continue;

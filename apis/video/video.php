@@ -468,6 +468,7 @@ switch ($type) {
         // saveId();
         break;
     case 'searchAlarm':
+    case 'searchAlbum':
         $resu = json_decode('{"data":{"list":[],"total":0,"pic":null}}');
         loadPathNames();
         $list = array();

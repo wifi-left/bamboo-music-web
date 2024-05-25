@@ -17,7 +17,7 @@ function getId2($path)
     if (empty($GLOBALS['temp'][$path])) {
         // new id
         $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = $id;
+        $GLOBALS['temp'][$path] = dechex($id);
     }
     return $GLOBALS['temp'][$path];
 }
@@ -36,8 +36,8 @@ function saveCover($writer, $path)
     if (empty($GLOBALS['temp'][$path])) {
         // new id
         $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = $id;
-        writeFileInfo($writer, $id, $path, "", -1, "i");
+        $GLOBALS['temp'][$path] = dechex($id);
+        writeFileInfo($writer, dechex($id), $path, "", -1, "i");
     }
     return $GLOBALS['temp'][$path];
 }
@@ -71,6 +71,17 @@ function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f'
     $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n<\r\n";
     fwrite($writer, $out);
 }
+function remove_ext($path)
+{
+    $parent = dirname($path);
+    $basen = basename($path);
+    $idx = strripos($basen, ".");
+    if ($idx == false) {
+        return $path;
+    } else {
+        return $parent . "\\" . substr($basen, 0, $idx);
+    }
+}
 function searchLocalFiles($path, $writer)
 {
     if (!is_dir($path)) {
@@ -91,8 +102,19 @@ function searchLocalFiles($path, $writer)
             if (is_dir($path . '\\' . $value)) {
                 $tresult = searchLocalFiles($path . '\\' . $value, $writer); //继续遍历
             } else {
+                $coverd = $cover;
+
                 $flag = false;
-                if (fnmatch("*.mp3", $path . '\\' . $value)) $flag = true;
+                $pathwithoutext = remove_ext($path . '\\' . $value);
+                // echo $pathwithoutext . "\n";
+                if (fnmatch("*.mp3", $path . '\\' . $value)) {
+                    $flag = true;
+                }
+                if (file_exists($pathwithoutext . '.jpg')) {
+                    $coverd = saveCover($writer, $pathwithoutext . '.jpg');
+                } else if (file_exists($pathwithoutext . '.png')) {
+                    $coverd = saveCover($writer, $pathwithoutext . '.png');
+                }
                 if (!$flag)
                     continue;
                 $id = getId2($path . '\\' . $value, 2);
@@ -107,7 +129,7 @@ function searchLocalFiles($path, $writer)
                 if ($end > 0) {
                     $name = substr($value, 0, $end);
                 }
-                writeFileInfo($writer, $id, $path . '\\' . $value, $name, $cover);
+                writeFileInfo($writer, $id, $path . '\\' . $value, $name, $coverd);
             }
         }
     }
