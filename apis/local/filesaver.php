@@ -26,8 +26,8 @@ function saveFolder($writer, $path, $cover = -1)
     if (empty($GLOBALS['temp'][$path])) {
         // new id
         $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = $id;
-        writeFileInfo($writer, $id, $path, "", $cover, "l");
+        $GLOBALS['temp'][$path] = dechex($id);
+        writeFileInfo($writer, dechex($id), $path, "", $cover, "l");
     }
     return $GLOBALS['temp'][$path];
 }
