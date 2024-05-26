@@ -1568,9 +1568,9 @@ body {
     right:0;
     bottom:0;
     display: none;
-    background-color: rgba(30, 30, 30, 0.5);
+    background-color: rgba(30, 30, 30, 0.8);
     z-index: 1005;
-    height:100%;
+    height:calc(100% - 78px);
     width:100%;
 
 }
