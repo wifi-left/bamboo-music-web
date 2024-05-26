@@ -382,7 +382,62 @@ function btn_watchVideo(ele, isRootNode = false, reloadSuggest = true) {
     // console.log(songname)
     watchVideo(songid, songname, singer, singerid, albumid, reloadSuggest);
 }
+function btn_shareURL(ele) {
+    infoele = ele.parentNode.parentNode.parentNode;
+    // console.log(infoele)
+    let songid = infoele.getAttribute("songid");
+    let songname = infoele.getAttribute("songname");
+    let singer = infoele.getAttribute("singer");
+    let singerid = infoele.getAttribute("singerid");
+    let album = infoele.getAttribute("album");
+    let albumid = infoele.getAttribute("albumid");
+    shareEventHandler(songid, songname, singer, album)
 
+}
+function shareEventHandler(songid, songname, singer, album) {
+    let brE = document.createElement("br");
+    let brE1 = document.createElement("br");
+    let brE2 = document.createElement("br");
+    let brE3 = document.createElement("br");
+    let titleE = document.createElement("h2");
+    titleE.innerText = "歌曲【" + songname + "】";
+    let songidE = document.createElement("span");
+    songidE.innerText = "歌曲ID：" + songid + "";
+    let singerE = document.createElement("span");
+    singerE.innerText = "歌手：" + singer + "";
+    let albumE = undefined;
+    if (album != undefined && album != "") {
+        albumE = document.createElement("span");
+        albumE.innerText = "专辑：" + album + "";
+    }
+    let urlE = document.createElement("span");
+    urlE.innerText = "链接：" + location.origin + location.pathname + "#musicid=" + songid;
+    let tipE = document.createElement("p");
+    tipE.innerText = "点击此处或者空白处关闭";
+    tipE.onclick = closeShare;
+    tipE.classList.add("share-tip");
+    const SHARE_CONTENT = document.getElementById("share-content");
+    SHARE_CONTENT.innerHTML = "";
+    SHARE_CONTENT.appendChild(titleE)
+    SHARE_CONTENT.appendChild(brE)
+    SHARE_CONTENT.appendChild(songidE)
+    SHARE_CONTENT.appendChild(brE1)
+    SHARE_CONTENT.appendChild(singerE)
+    SHARE_CONTENT.appendChild(brE2)
+    if (albumE != undefined)
+        SHARE_CONTENT.appendChild(albumE)
+    SHARE_CONTENT.appendChild(brE3)
+    SHARE_CONTENT.appendChild(urlE)
+    SHARE_CONTENT.appendChild(tipE)
+    showWindow("share", false)
+}
+document.getElementById("share-content").onclick = function () {
+    event.stopPropagation();
+}
+document.getElementById("win-share").onclick = closeShare;
+function closeShare() {
+    document.getElementById("win-share").style.display = "none";
+}
 function btn_playMusic(ele, openGUI = false, isRootNode = false) {
     let infoele = undefined;
     if (isRootNode) {
@@ -520,10 +575,10 @@ function loadLrcConfig() {
         }
     }
     let rate = parseFloat(localStorage.getItem("update-rate"));
-    if(rate=="" || rate ==null || isNaN(rate)){
+    if (rate == "" || rate == null || isNaN(rate)) {
         rate = 0.2;
     }
-    if(rate <= 0) rate = 0;
+    if (rate <= 0) rate = 0;
     updateRate = rate;
     document.getElementById("setting-rateInput").value = updateRate;
 
@@ -540,9 +595,9 @@ function enableListSave(flag) {
     enableListSaving = flag;
     localStorage.setItem("enableListSaving", (flag));
 }
-function saveRate(){
+function saveRate() {
     updateRate = parseFloat(document.getElementById("setting-rateInput").value);
-    if(isNaN(updateRate)){
+    if (isNaN(updateRate)) {
         updateRate = 0.2;
         document.getElementById("setting-rateInput").value = updateRate;
     }
@@ -564,7 +619,7 @@ function saveLrcConfig() {
         'normal-font-size': lrc_normal_font_size,
         'selected-font-size': lrc_selected_font_size
     }
-    
+
     localStorage.setItem("lrc_settings", JSON.stringify(m));
     set_globle_css_var();
 };

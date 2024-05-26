@@ -1561,3 +1561,43 @@ body {
         width: calc(100% - 156px);
     }
 }
+#win-share{
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    display: none;
+    background-color: rgba(30, 30, 30, 0.5);
+    z-index: 1005;
+    height:100%;
+    width:100%;
+
+}
+#share-content{
+    display: inline-block;
+    position: absolute;
+    top:50%;
+    left:50%;
+    max-width:calc(100% - 80px);
+    width:auto;
+    max-height:80%;
+    background-color: var(--main-bg-color);
+    border:1px solid black;
+    transform: translateX(-50%) translateY(-50%);
+    overflow: auto;
+    padding: 40px 40px 40px 40px;
+}
+
+#share-content span{
+    font-size:18px;
+    line-height:40px;
+}
+.share-tip{
+    font-size:12px;
+    color:rgb(200,200,200);
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+}

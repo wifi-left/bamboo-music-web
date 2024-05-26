@@ -253,6 +253,9 @@ function play_music_id(songid, openGUI = false) {
                     localStorage.setItem("songlrc", JSON.stringify(oLRC));
                     window.open(`./apis/download.php?url=${btoa(playurl)}&filename=${btoa(encodeURI(`${singer} - ${name}`))}`);
                 }
+                document.querySelector("#pane-share").onclick = function () {
+                    shareEventHandler(playing_id,name,singer,album);
+                }
             } catch (e) {
                 console.warn(e);
             }
