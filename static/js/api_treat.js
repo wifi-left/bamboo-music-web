@@ -1,3 +1,4 @@
+
 function deal_data_search_playlist(data, clean = true) {
     // TODO
     try {
@@ -100,6 +101,9 @@ function deal_data_search_playlist(data, clean = true) {
             liele.appendChild(rightpart);
             // 添加成员
             listRootObj.appendChild(liele);
+            let hr = document.createElement("div");
+            hr.classList.add("pretty-hr");
+            listRootObj.appendChild(hr);
         }
         if (keys.length == 0) {
             if (clean) {
@@ -283,6 +287,9 @@ function deal_data_search(data, clean = true, nomore = false) {
             liele.appendChild(rightpart);
             // 添加成员
             listRootObj.appendChild(liele);
+            let hr = document.createElement("div");
+            hr.classList.add("pretty-hr");
+            listRootObj.appendChild(hr);
         }
         if (keys.length == 0) {
             if (clean) {
@@ -540,6 +547,9 @@ function deal_data_suggest_video(data, clean = true) {
                 btn_watchVideo(this, true, false);
             }
             listRootObj.appendChild(liele);
+            let hr = document.createElement("div");
+            hr.classList.add("pretty-hr");
+            listRootObj.appendChild(hr);
         }
         if (keys.length == 0) {
             if (clean) {
@@ -695,21 +705,7 @@ function api_suggestKey(key, type = undefined) {
     });
 }
 
-var PromptTimeoutId = -1;
-function show_msg(message, timeout = 0, raw = false) {
-    if (raw) {
-        promptBlockTitleObj.innerHTML = message;
-    } else {
-        promptBlockTitleObj.innerText = message;
-    }
-    $(promptBlockObj).fadeIn(200);
-    if (timeout > 0) {
-        PromptTimeoutId = setTimeout(function () {
-            $(promptBlockObj).fadeOut(200);
-            PromptTimeoutId = -1;
-        }, timeout);
-    }
-}
+
 
 function api_list_alarm(albumid, type, clean = true, page = 1) {
     if (l_cooldown == true) {
@@ -780,6 +776,7 @@ function deal_data_playlist_content(data, clean = true) {
             imgele.src = pic;
             leftpart.appendChild(imgele);
             // 右侧：信息
+            
             let rightpart = document.createElement("div");
             rightpart.classList.add("right-part");
             let nameele = document.createElement("div");
@@ -870,7 +867,11 @@ function deal_data_playlist_content(data, clean = true) {
             liele.appendChild(leftpart);
             liele.appendChild(rightpart);
             // 添加成员
+            
             listRootObj.appendChild(liele);
+            let hr = document.createElement("div");
+            hr.classList.add("pretty-hr");
+            listRootObj.appendChild(hr);
         }
         if (keys.length == 0) {
             if (clean) {

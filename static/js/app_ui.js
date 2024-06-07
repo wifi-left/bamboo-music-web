@@ -1,9 +1,34 @@
 
 var SlideDownTimeoutFunc = 0;
+var PromptTimeoutId = -1;
+
 // 获取固定的 HTML 对象
 document.querySelectorAll(".version-show").forEach((ele) => {
     ele.innerText = BAMBOOMUSIC.version;
 });
+function show_msg(message, timeout = 0, raw = false, showRightNow = false) {
+    if (PromptTimeoutId != -1) {
+        clearInterval(PromptTimeoutId);
+        PromptTimeoutId = -1;
+    }
+    if (raw) {
+        promptBlockTitleObj.innerHTML = message;
+    } else {
+        promptBlockTitleObj.innerText = message;
+    }
+    if (showRightNow) $(promptBlockObj).fadeIn(1);
+    else $(promptBlockObj).fadeIn(200);
+
+    if (timeout > 0) {
+        PromptTimeoutId = setTimeout(function () {
+            if (showRightNow) {
+                $(promptBlockObj).fadeOut(1);
+            } else
+                $(promptBlockObj).fadeOut(200);
+            PromptTimeoutId = -1;
+        }, timeout);
+    }
+}
 const searchTypeSelector = document.getElementById("search-selector");
 const searchBoxObj = document.getElementById("music-searchbox");
 const searchButtonObj = document.getElementById("search-music-page");
@@ -20,6 +45,7 @@ const musicPlayerObj = document.getElementById("music-player-audio");
 const searchLoadingPaneObj = document.getElementById("search-loading-pane");
 const LRC_root_obj = document.querySelector(".lrc-right-part");
 const listRootObj = document.querySelector("#list-item-head");
+const orderTypeObj = document.getElementById("obj-order-type");
 
 var nowWindow = "";
 
@@ -582,6 +608,7 @@ function loadLrcConfig() {
     updateRate = rate;
     document.getElementById("setting-rateInput").value = updateRate;
 
+
     document.getElementById("norlrccolor").value = lrc_normal_line_color;
     document.getElementById("norlineheight").value = lrc_normal_line_height;
     document.getElementById("norfontsize").value = lrc_normal_font_size;
@@ -602,6 +629,16 @@ function saveRate() {
         document.getElementById("setting-rateInput").value = updateRate;
     }
     localStorage.setItem("update-rate", updateRate);
+}
+function saveVolume() {
+    let volume = parseFloat(document.getElementById("setting-volumeInput").value) / 100;
+    if (isNaN(volume) || volume < 0 || volume > 100) {
+        volume = 0;
+        document.getElementById("setting-volumeInput").value = volume * 100;
+    }
+    volumeobj.value = volume * 100;
+    changePos(volumeobj);
+    volumeobj.onchange();
 }
 function saveLrcConfig() {
     lrc_normal_line_color = document.getElementById("norlrccolor").value;
@@ -719,4 +756,10 @@ function ReloadLoveListUI() {
         linef.appendChild(actionbar);
         root.appendChild(linef);
     }
+}
+function changeOrder(ele) {
+    orderType++;
+    if (orderType >= 4) orderType = 0;
+    onChangeOrderType();
+    saveOrderType();
 }

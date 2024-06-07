@@ -24,3 +24,7 @@ function fetchi(url, type = 'text', callback, fallbackfunc, fallback = 3) {
         }, 2000);
     })
 }
+
+function get_random(min, max) {
+    return parseInt(Math.random() * (max - min) + min)
+}

@@ -28,6 +28,7 @@ videoPlayerObj.volume = volm;
 volumeobj.value = vol * 100;
 // console.log(vol);
 changePos(volumeobj);
+document.getElementById("setting-volumeInput").value = volumeobj.value;
 
 videoPlayerObj.onvolumechange = function () {
     localStorage.setItem("mvolume", this.volume);
@@ -47,32 +48,54 @@ function secondToTime_int(second) {
 var mplayer = {
     trackEvents: true
 }
-function play_last_music(openGUI = false) {
+function play_last_music(openGUI = false, isauto = false) {
     if (playing_list.length <= 0) {
         if (myAudioStation.length <= 1)
             enterAudioStation(false);
         else {
             play_music_id(myAudioStation[myAudioStation.length - 2], openGUI);
             myAudioStation.splice(myAudioStation.length - 1, 1);
-
         }
         return;
     }
-    let target_idx = playing_idx - 1;
+    let target_idx = playing_idx;
+
+    target_idx = playing_idx - 1;
+
     if (target_idx < 0) {
         target_idx = playing_list.length - 1;
     }
+
     play_idx_music(target_idx, openGUI);
 }
-function play_next_music(openGUI = false) {
+function play_next_music(openGUI = false, isauto = false) {
+    if (orderType == 1 && isauto) {
+        musicPlayerObj.currentTime = 0;
+        musicPlayerObj.play();
+        return;
+    }
     if (playing_list.length <= 0) {
 
         enterAudioStation(false);
         return;
     }
-    let target_idx = playing_idx + 1;
-    if (target_idx >= playing_list.length) {
-        target_idx = 0;
+    let target_idx = playing_idx;
+
+    if (orderType == 3 && isauto) {// 0: 顺序; 1:单曲; 2:随机; 3:逆序
+        target_idx = playing_idx - 1;
+
+        if (target_idx < 0) {
+            target_idx = playing_list.length - 1;
+        }
+    } else if (orderType == 2 && isauto) {
+        target_idx = get_random(0, playing_list.length - 1);
+        if(target_idx >= playing_idx) target_idx ++;
+        play_idx_music(target_idx);
+    } else {
+        target_idx = playing_idx + 1;
+        if (target_idx >= playing_list.length) {
+            target_idx = 0;
+        }
     }
     play_idx_music(target_idx, openGUI);
 
@@ -150,8 +173,8 @@ function startTrack() {
 // musicPlayerObj.onre
 // musicPlayerObj.one
 let storedWidth = 0;
-function updateWebProgress(width){
-    if(Math.abs(width - storedWidth)>=updateRate){
+function updateWebProgress(width) {
+    if (Math.abs(width - storedWidth) >= updateRate) {
         document.documentElement.style.setProperty(`--playing-progress`, width + "%");
         storedWidth = width;
     }
@@ -200,7 +223,7 @@ musicPlayerObj.onerror = function (e) {
 }
 musicPlayerObj.onended = function () {
     // changePauseBtnStatus(true);
-    play_next_music();
+    play_next_music(false, true);
     // console.warn(e);
 }
 

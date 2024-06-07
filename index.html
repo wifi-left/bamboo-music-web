@@ -162,6 +162,7 @@
                 <div class="page-head-home"><span>播放列表</span></div>
                 <!-- <button onclick="changeWindow('infos');" class="button-green">下载APP</button> -->
                 <!-- <div class="loader"></div> -->
+                <button class="fa fa-sort-numeric-asc button playing-list-order" id="obj-order-type" onclick="changeOrder(this);"></button>
                 <button class="fa fa-close button playing-list-close" onclick="showPlayList(false);"></button>
                 <button class="fa fa-trash button playing-list-removeall" onclick="clear_playing_list();"></button>
                 <div class="playing-list-father">
@@ -282,9 +283,11 @@
 
             <div id="win-setting" class="app-content-window">
                 <h1 class="fa fa-gears win-fronter">设置</h1>
-                <h2>进度条显示更新频率</h2>
-                <input class="input setting-input" id="setting-rateInput" />
-                <button class="button-green" onclick="saveRate()">保存</button>
+                <h2>音量设置</h2>
+                <p>提示：此处的音量设置并非实时与进度条同步</p>
+                <input class="input setting-input" id="setting-volumeInput" /><span>%</span>
+                <button class="button-green" onclick="saveVolume()">保存</button>
+                
                 <h2>歌词注音</h2>
                 <button class="button" onclick="enableKuromaji(1)">开启罗马音标注</button>
                 <button class="button" onclick="enableKuromaji(0)">关闭罗马音标注（推荐）</button>
@@ -319,7 +322,12 @@
                 <button class="button" onclick="enableListSave(1)">保存记录</button>
                 <button class="button" onclick="enableListSave(0)">不保存记录</button>
                 <div class="hr"></div>
-                <a class="url" href="./export.html">导入/导出列表</a>
+                <h2>进度条显示更新频率</h2>
+                <input class="input setting-input" id="setting-rateInput" />
+                <button class="button-green" onclick="saveRate()">保存</button><br/>
+
+                <a class="url" href="./export.html">导入/导出列表</a><br/>
+
                 <h2>制作信息</h2>
                 <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
                 <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
@@ -331,7 +339,7 @@
   <input type="text" name="" id="demo" value="" />
   <div id="res">接收到的服务器端消息显示区域</div>
   <script src="/public/event.js"></script> -->
-    <script src="./static/js/fetchlib.js"></script>
+    <script src="./static/js/utils.js"></script>
     <script src="./static/js/app_ui.js"></script>
     <script src="./static/js/app.js"></script>
     <script src="./static/js/api_treat.js"></script>

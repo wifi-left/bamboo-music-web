@@ -32,6 +32,7 @@ var lrc_selected_line_height = 42;
 var lrc_selected_font_size = 24;
 var lrc_normal_line_color = "rgb(209, 209, 209)";
 var lrc_selected_line_color = "rgb(23, 236, 148)";
+var orderType = 0; // 0: 顺序; 1:单曲; 2:随机; 3:逆序
 
 var updateRate = 0.2;
 
@@ -40,6 +41,27 @@ var enableListSaving = true;
 var userLoves = [];
 
 var mp = null;
+
+// 播放顺序
+orderType = parseInt(localStorage.getItem("music-play-order"));
+if(orderType == null || isNaN(orderType)) orderType = 0;
+// var show_msg = function(data,time){console.log("The log function hasn't be inited yet...",data)};
+onChangeOrderType();
+function onChangeOrderType() {
+    if (orderType == 0) {
+        orderTypeObj.className = "fa fa-sort-numeric-asc button playing-list-order";
+        show_msg("播放顺序：顺序播放",1000,false,true)
+    }else if(orderType == 1){
+        orderTypeObj.className = "fa fa-repeat button playing-list-order";
+        show_msg("播放顺序：单曲循环",1000,false,true)
+    }else if(orderType == 2){
+        orderTypeObj.className = "fa fa-random button playing-list-order";
+        show_msg("播放顺序：随机播放",1000,false,true)
+    }else{
+        orderTypeObj.className = "fa fa-sort-numeric-desc button playing-list-order";
+        show_msg("播放顺序：逆序播放",1000,false,true)
+    }
+};
 
 // 判断是否已经读过用户已读
 let hasReadme = localStorage.getItem("hasReadme");
@@ -101,7 +123,7 @@ function romajiTranslate(texts, resultFunc) {
         { to: "romaji", "mode": "spaced", "romajiSystem": "passport" }).then(data => {
             resultFunc(data);
             // console.log(this.ele.id);
-        }).catch(e=>{
+        }).catch(e => {
             console.warn(e);
             resultFunc();
         });
@@ -118,12 +140,12 @@ function lrcRomaji(refunc) {
             // texts += (texts === "" ? "" : "\r\n") + oLRC['ms'][i].c;
             let idx = i;
             romajiTranslate(oLRC['ms'][idx].c, function (data) {
-                if(data == null){
+                if (data == null) {
                     oLRC['ms'][i].tkuro = false;
                 }
                 oLRC['ms'][idx].tc = data;
                 nowRomajiCount++;
-                if(nowRomajiCount >= toRomajiCount) refunc();
+                if (nowRomajiCount >= toRomajiCount) refunc();
             })
         };
     }
@@ -254,7 +276,7 @@ function play_music_id(songid, openGUI = false) {
                     window.open(`./apis/download.php?url=${btoa(playurl)}&filename=${btoa(encodeURI(`${singer} - ${name}`))}`);
                 }
                 document.querySelector("#pane-share").onclick = function () {
-                    shareEventHandler(playing_id,name,singer,album);
+                    shareEventHandler(playing_id, name, singer, album);
                 }
             } catch (e) {
                 console.warn(e);
@@ -426,7 +448,9 @@ function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) 
     }
 
 }
-
+function saveOrderType() {
+    localStorage.setItem("music-play-order", orderType);
+}
 function loadUserLoves() {
     if (!enableListSaving) {
         return;
