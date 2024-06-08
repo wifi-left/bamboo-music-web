@@ -1507,6 +1507,10 @@ body {
     color: #049250;
     font-weight: bold;
 }
+#playlist-item-head .left-part{
+    display: inline-block;
+    vertical-align: middle;
+}
 
 @media only screen and (min-width: 1400px) {
     #video-player-suggest {
@@ -1572,12 +1576,6 @@ body {
         padding-right: 8px;
     }
 
-    #playlist-item-head .left-part {
-        width: calc(100%);
-        /* padding-left: 8px; */
-        display: inline-block;
-        vertical-align: middle;
-    }
 
     #playlist-item-head .list-left-img {
         width: calc(100%);
@@ -1608,6 +1606,17 @@ body {
         /* padding-left: 8px; */
         display: none;
         vertical-align: middle;
+    }
+
+    #playlist-item-head .left-part{
+        display: none;
+        vertical-align: middle;
+    }
+    #playlist-item-head li:nth-child(1) .left-part{
+        display: inline-block;
+        vertical-align: middle;
+        width: calc(100%);
+
     }
 
     #list-item-head .list-left-img {
