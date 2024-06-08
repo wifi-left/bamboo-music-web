@@ -38,28 +38,28 @@ var updateRate = 0.2;
 
 var enableListSaving = true;
 
-var userLoves = [];
+var userLoves = {};
 
 var mp = null;
 
 // 播放顺序
 orderType = parseInt(localStorage.getItem("music-play-order"));
-if(orderType == null || isNaN(orderType)) orderType = 0;
+if (orderType == null || isNaN(orderType)) orderType = 0;
 // var show_msg = function(data,time){console.log("The log function hasn't be inited yet...",data)};
 onChangeOrderType();
 function onChangeOrderType() {
     if (orderType == 0) {
         orderTypeObj.className = "fa fa-sort-numeric-asc button playing-list-order";
-        show_msg("播放顺序：顺序播放",1000,false,true)
-    }else if(orderType == 1){
+        show_msg("播放顺序：顺序播放", 1000, false, true)
+    } else if (orderType == 1) {
         orderTypeObj.className = "fa fa-repeat button playing-list-order";
-        show_msg("播放顺序：单曲循环",1000,false,true)
-    }else if(orderType == 2){
+        show_msg("播放顺序：单曲循环", 1000, false, true)
+    } else if (orderType == 2) {
         orderTypeObj.className = "fa fa-random button playing-list-order";
-        show_msg("播放顺序：随机播放",1000,false,true)
-    }else{
+        show_msg("播放顺序：随机播放", 1000, false, true)
+    } else {
         orderTypeObj.className = "fa fa-sort-numeric-desc button playing-list-order";
-        show_msg("播放顺序：逆序播放",1000,false,true)
+        show_msg("播放顺序：逆序播放", 1000, false, true)
     }
 };
 
@@ -237,7 +237,7 @@ function list_singer_gui(singer, singerid, clean = true) {
     // console.log(114514);
 }
 
-function play_music_id(songid, openGUI = false) {
+function play_music_id(songid, openGUI = false, whetherAddToList = false, preventRepeat = false) {
     playing_id = songid;
     let url = get_api_play_url(songid, "music");
     if (openGUI)
@@ -268,7 +268,12 @@ function play_music_id(songid, openGUI = false) {
             let pic = info['pic'];
             let addition = info['addition'];
             // location.hash = `musicid=${songid}`;
+            oLRC.info = { id: songid, name: name, singer: singer, singerid: singerid, album: album, albumid: albumid, pic: pic, addition: addition };
             change_music(name, singer, playurl, true, info, openGUI);
+            if (whetherAddToList) {
+                playing_idx = addToList({ name: name, singer: singer, singerid: singerid, album: album, albumid: albumid, pic: pic, id: songid }, -1, false, false, preventRepeat);
+                highlight_playing_list_ele();
+            }
             document.getElementById("video-musicplayer-loading-pane").style.display = "none";
             try {
                 document.querySelector("#pane-download-music").onclick = function () {
@@ -281,6 +286,7 @@ function play_music_id(songid, openGUI = false) {
             } catch (e) {
                 console.warn(e);
             }
+            reloadPlayingList();
 
         }, e => {
             change_music("获取歌曲信息失败", "无法获取到信息", playurl, true, undefined, openGUI);
@@ -294,45 +300,7 @@ function play_music_id(songid, openGUI = false) {
         show_msg("无法获取歌曲信息，无法播放歌曲", 3000);
     });
 }
-function play_music_id_toList(songid, openGUI = false) {
-    playing_id = songid;
-    // let url = get_api_play_url(songid, "music");
-    if (openGUI)
-        document.getElementById("video-musicplayer-loading-pane").style.display = "inline-block";
-    let url = get_api_info(songid, "music");
-    try {
-        fetchi(url, "json", data => {
-            let info = data.data.info;
-            let lrc = data.data.lrc;
-            oLRC.ms = []
-            if (lrc != undefined) {
-                createLrcObj(lrc);
-            }
-            init_lrc_pane();
-            lrcRomaji(() => {
-                init_lrc_pane();
-            });
-            let name = info['name'];
-            let singer = info['artist'];
-            let singerid = info['artistid'];
-            let album = info['album'];
-            let albumid = info['albumid'];
-            let pic = info['pic'];
-            let addition = info['addition'];
-            playing_idx = addToList({ name: name, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid }, playing_list.length, true, true);
-            document.getElementById("video-musicplayer-loading-pane").style.display = "none";
-        }, e => {
 
-            console.error(e);
-            document.getElementById("video-musicplayer-loading-pane").style.display = "none";
-            show_msg("无法获取歌曲信息，无法从URL播放歌曲。", 3000);
-        });
-    } catch (e) {
-        document.getElementById("video-musicplayer-loading-pane").style.display = "none";
-        console.error(e);
-        show_msg("无法获取歌曲信息，无法从URL播放歌曲", 3000);
-    };
-}
 function removeFromList(idx) {
     if (idx == -1) {
         // idx = playing_list.length;
@@ -360,7 +328,7 @@ function clear_playing_list() {
         saveUserLoves();
     }
 }
-function addToList(info, idx = -1, forcePlayNow = false, openGUI = false) {
+function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preventRepeat = false) {
     if (idx == -1) {
         idx = playing_list.length;
     }
@@ -371,7 +339,7 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false) {
                 if (forcePlayNow) {
                     play_idx_music(playing_list.length - 1, openGUI);
                 }
-                return;
+                return playing_list.length - 1;
             }
         }
     } catch (e) {
@@ -379,9 +347,17 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false) {
     }
 
     try {
+
         if (playing_list[playing_idx]['id'] == info['id']) {
             show_msg("歌曲已在播放中", 1000);
-            return;
+            return playing_idx;
+        } else if (preventRepeat) {
+            for (let i = 0; i < playing_list.length; i++) {
+                if (playing_list[i]['id'] == info.id) {
+                    play_idx_music(i, openGUI);
+                    return i;
+                }
+            }
         }
     } catch (e) {
 
@@ -441,7 +417,7 @@ function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) 
 
     if (autoplay && !forcePlay && playing_list.length > 0) {
         if (playing_idx == -1) {
-            play_next_music(openGUI);
+            play_next_music(openGUI, true);
         } else if (musicPlayerObj.paused) {
             play_next_music(openGUI);
         }
@@ -452,18 +428,18 @@ function saveOrderType() {
     localStorage.setItem("music-play-order", orderType);
 }
 function loadUserLoves() {
-    if (!enableListSaving) {
-        return;
-    }
+
     try {
         userLoves = JSON.parse(localStorage.getItem("user-loves"));
-        playing_list = JSON.parse(localStorage.getItem("playing-list"));
+        if (enableListSaving) {
+            playing_list = JSON.parse(localStorage.getItem("playing-list"));
+        }
     } catch (e) {
-        userLoves = [];
+        userLoves = {};
         playing_list = [];
     }
     if (userLoves == null) {
-        userLoves = [];
+        userLoves = {};
     }
     if (playing_list == null) {
         playing_list = [];
@@ -474,6 +450,7 @@ function loadUserLoves() {
 function saveUserLoves() {
     localStorage.setItem("user-loves", JSON.stringify(userLoves));
     localStorage.setItem("playing-list", JSON.stringify(playing_list));
+    ReloadLoveListUI();
 }
 
 function isFullScreen() {
@@ -485,6 +462,27 @@ function isFullScreen() {
     );
 }
 
-function addToUserLove() {
+function addToUserLove(info, parent = 'default', noUpdate = false) {
+    if (parent == "") parent = "default";
+    if (userLoves[parent] == undefined) {
+        userLoves[parent] = { lists: [], lastUpdatedTime: "Unknown" }
+    }
+    userLoves[parent].lastUpdatedTime = formatDateTime(new Date());
+    if (userLoves[parent].lists == undefined) userLoves[parent].lists = [];
+    if (Array.isArray(info)) {
+        for (let i = 0; i < info.length; i++) {
+            userLoves[parent].lists.splice(userLoves[parent].lists.length, 0, info[i]);
+        }
+    } else {
+        userLoves[parent].lists.splice(userLoves[parent].lists.length, 0, info);
+    }
+    if (!noUpdate) saveUserLoves();
+}
 
+window.onhashchange = function (ev) {
+    if (hashChanged) {
+        hashChanged = false;
+        return;
+    }
+    hashDetect();
 }

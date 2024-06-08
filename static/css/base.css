@@ -51,17 +51,20 @@
 }
 
 .star-list-text-root .songname {
+    cursor: pointer;
     color: white;
     text-indent: 8px;
-    max-width: 50%;
     overflow: hidden;
     vertical-align: top;
     text-overflow: ellipsis;
     display: inline-block;
+    max-width: calc(100% - 42px);
+    /* word-wrap: break-word; */
+    word-break: break-all;
 }
 
 .star-list-text-root {
-    width: calc(100% - 112px);
+    width: calc(100% - 144px);
     margin: 0;
     display: inline-block;
     padding: 0;
@@ -102,7 +105,7 @@
 
 #lover-displayer .action-bar {
     display: inline-block;
-    width: 96px;
+    width: 128px;
 }
 
 #playing-list-head {
@@ -152,6 +155,86 @@
     bottom: 0;
     border-top: 1px solid #333;
     background: var(--main-bg-color);
+}
+
+.dialog-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 78px;
+    background-color: rgba(30, 30, 30, 0.8);
+    z-index: 5000;
+    display: none;
+}
+
+.dialog-content-close {
+    position: fixed;
+    z-index: 3;
+    right: 24px;
+    top: 20px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+#dialog-content-main {
+    width: 100%;
+    height: calc(100% - 72px);
+    margin-top: 52px;
+}
+
+.dialog-title {
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    display: inline-block;
+    font-weight: bold;
+    font-size: 22px;
+    height: 32px;
+    line-height: 32px;
+}
+
+.dialog-title::before {
+    margin-right: 12px;
+}
+
+.dialog-content {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    position: absolute;
+    padding: 20px 24px 4px 24px;
+    /* top right bottom left */
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    height: calc(100% - 96px);
+    min-height: 200px;
+    width: calc(100% - 48px);
+    max-width: 600px;
+    max-height: 520px;
+    overflow: auto;
+    background-color: var(--main-bg-color);
+    border: 1px solid black;
+}
+
+#love-name-lists {
+    width: 100%;
+    height: calc(100% - 40px);
+    outline: none;
+    border: 1px solid #333;
+    font-size: 18px;
+}
+
+.playing-list-addtoloves {
+    position: absolute;
+    z-index: 3;
+    left: 60px;
+    top: 20px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
 }
 
 .playing-list-order {
@@ -257,6 +340,7 @@
     cursor: pointer;
     /* transition: ; */
 }
+
 
 #music-lrc-info-text-name {
     user-select: text;
@@ -815,7 +899,7 @@ body {
 }
 
 .page-head-musiclist {
-    width: calc(100% - 128px);
+    width: calc(100% - 232px);
     position: absolute;
     top: 12px;
     left: 68px;
@@ -1354,6 +1438,30 @@ body {
     width: 36px;
     position: absolute;
     right: 14px;
+    top: 14px;
+    padding: 0 0 0 0;
+}
+#btn-add-star-musiclist{
+    height: 36px;
+    width: 36px;
+    position: absolute;
+    right: 54px;
+    top: 14px;
+    padding: 0 0 0 0;
+}
+#btn-play-list-musiclist{
+    height: 36px;
+    width: 36px;
+    position: absolute;
+    right: 134px;
+    top: 14px;
+    padding: 0 0 0 0;
+}
+#btn-add-list-musiclist{
+    height: 36px;
+    width: 36px;
+    position: absolute;
+    right: 94px;
     top: 14px;
     padding: 0 0 0 0;
 }

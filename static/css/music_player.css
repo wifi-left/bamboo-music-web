@@ -341,12 +341,13 @@ input[type=range]::-webkit-slider-thumb:active {
     /* cursor: pointer; */
     font-size: 22px;
     display: inline-block;
-    width: 100%;
+    width: calc(100% - 8px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     vertical-align: middle;
 }
+
 
 #music-lrc-info-text-singer {
     font-weight: bold;

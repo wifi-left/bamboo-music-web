@@ -106,7 +106,6 @@ function play_idx_music(target_idx = 0, openGUI = false) {
         return;
     }
     if (location.hash === "#station") location.hash = "";
-
     if (playing_idx == -1) {
 
     } else {

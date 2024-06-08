@@ -8979,7 +8979,7 @@ function runTimeout(fun) {
         //normal enviroments in sane situations
         return setTimeout(fun, 0);
     }
-    // if setTimeout wasn't available but was latter defined
+    // if setTimeout wasn't available but was later defined
     if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
         cachedSetTimeout = setTimeout;
         return setTimeout(fun, 0);
@@ -9004,7 +9004,7 @@ function runClearTimeout(marker) {
         //normal enviroments in sane situations
         return clearTimeout(marker);
     }
-    // if clearTimeout wasn't available but was latter defined
+    // if clearTimeout wasn't available but was later defined
     if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
         cachedClearTimeout = clearTimeout;
         return clearTimeout(marker);

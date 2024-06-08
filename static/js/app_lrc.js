@@ -11,7 +11,8 @@ var oLRC = {
     //时间补偿值，单位毫秒，用于调整歌词整体位置
     ms: [],
     //歌词数组{t:时间,c:歌词}
-    hasTranslate: false
+    hasTranslate: false,
+    info: { id: "", name: "", singer: "", singerid: "", album: "", albumid: "", pic: "", addition: "" }
 };
 
 function to_string(s) {

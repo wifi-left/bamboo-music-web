@@ -619,6 +619,7 @@ function deal_data_suggest_video(data, clean = true) {
 function enterAudioStation(openGUI = true) {
     show_msg("随机电台模式", 2000);
     location.hash = "station";
+    hashChanged=true;
     random_Song(openGUI);
 }
 function random_Song(openGUI = false) {
@@ -712,6 +713,10 @@ function api_list_alarm(albumid, type, clean = true, page = 1) {
         console.log("Cooldown...");
         return; // 冷却中
     }
+    if(type == 'star'){
+        treat_star_detail(albumid);
+        return;
+    }
     l_type = type;
     l_playlistid = albumid;
     l_cooldown = true;
@@ -795,6 +800,7 @@ function deal_data_playlist_content(data, clean = true) {
             albumele.innerHTML = `<span class='small-gray-text'>专辑：</span>`;
             dataele.innerHTML = `<span class='small-gray-text'>出版时间：</span>`;
             additionele.innerHTML = `<span class='small-gray-text'>附加信息：</span>`;
+            
             let songnameobj = document.createElement("b");
             songnameobj.classList.add("song-name");
             songnameobj.innerText = name;
