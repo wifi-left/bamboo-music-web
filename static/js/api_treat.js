@@ -619,7 +619,7 @@ function deal_data_suggest_video(data, clean = true) {
 function enterAudioStation(openGUI = true) {
     show_msg("随机电台模式", 2000);
     location.hash = "station";
-    hashChanged=true;
+    hashChanged = true;
     random_Song(openGUI);
 }
 function random_Song(openGUI = false) {
@@ -628,9 +628,9 @@ function random_Song(openGUI = false) {
     let url = get_api_default_list(seed, 1);
     fetchi(url, "text", function (text) {
         let data = {};
-        try{
+        try {
             data = JSON.parse(text);
-        }catch(e){
+        } catch (e) {
             console.error(e);
             throw e;
         }
@@ -713,8 +713,9 @@ function api_list_alarm(albumid, type, clean = true, page = 1) {
         console.log("Cooldown...");
         return; // 冷却中
     }
-    if(type == 'star'){
-        treat_star_detail(albumid);
+    if (type == 'star') {
+        if (clean)
+            treat_star_detail(albumid);
         return;
     }
     l_type = type;
@@ -781,7 +782,7 @@ function deal_data_playlist_content(data, clean = true) {
             imgele.src = pic;
             leftpart.appendChild(imgele);
             // 右侧：信息
-            
+
             let rightpart = document.createElement("div");
             rightpart.classList.add("right-part");
             let nameele = document.createElement("div");
@@ -800,7 +801,7 @@ function deal_data_playlist_content(data, clean = true) {
             albumele.innerHTML = `<span class='small-gray-text'>专辑：</span>`;
             dataele.innerHTML = `<span class='small-gray-text'>出版时间：</span>`;
             additionele.innerHTML = `<span class='small-gray-text'>附加信息：</span>`;
-            
+
             let songnameobj = document.createElement("b");
             songnameobj.classList.add("song-name");
             songnameobj.innerText = name;
@@ -873,7 +874,7 @@ function deal_data_playlist_content(data, clean = true) {
             liele.appendChild(leftpart);
             liele.appendChild(rightpart);
             // 添加成员
-            
+
             listRootObj.appendChild(liele);
             let hr = document.createElement("div");
             hr.classList.add("pretty-hr");

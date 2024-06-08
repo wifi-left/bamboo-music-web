@@ -81,7 +81,7 @@ if (backgroundImage != "") {
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
-Kuroshiro_state = (localStorage.getItem("kuroshiro") == "true");
+var Kuroshiro_state = (localStorage.getItem("kuroshiro") == "true");
 const KURO = new Kuroshiro.default();
 if (allow_Kuroshiro) {
     if (Kuroshiro_state) {
@@ -431,6 +431,9 @@ function loadUserLoves() {
 
     try {
         userLoves = JSON.parse(localStorage.getItem("user-loves"));
+        if(Array.isArray(userLoves)){
+            userLoves = {};
+        }
         if (enableListSaving) {
             playing_list = JSON.parse(localStorage.getItem("playing-list"));
         }

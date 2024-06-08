@@ -977,9 +977,6 @@ function wantPlayListAddToList(clean = false) {
         let info = { name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic };
         playing_list.push(info);
     }
-    if (playing_idx == -1) {
-        play_next_music(false, true);
-    }
     reloadPlayingList();
     show_msg("添加到播放列表成功！", 1000)
 }
@@ -993,12 +990,12 @@ function addStarListToPlaying(ele, clear = false) {
         playing_list = playing_list.concat(userLoves[id].lists);
     }
     show_msg("已添加到播放列表。", 1000);
-    reloadPlayingList();
     if (clear || playing_idx == -1) {
         playing_idx = -1;
         playing_id = -1;
-        play_next_music(false, false);
     }
+    reloadPlayingList();
+
 }
 function show_star_detail(ele) {
     let id = ele.parentNode.getAttribute("pid");
@@ -1189,4 +1186,13 @@ function treat_star_detail(ppid) {
         listRootObj.appendChild(errele);
         console.error(e);
     }
+}
+
+function saveMyApi() {
+    let ctx = LOCALAPIINPUT.value;
+    localSettings.setItem("localapi", ctx);
+}
+function saveWYCookie() {
+    let ctx = WYAPIINPUT.value;
+    localSettings.setItem("wyapi", ctx);
 }

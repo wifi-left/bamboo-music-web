@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
+    <title>Bamboo Music 竹子音乐</title>
+    <script src="./static/js/kuroshiro/kuroshiro.min.js"></script>
+    <script src="./static/js/kuroshiro/kuroshiro-analyzer-kuromoji.min.js" type="text/javascript"
+        charset="utf-8"></script>
+    <script src="./static/js/checkie.js"></script>
+    <script src="./static/js/gquery.min.js"></script>
+    <script src="./static/js/default_settings.js"></script>
+    <link href="./static/css/element_style.css" rel="stylesheet" />
+    <link href="./static/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="./static/css/base.css" rel="stylesheet" />
+    <link href="./static/css/music_player.css" rel="stylesheet" />
+    <style>
+    </style>
+
+</head>
+
+<body>
+    <audio id="music-player-audio" style="display:none;"></audio>
+    <div class="app-root">
+        <div class="promptBlock"><span id="prompt-content"></span></div>
+        <!-- Dialogs: Stars -->
+        <div id="dialog-root" class="dialog-root">
+            <div id="dialog-content" class="dialog-content">
+                <button class="fa fa-close button dialog-content-close" onclick="closeDialog();"></button>
+                <span class="fa fa-star dialog-title">添加收藏到...</span>
+                <div id="dialog-content-main">
+                    <select id="love-name-lists" multiple>
+                        <optgroup label="默认">
+                            <option value="default">默认收藏夹</option>
+                            <option value="later">稍后再听</option>
+                        </optgroup>
+                        <optgroup label="用户自定义收藏夹" id="user-custom-lovers">
+                            <option value="fol">小花</option>
+                            <option value="gla">小草</option>
+                        </optgroup>
+                    </select><br />
+                    <div class="position-right" style="margin-top:8px;">
+                        <button class="button new-love-folder" onclick="wantNewLoves()">新收藏夹</button>
+
+                        <button class="button" onclick="closeDialog()">取消</button>
+                        <button class="button-green" onclick="wantAddUserLovers()">确定</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- Big screen -->
+        <div class="phone-bottom-bar">
+            <button onclick="changeWindow('search',true,this);" id="btn-search-bottom" class="bottom-btn">
+                <span class="fa fa-search"></span>
+                <span class="bottom-btn-title">探索</span>
+            </button>
+            <!-- <button onclick="changeWindow('app',true,this);" id="btn-app-bottom" class="bottom-btn">
+                <span class="fa fa-cloud-download"></span>
+                <span class="bottom-btn-title">App</span>
+            </button> -->
+            <button onclick="changeWindow('account',true,this);" id="btn-account-bottom" class="bottom-btn">
+                <span class="fa fa-user-circle"></span>
+                <span class="bottom-btn-title">个人中心</span>
+            </button>
+            <button onclick="changeWindow('setting',true,this);" id="btn-setting-bottom" class="bottom-btn">
+                <span class="fa fa-gears"></span>
+                <span class="bottom-btn-title">设置</span>
+            </button>
+        </div>
+        <div class="root-left-part">
+            <div id="left-sel-display-bar"></div>
+            <div class="mainpage-btn">
+                <span class="mainpage-title">竹子音乐</span>
+            </div>
+
+            <button onclick="changeWindow('search',true,this);" id="btn-search" class="left-btn">
+                <span class="fa fa-search"></span>
+                <span class="left-btn-title">探索</span>
+            </button>
+            <!-- <button onclick="changeWindow('app',true,this);" id="btn-app" class="left-btn">
+                <span class="fa fa-cloud-download"></span>
+                <span class="left-btn-title">App</span>
+            </button> -->
+            <div class="left-btn-bottom">
+                <button onclick="changeWindow('account',true,this);" id="btn-account" class="left-btn">
+                    <span class="fa fa-user-circle"></span>
+                    <span class="left-btn-title">个人中心</span>
+                </button>
+                <button onclick="changeWindow('setting',true,this);" id="btn-setting" class="left-btn">
+                    <span class="fa fa-gears"></span>
+                    <span class="left-btn-title">设置</span>
+                </button>
+                <span class="version-show" id="version-show">加载版本号中...</span>
+            </div>
+
+        </div>
+        <div class="musicpane-control">
+            <span class="pane-music-name"><span id="pane-music-info-name">无内容播放</span><span
+                    id="pane-music-info-singer">无内容播放</span></span>
+            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward"></button>
+            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play"></button>
+            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward"></button>
+
+            <input type="range" class="player-range" id="play-progress" max="1000" min="0" step="1" value="0"
+                onmousedown="cancelTrack()" onmouseup="startTrack()" ontouchstart="cancelTrack()"
+                ontouchend="startTrack()" />
+            <span id="player-time-current">00:00</span>
+            <span id="player-time-xie">/</span>
+            <span id="player-time-total">00:00</span>
+            <button id="mute-volume" class="button player-control fa fa-volume-up" onclick="muteVolume(this)"></button>
+            <input type="range" class="player-range" id="volume-set" step="1" max="100" value="0" min="0" />
+            <button id="music-detail-btn" class="button player-control fa fa-info-circle"
+                onclick="showHideMusicPlayerPane(!MusicPlayerPaneState,false,true)"></button>
+            <button id="music-playlist-btn" class="button player-control fa fa-list-ul"
+                onclick="showPlayList(!PlayListPaneState)"></button>
+            <div class="player-progress-displayer"></div>
+        </div>
+        <div id="win-playing" class="app-content-window">
+            <div id="win-playing-host">
+                <div class="player-progress-displayer"></div>
+
+                <div class="page-head-music-player">
+                    <div class="page-head-musicinfo">
+                        <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
+                    </div>
+                    <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
+                        class="button fa fa-close"></button>
+                    <button id="close-playing-page2" onclick="showHideMusicPlayerPane(false,true);"
+                        class="button fa fa-level-up"></button>
+                    <button id="show-playing-other-control" class="button fa fa-info-circle"
+                        onclick="showPlayingMenu(null);"></button>
+                </div>
+                <div class="page-content" id="playing-lrc-area">
+                    <div class="lrc-left-part">
+                        <div class="div-middle music-player-info-root">
+                            <img id="music-lrc-info-pic" src="./static/img/default_cd_old_.png" />
+                            <div></div>
+                            <div class="music-lrc-info-text-root">
+                                <span class="list-line-ele"><b id="music-lrc-info-text-name">这里是歌名</b></span>
+                                <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
+                                        class="small-gray-text width-80">相关人员：</span><b
+                                        id="music-lrc-info-text-singer">这里是歌手</b></span>
+                                <span class="list-line-ele" id="music-lrc-info-text-album-root"><span
+                                        class="small-gray-text width-40">专辑：</span><b
+                                        id="music-lrc-info-text-album">这里是专辑</b></span>
+                                <div class="music-lrc-info-control">
+                                    <!-- 收藏 -->
+                                    <button class="button music-info-control-button fa fa-star"
+                                        onclick="btn_addStar_now()"></button>
+                                    <!-- 视频 -->
+                                    <button class="button music-info-control-button fa fa-tv"
+                                        id="music-lrc-info-tv"></button>
+                                    <!-- 分享 -->
+                                    <button class="button music-info-control-button fa fa-share"
+                                        id="pane-share"></button>
+                                    <button class="button music-info-control-button fa fa-expand"
+                                        onclick="GetFullscreen()"></button>
+                                    <!-- 下载 -->
+                                    <button id="pane-download-music"
+                                        class="button music-info-control-button fa fa-download"></button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lrc-right-part">
+                        <ul id="lrc-show-root">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div id="win-playlist" class="app-content-window" onclick="showPlayList(false);">
+            <div id="playlist-root" onclick="preventPopUp(event)">
+                <div class="page-head-home"><span>播放列表</span></div>
+                <!-- <button onclick="changeWindow('infos');" class="button-green">下载APP</button> -->
+                <!-- <div class="loader"></div> -->
+                <button class="fa fa-star button playing-list-addtoloves" id="obj-addtoloves"
+                    onclick="addPlaylisttoLoves(this);"></button>
+                <button class="fa fa-sort-numeric-asc button playing-list-order" id="obj-order-type"
+                    onclick="changeOrder(this);"></button>
+                <button class="fa fa-close button playing-list-close" onclick="showPlayList(false);"></button>
+                <button class="fa fa-trash button playing-list-removeall" onclick="clear_playing_list();"></button>
+                <div class="playing-list-father">
+                    <ul id="playing-list-head">
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="app-content">
+
+            <div id="win-search" class="app-content-window">
+                <div id="video-musicplayer-loading-pane" class="loading-pane">
+                    <div class="loading-pane-middle">
+                        <div class="loader"></div><b class="unable-sel" style="margin-left: 16px;">正在缓冲中...</b>
+                    </div>
+                </div>
+                <div id="win-musiclist" class="app-content-window-child">
+                    <button onclick="hideWindow(this.parentNode);" class="button fa fa-close close-win-page"></button>
+                    <button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" id="btn-add-list-musiclist" onclick="wantPlayListAddToList()"></button>
+                    <button title="立即播放" class="button btn-add-list fa fa-play-circle" id="btn-play-list-musiclist" onclick="wantPlayListAddToList(true)"></button>
+                    <button title="添加收藏" class="button btn-add-list fa fa-star" id="btn-add-star-musiclist" onclick="wantAddLovesToList()"></button>
+                    
+                    <button class="button fa fa-refresh reflush-page" onclick="refrush_detail_list();"></button>
+                    <div class="page-head-musiclist">
+                        <span id="list-album-name">专辑</span>
+                        <span id="list-album-singer-root" class="small-gray-text">
+                            相关人员：<b id="list-album-singer"></b>
+                        </span>
+                    </div>
+                    <div class="page-musiclist-list">
+                        <ul id="playlist-item-head">
+
+                        </ul>
+                    </div>
+                </div>
+                <div id="win-detail" class="app-content-window-child">
+                    <h1>音乐详情</h1>
+                    <button onclick="hideWindow(this.parentNode);" class="button fa fa-close close-win-page"></button>
+                </div>
+                <div id="win-video-player" class="app-content-window-child">
+                    <button id="close-playing-video-page"
+                        onclick="document.getElementById('mui-player').pause();hideWindow(this.parentNode);"
+                        class="button fa fa-close"></button>
+                    <div id="video-player-info-head">
+                        <h1 id="video-player-title"></h1>
+                        <span id="video-player-uploader">相关人员：<b id="video-player-uploader-text"></b></span>
+                    </div>
+
+                    <div id="video-player-loading-pane" class="loading-pane">
+                        <div class="loading-pane-middle">
+                            <div class="loader"></div><b class="unable-sel"
+                                style="margin-left:16px;font-size:16px;">正在缓冲中...</b>
+                        </div>
+                    </div>
+                    <div id="video-player-suggest" class="unable-sel">
+                        <p class="video-player-suggest-title fa fa-star">&nbsp;相关推荐</p>
+                        <ul id="video-player-suggest-list">
+
+                        </ul>
+                    </div>
+                    <div id="video-player-main">
+                        <video id="mui-player" controls loop>
+                        </video>
+                    </div>
+
+                </div>
+                <div class="page-head">
+                    <div class="page-head-music">
+                        <div class="suggestKeyRoot">
+                            <ul id="fillinfo" tabindex="0">
+                            </ul>
+                        </div>
+                        <button id="reflush-music-page" class="button fa fa-refresh"></button>
+                        <div class="search-selector-father button"><select id="search-selector">
+
+                            </select></div>
+
+                        <input placeholder="输入搜索关键字、链接地址" id="music-searchbox" class="input"
+                            autocomplete="off" /><button id="search-music-page" class="button fa fa-search"></button>
+                    </div>
+                </div>
+                <div class="page-content">
+                    <div class="list-box">
+                        <div id="search-loading-pane" class="loading-pane">
+                            <div class="loading-pane-middle">
+                                <div class="loader"></div><b class="unable-sel"
+                                    style="margin-left:16px;font-size:16px;">正在缓冲中...</b>
+                            </div>
+                        </div>
+                        <ul id="list-item-head">
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div id="win-app" class="app-content-window">
+                <div class="not-build-yet div-middle unable-sel text-middle">
+                    <img src="./static/img/favicon.png" width="120" />
+                    <h1>下载 APP</h1>
+                    <p>新版 APP 正在努力研发中...</p>
+                </div>
+            </div>
+            <div id="win-share">
+                <div id="share-content">111</div>
+            </div>
+            <div id="win-account" class="app-content-window">
+                <h1 class="fa fa-address-card win-fronter">个人中心</h1><br />
+                <h2 class="fa fa-star win-subtitle">收藏列表</h2><br />
+                <ul id="lover-displayer">
+                    <div class="list-item">暂无项目</div>
+                    <div class="list-item">暂无项目</div>
+                    <div class="list-item">暂无项目</div>
+                </ul>
+            </div>
+            <div id="win-love" class="app-content-window">
+                <h1 class="fa fa-heart win-fronter">我喜欢</h1>
+            </div>
+
+
+            <div id="win-setting" class="app-content-window">
+                <h1 class="fa fa-gears win-fronter">设置</h1>
+                <h2>音量设置</h2>
+                <p>提示：此处的音量设置并非实时与进度条同步</p>
+                <h2>音源设置</h2>
+                <input class="input setting-input" id="setting-volumeInput" /><span>%</span>
+                <button class="button-green" onclick="saveVolume()">保存</button>
+                <h3>在线B：登录Cookie</h3>
+                <span>填入您的Cookie后即可播放在线B您购买的曲库！</span><br/>
+                <input class="input setting-input" id="setting-wy-api"  /><button class="button" onclick="saveWYCookie()">保存</button><br />
+                <h3>自建C：Bamboo Music API设置</h3>
+                <span>填入URL后即可使用自建C提供的API：</span><br/>
+                <input class="input setting-input" id="setting-local-api"  /><button class="button" onclick="saveMyApi()">保存</button><br />
+                <h3>在线：获取的音质</h3>
+                <span>请注意：如果没有所需音质，很可能会获取到最低音质。</span><br/>
+                <button class="button" onclick="onlineFlac(false)">获取MP3格式</button><button class="button" onclick="onlineFlac(true)">获取FLAC格式</button><br />
+                <h2>歌词注音</h2>
+                <button class="button" onclick="enableKuromaji(1)">开启罗马音标注</button>
+                <button class="button" onclick="enableKuromaji(0)">关闭罗马音标注（推荐）</button>
+                <h2>播放页样式</h2>
+                <h3>背景</h3>
+                <span>支持CSS语法（Background）</span>
+                <input class="input setting-input" id="setting-background-image" /><button class="button"
+                    onclick="saveBackgroundImage()">保存</button><br />
+                <span>预设：</span><button class="button" onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button
+                    class="button" onclick="saveBackgroundImageSample('')">无背景</button><br />
+                <h3>歌词</h3>
+                <span>普通歌词颜色：</span><input class="input setting-input" id='norlrccolor' type='text' /><input
+                    type="color" class="input"
+                    onchange="document.getElementById('norlrccolor').value = this.value;" /><br />
+                <span>普通歌词行高（间距）：</span><input class="input setting-input" id='norlineheight' type='text' /><br />
+                <span>普通歌词字体大小：</span><input class="input setting-input" id='norfontsize' type='text' /><br />
+                <span>选中歌词颜色：</span><input class="input setting-input" id='sellrccolor' type='text' /><input
+                    type="color" class="input"
+                    onchange="document.getElementById('sellrccolor').value = this.value;" /><br />
+                <span>选中歌词行高（间距）：</span><input class="input setting-input" id='sellineheight' type='text' /><br />
+                <span>选中歌词字体大小：</span><input class="input setting-input" id='selfontsize' type='text' /><br />
+                <button class="button-green" onclick="saveLrcConfig();">保存歌词设置</button>
+
+                <div class="lrc-line-show">
+                    预览 Line Normal Text
+                </div>
+                <div class="lrc-line-sel-show">
+                    预览 Line Selected
+                </div>
+                <h2>播放列表</h2>
+                <p>当关闭页面时：</p>
+                <button class="button" onclick="enableListSave(1)">保存记录</button>
+                <button class="button" onclick="enableListSave(0)">不保存记录</button>
+                <div class="hr"></div>
+                <h2>进度条显示更新频率</h2>
+                <input class="input setting-input" id="setting-rateInput" />
+                <button class="button-green" onclick="saveRate()">保存</button><br />
+
+                <a class="url" href="./export.html">导入/导出列表</a><br />
+
+                <h2>制作信息</h2>
+                <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
+                <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
+                <span class="final-ele">仅提供技术支持</span>
+            </div>
+        </div>
+    </div>
+    <!-- <button type="button" id="btn">按钮</button>
+  <input type="text" name="" id="demo" value="" />
+  <div id="res">接收到的服务器端消息显示区域</div>
+  <script src="/public/event.js"></script> -->
+    <script src="./static/js/utils.js"></script>
+    <script src="./static/js/app_ui.js"></script>
+    <script src="./static/js/app.js"></script>
+    <script src="./static/js/api_treat.js"></script>
+    <script src="./static/js/app_mp3player.js"></script>
+    <script src="./static/js/app_lrc.js"></script>
+</body>
+
+</html>
