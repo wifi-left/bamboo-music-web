@@ -1199,7 +1199,7 @@ function saveWYCookie() {
 
 // Shortcut keys
 document.onkeydown = function (ev) {
-    if (ev.ctrlKey) {
+    if (ev.altKey) {
         if (ev.code === 'KeyN') {
             play_next_music();
             ev.preventDefault();
