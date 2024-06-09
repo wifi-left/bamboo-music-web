@@ -1217,7 +1217,7 @@ document.onkeydown = function (ev) {
         play_next_music();
         ev.preventDefault();
     } else if (ev.key === 'MediaStop') {
-        pause_music();
+        pause_music(true);
         musicPlayerObj.currentTime = 0;
         ev.preventDefault();
     }
