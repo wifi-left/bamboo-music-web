@@ -875,7 +875,7 @@ function openAddStarDialog(info, type = 'music') {
 function reloadCustomLoveLists() {
     if (userLoves["default"] == undefined) userLoves["default"] = { lists: [] };
     if (userLoves["later"] == undefined) userLoves["later"] = { lists: [] };
-    document.getElementById("love-name-lists").innerHTML = `<optgroup label="默认"><option value="default">默认收藏夹 (${(userLoves["default"].lists.length)})</option><option value="later">稍后再听 (${(userLoves["later"].lists.length)})</option></optgroup><optgroup label="用户自定义收藏夹" id="user-custom-lovers"><option value="fol">小花</option><option value="gla">小草</option></optgroup>`;
+    document.getElementById("love-name-lists").innerHTML = `<optgroup label="默认"><option value="default" selected>默认收藏夹 (${(userLoves["default"].lists.length)})</option><option value="later">稍后再听 (${(userLoves["later"].lists.length)})</option></optgroup><optgroup label="用户自定义收藏夹" id="user-custom-lovers"><option value="fol">小花</option><option value="gla">小草</option></optgroup>`;
     let rt = document.getElementById("user-custom-lovers");
     rt.innerHTML = "";
     for (let name in userLoves) {
@@ -1195,4 +1195,31 @@ function saveMyApi() {
 function saveWYCookie() {
     let ctx = WYAPIINPUT.value;
     localSettings.setItem("wyapi", ctx);
+}
+
+// Shortcut keys
+document.onkeydown = function (ev) {
+    if (ev.ctrlKey) {
+        if (ev.code === 'KeyN') {
+            play_next_music();
+            ev.preventDefault();
+        } else if (ev.code === 'KeyL') {
+            play_last_music();
+            ev.preventDefault();
+        } else if (ev.code === 'KeyP') {
+            pause_music();
+            ev.preventDefault();
+        }
+    } else if (ev.key === 'MediaTrackPrevious') {
+        play_last_music();
+        ev.preventDefault();
+    } else if (ev.key === 'MediaTrackNext') {
+        play_next_music();
+        ev.preventDefault();
+    } else if (ev.key === 'MediaStop') {
+        pause_music();
+        musicPlayerObj.currentTime = 0;
+        ev.preventDefault();
+    }
+
 }

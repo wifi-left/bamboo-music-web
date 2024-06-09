@@ -151,8 +151,8 @@ function highlight_playing_list_ele() {
         ele.classList.add("playing");
     }
 }
-function pause_music() {
-    if (musicPlayerObj.paused) {
+function pause_music(force = false) {
+    if (musicPlayerObj.paused && !force) {
         if (playing_idx < 0 && playing_list.length > 0) {
             // playing_idx = 0;
             play_idx_music(0);
