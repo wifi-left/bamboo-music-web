@@ -451,6 +451,7 @@ input[type=range]::-webkit-slider-thumb:active {
 .music-player-info-root {
     height: auto;
     width: 100%;
+    max-height: calc(100%);
 }
 
 #music-lrc-info-pic {
@@ -502,7 +503,7 @@ input[type=range]::-webkit-slider-thumb:active {
 #win-playing {
     background-position: center;
     background-size: cover;
-    background-image: url(../img/default_cd_old_.png);
+    background-image: url(../img/default_cd.png);
 }
 
 #win-playing-host {
@@ -587,7 +588,99 @@ input[type=range]::-webkit-slider-thumb:active {
     }
 }
 
+#music-lrc-info-text-singer-root {
+    display: inline-block;
+}
 
+#music-lrc-info-text-album-root {
+    display: inline-block;
+}
+
+#music-lrc-info-text-name-root {
+    display: inline-block;
+}
+
+@media only screen and (max-height:584px) {
+    #close-playing-page2 {
+        display: none;
+    }
+
+    #show-playing-other-control {
+        display: inline-block;
+    }
+
+    #playing-lrc-area .lrc-left-part {
+        /* width: calc(40% - 4px); */
+        /* width: 560px;
+         */
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        width: calc(100% - 16px);
+        top: 0;
+        left: 12px;
+        z-index: 1;
+        display: inline-block;
+        opacity: 0;
+        transition: 100ms;
+        pointer-events: none;
+    }
+
+    #playing-lrc-area .lrc-left-part.active {
+        /* display: inline-block; */
+        pointer-events: auto;
+        opacity: 1;
+    }
+
+    #playing-lrc-area .lrc-right-part {
+        opacity: 1;
+    }
+
+    #playing-lrc-area .lrc-right-part.active {
+        opacity: 0;
+    }
+
+    #playing-lrc-area .lrc-right-part {
+        width: calc(100% - 16px);
+        top: 0;
+        left: 12px;
+    }
+
+    .music-lrc-info-text-root {
+        min-width: 188px;
+        max-width: calc(100% - 260px);
+        width: auto;
+        height: 128px;
+        overflow: auto;
+        margin-top: 0px;
+        vertical-align: middle;
+        display: inline-block;
+    }
+
+    .lrc-left-part {
+        overflow: auto;
+    }
+
+    #music-lrc-info-pic {
+        vertical-align: middle;
+    }
+}
+
+@media only screen and (max-height:448px) {
+    #music-lrc-info-pic {
+        height: 180px;
+        width: 180px;
+    }
+}
+
+@media only screen and (max-height:392px) {
+    #music-lrc-info-pic {
+        height: 120px;
+        width: 120px;
+    }
+    #music-lrc-info-text-name{
+        font-size:16px;
+    }
+}
 
 /* 给移动设备做适配 */
 @media only screen and (max-width: 948px) {
@@ -716,6 +809,12 @@ input[type=range]::-webkit-slider-thumb:active {
     }
 
     /* .musicpane-control.playing-display  */
+
+
+    #playing-lrc-area {
+        top: 60px;
+    }
+
     #playing-lrc-area .lrc-left-part {
         /* width: calc(40% - 4px); */
         /* width: 560px;
@@ -730,10 +829,6 @@ input[type=range]::-webkit-slider-thumb:active {
         opacity: 0;
         transition: 100ms;
         pointer-events: none;
-    }
-
-    #playing-lrc-area {
-        top: 60px;
     }
 
     #playing-lrc-area .lrc-left-part.active {

@@ -426,7 +426,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
     document.getElementById("page-info-singer").innerText = singer;
     document.getElementById("pane-music-info-name").innerText = title;
     document.getElementById("pane-music-info-singer").innerText = singer;
-    show_msg(`正在播放：${singer} - ${title}`, 3000);
+    show_msg(`正在播放：${singer} - ${title}`, 1000);
     musicPlayerObj.src = url;
 
     if (info != undefined) {
@@ -440,7 +440,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         let pic = info.pic;
 
         if (pic == null) {
-            document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd_old_.png";
+            document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd.png";
             pic = FALLBACK_BACKGROUND;
         } else {
             document.getElementById("music-lrc-info-pic").src = pic;

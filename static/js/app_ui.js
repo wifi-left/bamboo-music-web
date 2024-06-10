@@ -193,6 +193,7 @@ window.onload = function () {
 }
 function hashDetect() {
     if (location.hash === "#station") {
+        show_msg("正在进入随机电台模式...");
         enterAudioStation();
         return;
     }
@@ -539,7 +540,7 @@ function preventPopUp(e) {
 }
 
 function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromControlPane = false) {
-
+    suggestKeyRootObj.style.display = "none";
     if (isFullScreen()) {
         document.exitFullscreen()
         if (exit_fullscreen) {
@@ -729,7 +730,7 @@ function saveBackgroundImage() {
         }
         document.getElementById("win-playing-host").classList.remove("color");
     } else {
-        document.getElementById("win-playing").style.background = "rgb(30,30,30)";
+        document.getElementById("win-playing").style.background = "var(--main-bg-color)";
         document.getElementById("win-playing-host").classList.add("color");
     }
 }

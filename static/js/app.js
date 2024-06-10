@@ -46,20 +46,24 @@ var mp = null;
 orderType = parseInt(localStorage.getItem("music-play-order"));
 if (orderType == null || isNaN(orderType)) orderType = 0;
 // var show_msg = function(data,time){console.log("The log function hasn't be inited yet...",data)};
-onChangeOrderType();
-function onChangeOrderType() {
+onChangeOrderType(false);
+function onChangeOrderType(showMessage = true) {
     if (orderType == 0) {
         orderTypeObj.className = "fa fa-sort-numeric-asc button playing-list-order";
-        show_msg("播放顺序：顺序播放", 1000, false, true)
+        if (showMessage)
+            show_msg("播放顺序：顺序播放", 1000, false, true)
     } else if (orderType == 1) {
         orderTypeObj.className = "fa fa-repeat button playing-list-order";
-        show_msg("播放顺序：单曲循环", 1000, false, true)
+        if (showMessage)
+            show_msg("播放顺序：单曲循环", 1000, false, true)
     } else if (orderType == 2) {
         orderTypeObj.className = "fa fa-random button playing-list-order";
-        show_msg("播放顺序：随机播放", 1000, false, true)
+        if (showMessage)
+            show_msg("播放顺序：随机播放", 1000, false, true)
     } else {
         orderTypeObj.className = "fa fa-sort-numeric-desc button playing-list-order";
-        show_msg("播放顺序：逆序播放", 1000, false, true)
+        if (showMessage)
+            show_msg("播放顺序：逆序播放", 1000, false, true)
     }
 };
 
@@ -77,7 +81,7 @@ if (backgroundImage != "") {
         document.getElementById("win-playing-host").classList.remove("color");
     }
 } else {
-    document.getElementById("win-playing").style.background = "rgb(30,30,30)";
+    document.getElementById("win-playing").style.background = "var(--main-bg-color)";
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
@@ -431,7 +435,7 @@ function loadUserLoves() {
 
     try {
         userLoves = JSON.parse(localStorage.getItem("user-loves"));
-        if(Array.isArray(userLoves)){
+        if (Array.isArray(userLoves)) {
             userLoves = {};
         }
         if (enableListSaving) {
