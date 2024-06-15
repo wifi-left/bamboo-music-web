@@ -698,6 +698,7 @@ function showPlayingMenu(control) {
     if (control == null) {
         // 切换模式
         if (eme.classList.contains("active")) {
+
             eme.classList.remove("active");
             eme2.classList.remove("active");
         } else {
@@ -708,8 +709,11 @@ function showPlayingMenu(control) {
     } else {
         if (control) {
             eme.classList.add("active");
+            eme2.classList.add("active");
+
         } else {
             eme.classList.remove("active");
+            eme2.classList.remove("active");
         }
     }
 }
