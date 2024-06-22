@@ -834,6 +834,7 @@ body {
 
 #video-player-suggest-list .list-left-img {
     width: 120px;
+    border-radius: 8px;
 }
 
 #video-player-suggest-list .right-part {
@@ -968,6 +969,8 @@ body {
 
 #playlist-item-head .list-left-img {
     width: 120px;
+    border-radius: 8px;
+
 }
 
 #playlist-item-head .left-part {
@@ -1017,6 +1020,8 @@ body {
 
 #list-item-head .list-left-img {
     width: 120px;
+    border-radius: 8px;
+
 }
 
 #list-item-head .left-part {
