@@ -69,7 +69,7 @@ function play_last_music(openGUI = false, isauto = false) {
     play_idx_music(target_idx, openGUI);
 }
 function play_next_music(openGUI = false, isauto = false) {
-    if(playing_idx == -1){
+    if(playing_idx == -1 && playing_list.length > 0){
         play_idx_music(0, openGUI);
         return;
     }

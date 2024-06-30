@@ -376,7 +376,7 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preven
     return idx;
 }
 function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) {
-
+    saveUserLoves();
     let root = document.getElementById("playing-list-head");
     root.innerHTML = "";
     for (var i = 0; i < playing_list.length; i++) {
