@@ -1,5 +1,6 @@
 <?php
 include("./listfiles.php");
+include("../cache/salt.bamboomusic");
 if (empty($_GET['id'])) {
     http_response_code(403);
     return;
@@ -7,6 +8,14 @@ if (empty($_GET['id'])) {
 $type = "music";
 if (!empty($_GET['type'])) {
     $type = $_GET['type'];
+}
+if (empty($_GET['t'])) {
+    http_response_code(403);
+    return;
+}
+if (empty($_GET['d'])) {
+    http_response_code(403);
+    return;
 }
 $value = $_GET['id'];
 $res = getSongPath($value);
@@ -16,9 +25,18 @@ if ($res == false) {
     return;
 }
 // echo $res;
-
-
+$time = crypt($_GET['d'], $salt);
+$requesttime = strtotime($_GET['d']);
+$realtime = strtotime(date('Y-m-d'));
+if(abs($realtime - $requesttime)>=86400){
+    http_response_code(403);
+    return;
+}
 // 文件名
+if($time != $_GET['t']){
+    http_response_code(403);
+    return;
+}
 $filename = $res;
 
 // 文件路径

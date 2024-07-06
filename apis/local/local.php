@@ -1,6 +1,13 @@
 <?php
 include("./listfiles.php");
 include("./libs.php");
+if (!file_exists("../cache/salt.bamboomusic")) {
+    $mywritefile2 = fopen("../cache/salt.bamboomusic", "w") or send_error("无法写入缓存列表。");
+    fwrite($mywritefile2, '<?php $salt="bamboomusic";?>');
+    fclose($mywritefile2);
+}
+include("../cache/salt.bamboomusic");
+
 Header("content-type: application/json", true);
 function loadPath2Url()
 {
@@ -470,8 +477,7 @@ switch ($type) {
                 return;
             }
         }
-
-        $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&time=" . (int)(time() / 100);
+        $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&d=".date('Y-m-d')."&t=" . crypt(date('Y-m-d'),$salt);
         // echo $html;
         break;
     case 'singer':

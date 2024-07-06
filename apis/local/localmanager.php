@@ -124,7 +124,11 @@ switch ($action) {
 }
 function saveCFG()
 {
-    $mywritefile = fopen("../cache/config.json.bamboomusic", "w") or send_error("无法写入ID缓存列表。");
+    $mywritefile = fopen("../cache/config.json.bamboomusic", "w") or send_error("无法写入缓存列表。");
+    $mywritefile2 = fopen("../cache/salt.bamboomusic", "w") or send_error("无法写入缓存列表。");
     fwrite($mywritefile, json_encode($GLOBALS['config']));
+    fwrite($mywritefile2, '<?php $salt=' . json_encode($GLOBALS['config']->salt) . ';?>');
+
     fclose($mywritefile);
+    fclose($mywritefile2);
 }

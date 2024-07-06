@@ -450,6 +450,13 @@ function shareEventHandler(songid, songname, singer, album) {
     tipE.classList.add("share-tip");
     const SHARE_CONTENT = document.getElementById("share-content");
     SHARE_CONTENT.innerHTML = "";
+    let closeButton = document.createElement("button")
+    closeButton.onclick = closeShare;
+    closeButton.classList.add("button");
+    closeButton.classList.add("fa");
+    closeButton.classList.add("fa-close");
+    closeButton.classList.add("close-share");
+    SHARE_CONTENT.appendChild(closeButton)
     SHARE_CONTENT.appendChild(titleE)
     SHARE_CONTENT.appendChild(brE)
     SHARE_CONTENT.appendChild(songidE)

@@ -11,13 +11,23 @@
 
 */
 $temp = [];
+$ids = [];
 $idx = 0;
+function generateId($path){
+    $wantId = md5($path);
+    $i = 0;
+    while(!empty($GLOBALS['ids'][$wantId . $i])){
+        $i++;
+    }
+    return $wantId . $i;
+}
 function getId2($path)
 {
     if (empty($GLOBALS['temp'][$path])) {
         // new id
-        $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = dechex($id);
+        $id = generateId($path);
+        $GLOBALS['temp'][$path] = ($id);
+        $GLOBALS['ids'][$id] = true;
     }
     return $GLOBALS['temp'][$path];
 }
@@ -25,9 +35,10 @@ function saveFolder($writer, $path, $cover = -1)
 {
     if (empty($GLOBALS['temp'][$path])) {
         // new id
-        $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = dechex($id);
-        writeFileInfo($writer, dechex($id), $path, "", $cover, "l");
+        $id = generateId($path);
+        $GLOBALS['temp'][$path] = ($id);
+        $GLOBALS['ids'][$id] = true;
+        writeFileInfo($writer, ($id), $path, "", $cover, "l");
     }
     return $GLOBALS['temp'][$path];
 }
@@ -35,9 +46,10 @@ function saveCover($writer, $path)
 {
     if (empty($GLOBALS['temp'][$path])) {
         // new id
-        $id = $GLOBALS['idx']++;
-        $GLOBALS['temp'][$path] = dechex($id);
-        writeFileInfo($writer, dechex($id), $path, "", -1, "i");
+        $id = generateId($path);
+        $GLOBALS['temp'][$path] = ($id);
+        $GLOBALS['ids'][$id] = true;
+        writeFileInfo($writer, ($id), $path, "", -1, "i");
     }
     return $GLOBALS['temp'][$path];
 }
