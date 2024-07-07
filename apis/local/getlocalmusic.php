@@ -9,6 +9,10 @@ $type = "music";
 if (!empty($_GET['type'])) {
     $type = $_GET['type'];
 }
+if (empty($_GET['r'])) {
+    http_response_code(403);
+    return;
+}
 if (empty($_GET['t'])) {
     http_response_code(403);
     return;
@@ -25,7 +29,8 @@ if ($res == false) {
     return;
 }
 // echo $res;
-$time = crypt($_GET['d'], $salt);
+$ran = $_GET['r'];
+$time = crypt($value.'_'.$_GET['d'].$ran, $salt);
 $requesttime = strtotime($_GET['d']);
 $realtime = strtotime(date('Y-m-d'));
 if(abs($realtime - $requesttime)>=86400){

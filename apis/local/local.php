@@ -477,8 +477,13 @@ switch ($type) {
                 return;
             }
         }
-        $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&d=".date('Y-m-d')."&t=" . crypt(date('Y-m-d'),$salt);
+        $ran = time()."_".mt_rand(-65535,65535);
+        $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&d=".date('Y-m-d')."&t=" . crypt($value."_".date('Y-m-d').$ran,$salt)."&r=".$ran;
         // echo $html;
+        break;
+    case 'listen':
+        Header("Location: ../../index.html?musicid=$value", true, 302);
+        return;
         break;
     case 'singer':
         $resu = json_decode('{"data":{"list":[],"total":0}}');

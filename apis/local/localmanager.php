@@ -104,7 +104,7 @@ switch ($action) {
     case 3: //更改密码
         $value = base64_decode($value);
         if (strlen($value) >= 5) {
-            $salt = '19a1b0dd43fca26e6965bf12cadc22ebfe1c925c6821c1d6280f2183866b9735fhewhuwehfuhufhhhuehfuwefnewfduqnw98231ey723dh23hgr634g2r7h32fgergj98345hy745hy-64o64jyuh465yntuu4jhyu4he3uth453nmc2q3n2mq83s7ytvd87qxr72347h98tr534y7t42a2rhTtIRVs5wLG44OmntT4jl2DAKdc9f7Pexkcx8kjhupErbqduF0tANMqaSpN0nY0gmtwojN2xcDCAn8ly4rvMTv1Lfu6dm7xjMMT3JpxoJsjnB2HJfDT78NJTgyav0PSTw4KHLpVjUNTFyR11O32RhxrrjZ9giogoPuLuENJANqZYQ2P1NJjwoV0cTR1LSMQJ8duziNfHzqyB>V$i8f$oyK<kkJu;F1OW)-$8sx`yWMF^izrT2B:|^P4AnpZj0b=YP/M*c;f%Tt @I/KRo&:q;%FM3OvuN?n@pQg]<y;YY~EE=u6Oda?H7J~wG=(r:?HZP4Nu{Sv1pt_X>{FNC}qmn>+%k|jQZIR)E4EEJVTP+[adthh>it,<-y|o)0kb^xp+9g?';
+            $salt = 'wnqdhquwhewfnew3209834r9834f9hj34w9vjm4ch8gtm45c87l54xz8ki34jasdfghjklpouytrewqzxcvbnm92817493690765nuycd43udhy53h2s7kjy5jdm7432ymn723fhnwnqdhquwhewfnew3209834r9834f9hj34w9vjm4ch8gtm45c87l54xz8ki34jasdfghjklpouytrewqzxcvbnm92817493690765nuycd43udhy53h2s7kjy5jdm7432ymn723fhndsaeuwgtybxcummbzmnbzcemnbz3me76f32f916mxgrm31oewid21skt83m3edshrouie3yhdtuxh453h45yu';
             mt_srand(time());
             $randomidx = mt_rand(0, strlen($salt) - 30);
             $randomrdx = mt_rand($randomidx + 5, strlen($salt));
