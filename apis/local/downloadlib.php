@@ -40,43 +40,59 @@ class FileDownload
             //解决下载文件名乱码
             if (!$notitle) {
                 if (preg_match("/MSIE/", $ua) ||  preg_match("/Trident/", $ua)) {
-                    header('Content-Disposition: attachment; filename="' . $encoded_filename . '"');
+                    header('Content-Disposition: filename="' . $encoded_filename . '"');
                 } else if (preg_match("/Firefox/", $ua)) {
-                    header('Content-Disposition: attachment; filename*="utf8\'\'' . $name . '"');
+                    header('Content-Disposition: filename*="utf8\'\'' . $name . '"');
                 } else if (preg_match("/Chrome/", $ua)) {
-                    header('Content-Disposition: attachment; filename="' . $encoded_filename . '"');
+                    header('Content-Disposition: filename="' . $encoded_filename . '"');
                 } else {
-                    header('Content-Disposition: attachment; filename="' . $name . '"');
+                    header('Content-Disposition: filename="' . $encoded_filename . '"');
                 }
             }
 
             // header('Content-Disposition: attachment; filename="' . $name . '"');
             // echo json_encode($ranges);
             // return;
+            $offset = 0;
+            $target = $file_size - 1;
             if ($reload && $ranges != null) { // 使用续传
                 header('HTTP/1.1 206 Partial Content');
-                header('Accept-Ranges: bytes');
 
                 // 剩余长度
-                header(sprintf('Content-Length: %u', $ranges['end'] - $ranges['start']));
+                // header(sprintf('Content-Length: %u', (($ranges['end'] - $ranges['start']) + 1)));
 
                 // range信息
-                header(sprintf('Content-Range: bytes %s-%s/%s', $ranges['start'], $ranges['end'], $file_size));
-                //file_put_contents('test.log',sprintf('content-length:%u',$ranges['end']-$ranges['start']),FILE_APPEND);
+                header(sprintf('Content-Range: bytes %u-%u/%u', $ranges['start'], $ranges['end'], $file_size));
+
                 // fp指针跳到断点位置
                 // echo json_encode($ranges) . "<br/>";
                 // return;
                 fseek($fp, sprintf('%u', $ranges['start']));
+                $offset = $ranges['start'];
+                $target = $ranges['end'];
             } else {
                 // file_put_contents('test.log','2222',FILE_APPEND);
                 header('HTTP/1.1 200 OK');
                 header('Content-Length: ' . $file_size);
             }
 
-            while (!feof($fp)) {
+            $speed = 4096;
+            while (!feof($fp) && $offset <= $target) {
                 //echo fread($fp, round($this->_speed*1024,0));
                 //echo fread($fp, $file_size);
-                echo fread($fp, 4096);
+                if ($target - $offset <= $speed) {
+                    $tmp = fread($fp, $target - $offset + 1);
+                    $offset += $target - $offset;
+                    if ($tmp === false) break;
+                    echo $tmp;
+                    break;
+                } else {
+                    $tmp = fread($fp, $speed);
+                    $offset += $speed;
+                    if ($tmp === false) break;
+                    echo $tmp;
+                }
+
                 ob_flush();
             }
 
@@ -92,11 +108,14 @@ class FileDownload
      */
     private function getRange($file_size)
     {
-        if(empty($_SERVER['HTTP_RANGE'])){
+        if (empty($_SERVER['HTTP_RANGE'])) {
             return null;
         }
         $begin = 0;
         $end = $file_size - 1;
+        if (strpos($_SERVER['HTTP_RANGE'], ",") != false) {
+            return null;
+        }
         if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $_SERVER['HTTP_RANGE'], $matches)) {
             // 读取文件，起始节点
             $begin = intval($matches[1]);
@@ -105,6 +124,7 @@ class FileDownload
             if (!empty($matches[2])) {
                 $end = intval($matches[2]);
             }
+            if ($end >= $file_size) $end = $file_size - 1;
 
             $range = (array('start', 'end'));
             $range['start'] = $begin;

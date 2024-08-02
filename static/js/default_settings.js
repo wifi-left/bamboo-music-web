@@ -6,6 +6,15 @@ const BAMBOOMUSIC = {
 // audio: 普通
 // playlist: 播放列表（比如专辑） 
 // video: 视频
+var isIphone = false;
+isIphone = function () {
+    //获取浏览器navigator对象的userAgent属性（浏览器用于HTTP请求的用户代理头的值）
+    var info = navigator.userAgent;
+    //通过正则表达式的test方法判断是否包含“Mobile”字符串
+    var isPhone = /mobile/i.test(info);
+    //如果包含“Mobile”（是手机设备）则返回true
+    return isPhone;
+}();
 const DEFAULT_FALLBACK = { data: { total: 0, list: [] } };
 const localUrlRoot = "./apis/local/";
 const videoUrlRoot = "./apis/video/";

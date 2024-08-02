@@ -75,14 +75,17 @@ button {
 .button:disabled {
     color: rgb(109, 109, 109);
     border: 1px solid rgb(113, 113, 113);
+    cursor: progress;
 }
-.position-right{
-    width:100%;
+
+.position-right {
+    width: 100%;
     display: inline-block;
     text-align: right;
 }
+
 .button-green {
-    vertical-align:middle;
+    vertical-align: middle;
     cursor: pointer;
     font-weight: bold;
     color: white;
@@ -142,9 +145,10 @@ button {
     outline: none;
 
 }
-.setting-input{
-    margin-top:4px;
-    margin-bottom:4px;
+
+.setting-input {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .input:hover {

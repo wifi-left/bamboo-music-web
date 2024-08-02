@@ -40,6 +40,10 @@ $show_match = false;
 if (!empty($_GET['show_match'])) {
     $show_match = $_GET['show_match'] == 'true';
 }
+$ios = false;
+if (!empty($_GET['ios'])) {
+    $ios = $_GET['ios'] == 'true';
+}
 $offset = 0;
 $limit = 30;
 if (!empty($_GET['offset'])) {
@@ -71,7 +75,7 @@ $result = json_decode('{}');
 if (substr($value, 0, 6) == 'MUSIC_') {
     $value = substr($value, 6);
 }
-function fileListToData($searchValue, $show_match=false)
+function fileListToData($searchValue, $show_match = false)
 {
     $result = json_decode('{"data":{"total":30,"list":[]}}');
     $prefix = $GLOBALS['prefix'];
@@ -87,26 +91,26 @@ function fileListToData($searchValue, $show_match=false)
         $filebasename = basename($filewithoutext);
         $filepath = dirname($res);
         $musicid = $valued->id;
-        
-        
+
+
         $cover = $valued->cover;
         $pathid = getId($filepath);
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
 
-        
+
 
         if ($singer == "") $singer = "匿名";
 
-        if($show_match){
-            $singer = str_replace($searchValue,"<em>$searchValue</em>",$singer);
+        if ($show_match) {
+            $singer = str_replace($searchValue, "<em>$searchValue</em>", $singer);
         }
-        
+
         if (strpos($filebasename, " - ") != false)
             $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
         else $songname = $filebasename;
 
-        if($show_match){
-            $songname = str_replace($searchValue,"<em>$searchValue</em>",$songname);
+        if ($show_match) {
+            $songname = str_replace($searchValue, "<em>$searchValue</em>", $songname);
         }
 
         // echo strpos($res, " - ");
@@ -146,17 +150,45 @@ function searchSong($value)
     // $result->data->total = $GLOBALS['total'];
     // $GLOBALS['result'] = $result;
 }
-$seed = 1;
+$seed = 0;
 if (!empty($_GET['seed'])) $seed = $_GET['seed'];
 // echo strtotime("2022-17-12");
-$seed = strtotime(date('Y-m-d')) . $seed;
+if ($seed != 0) $seed = strtotime(date('Y-m-d')) . $seed;
 $uri = $_SERVER['REQUEST_URI'];
 $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
 // echo $offsets;
-switch ($type) {
-    case 'random':
+function getLocalMusicUrl($value, $redirect = false)
+{
+    $res = getSongPath($value);
+    if ($res == false) {
+        echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
+        http_response_code(404);
+        return;
+    }
+    $l2ulist = loadPath2Url();
+    for ($i = 0; $i < count($l2ulist); $i++) {
+        $ll = $l2ulist[$i];
+        if (substr($res, 0, strlen($ll->path)) == $ll->path) {
+            // echo ;
+            // break;
+            echo ($ll->url . (str_replace("\\", "/", substr($res, strlen($ll->path)))));
 
+            return;
+        }
+    }
+    $ran = time() . "" . mt_rand(0, 65535);
+    return dirname($GLOBALS['url']) . "/getlocalmusic.php?id=" . ($redirect ? "D" : "") . $value . "&type=music&d=" . date('Y-m-d') . "&t=" . base64_encode(crypt(($redirect ? "D" : "") . $value . "_" . date('Y-m-d') . $ran, $GLOBALS['salt'])) . "&r=" . $ran . "&ios=" . ($GLOBALS['ios'] ? "true" : "false");
+}
+$redirect = false;
+switch ($type) {
+    case 'random_url':
+        header('Cache-Control:no-cache,must-revalidate');
+        header('Pragma:no-cache');
+        header("Expires:0");
+        header('Access-Control-Allow-Origin: *');
+        $redirect = true;
+    case 'random':
         // echo $seed;
         // return;
 
@@ -182,6 +214,12 @@ switch ($type) {
             // echo json_encode($idcaches_OBJ);
             // return;
             $ress = getInfo($resid);
+            if ($redirect) {
+                $rurl = getLocalMusicUrl($resid, $redirect);
+                header("Location: $rurl");
+                echo "Redirected to " . $rurl;
+                return;
+            }
             // $res = getSongPath($value);
             $res = $ress['path'];
             if ($ress != false && $res != "") {
@@ -227,6 +265,7 @@ switch ($type) {
         // saveId();
         // $result->data-
         $result->data->total = ($offset) * $count + 1;
+
         $html = json_encode($result);
         break;
     case 'info':
@@ -460,25 +499,7 @@ switch ($type) {
         break;
     case 'url':
 
-        $res = getSongPath($value);
-        if ($res == false) {
-            echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
-            http_response_code(404);
-            return;
-        }
-        $l2ulist = loadPath2Url();
-        for ($i = 0; $i < count($l2ulist); $i++) {
-            $ll = $l2ulist[$i];
-            if (substr($res, 0, strlen($ll->path)) == $ll->path) {
-                // echo ;
-                // break;
-                echo ($ll->url . (str_replace("\\", "/", substr($res, strlen($ll->path)))));
-
-                return;
-            }
-        }
-        $ran = time()."_".mt_rand(-65535,65535);
-        $html = dirname($url) . "/getlocalmusic.php?id=" . $value . "&type=music&d=".date('Y-m-d')."&t=" . crypt($value."_".date('Y-m-d').$ran,$salt)."&r=".$ran;
+        $html = getLocalMusicUrl($value);
         // echo $html;
         break;
     case 'listen':
@@ -550,7 +571,7 @@ switch ($type) {
 
                 if ($ele->name == "") $ele->name = dirname($pps);
                 $pid = getId($pps);
-                if($pid == ""||$pid == null) continue;
+                if ($pid == "" || $pid == null) continue;
                 if (stristr($ele->name, $value) == false && $pid != $value) continue;
                 $skipcount_2++;
                 if ($skipcount_2 < ($offset - 1) * $limit + 1) continue;

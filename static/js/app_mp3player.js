@@ -8,7 +8,7 @@ const totalTimeObj = document.getElementById("player-time-total");
 const videoPlayerObj = document.getElementById("mui-player");
 const pauseMusicBTNObj = document.getElementById("pane-pause-music");
 
-let isIphone = false;
+var isIphone = false;
 isIphone = function () {
     //获取浏览器navigator对象的userAgent属性（浏览器用于HTTP请求的用户代理头的值）
     var info = navigator.userAgent;
@@ -49,6 +49,10 @@ var mplayer = {
     trackEvents: true
 }
 function play_last_music(openGUI = false, isauto = false) {
+    if (document.querySelector("#pane-last-music").hasAttribute("disabled")) return;
+    document.querySelector("#pane-last-music").setAttribute("disabled", true);
+    document.querySelector("#pane-next-music").setAttribute("disabled", true);
+
     if (playing_list.length <= 0) {
         if (myAudioStation.length <= 1)
             enterAudioStation(false);
@@ -69,13 +73,18 @@ function play_last_music(openGUI = false, isauto = false) {
     play_idx_music(target_idx, openGUI);
 }
 function play_next_music(openGUI = false, isauto = false) {
-    if(playing_idx == -1 && playing_list.length > 0){
+    if (document.querySelector("#pane-next-music").hasAttribute("disabled")) return;
+    document.querySelector("#pane-next-music").setAttribute("disabled", true);
+    document.querySelector("#pane-last-music").setAttribute("disabled", true);
+    if (playing_idx == -1 && playing_list.length > 0) {
         play_idx_music(0, openGUI);
         return;
     }
     if (orderType == 1 && isauto) {
         musicPlayerObj.currentTime = 0;
         musicPlayerObj.play();
+        document.querySelector("#pane-next-music").removeAttribute("disabled");
+
         return;
     }
     if (playing_list.length <= 0) {
@@ -93,7 +102,7 @@ function play_next_music(openGUI = false, isauto = false) {
         }
     } else if (orderType == 2 && isauto) {
         target_idx = get_random(0, playing_list.length - 1);
-        if(target_idx >= playing_idx) target_idx ++;
+        if (target_idx >= playing_idx) target_idx++;
         play_idx_music(target_idx);
     } else {
         target_idx = playing_idx + 1;
@@ -239,11 +248,24 @@ function changePauseBtnStatus(paused) {
         pauseMusicBTNObj.classList.remove("fa-play");
     }
 }
-function updateTime() {
+musicPlayerObj.oncanplay = function () {
     let duration = musicPlayerObj.duration;
-    if (!isNaN(duration)) {
+    if (!isNaN(duration) && !(duration == Infinity)) {
         totalTimeObj.innerText = secondToTime_int(duration);
     }
+}
+musicPlayerObj.ondurationchange = function () {
+    let duration = musicPlayerObj.duration;
+    if (!isNaN(duration) && !(duration == Infinity)) {
+        totalTimeObj.innerText = secondToTime_int(duration);
+    }
+}
+	
+function updateTime() {
+    // let duration = musicPlayerObj.duration;
+    // if (!isNaN(duration)) {
+    //     totalTimeObj.innerText = secondToTime_int(duration);
+    // }
     currentTimeObj.innerText = secondToTime_int(musicPlayerObj.currentTime);
 }
 
@@ -505,4 +527,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
             }
         });
     }
+    document.querySelector("#pane-next-music").removeAttribute("disabled");
+    document.querySelector("#pane-last-music").removeAttribute("disabled");
+
 }

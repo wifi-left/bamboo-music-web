@@ -21,27 +21,42 @@ if (empty($_GET['d'])) {
     http_response_code(403);
     return;
 }
+
+// echo $res;
+$ran = $_GET['r'];
 $value = $_GET['id'];
+$ios = false;
+if (!empty($_GET['ios'])) {
+    $ios = $_GET['ios'] == 'true';
+}
+$time = crypt($value . '_' . $_GET['d'] . $ran, $salt);
+$requesttime = strtotime($_GET['d']);
+$realtime = strtotime(date('Y-m-d'));
+if (abs($realtime - $requesttime) >= 86400) {
+    http_response_code(403);
+    return;
+}
+// 文件名
+if ($time != base64_decode($_GET['t'])) {
+    http_response_code(403);
+    return;
+}
+
+$allowOringin = false;
+if (substr($value, 0, 1) == 'D') {
+    $allowOringin = true;
+    $value = substr($value, 1);
+}
+if ($allowOringin) {
+    header('Access-Control-Allow-Origin: *');
+}
 $res = getSongPath($value);
 if ($res == false) {
     echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
     http_response_code(404);
     return;
 }
-// echo $res;
-$ran = $_GET['r'];
-$time = crypt($value.'_'.$_GET['d'].$ran, $salt);
-$requesttime = strtotime($_GET['d']);
-$realtime = strtotime(date('Y-m-d'));
-if(abs($realtime - $requesttime)>=86400){
-    http_response_code(403);
-    return;
-}
-// 文件名
-if($time != $_GET['t']){
-    http_response_code(403);
-    return;
-}
+
 $filename = $res;
 
 // 文件路径
@@ -91,6 +106,14 @@ header("Last-Modified: $time");
 
 //$begin++;  如果不读取第一个字节
 include("downloadlib.php");
+header("Accept-Encoding: identity");
+if (stripos($_SERVER['HTTP_USER_AGENT'], "iPhone") != false) $ios = true;
+// user-agent
+header('Accept-Ranges: bytes');
 
 $obj = new FileDownload();
+// if ($ios) {
+//     $obj->download($location, '', false, $mimeType, false);
+// } else {
 $obj->download($location, '', true, $mimeType, false);
+// }

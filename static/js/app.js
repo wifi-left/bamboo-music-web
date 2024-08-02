@@ -297,11 +297,17 @@ function play_music_id(songid, openGUI = false, whetherAddToList = false, preven
             console.error(e);
             document.getElementById("video-musicplayer-loading-pane").style.display = "none";
             show_msg("无法获取歌曲信息，但歌曲可以播放。", 3000);
+
+            document.querySelector("#pane-next-music").removeAttribute("disabled");
+            document.querySelector("#pane-last-music").removeAttribute("disabled");
         });
     }, e => {
         document.getElementById("video-musicplayer-loading-pane").style.display = "none";
         console.error(e);
         show_msg("无法获取歌曲信息，无法播放歌曲", 3000);
+
+        document.querySelector("#pane-next-music").removeAttribute("disabled");
+        document.querySelector("#pane-last-music").removeAttribute("disabled");
     });
 }
 
