@@ -11,8 +11,12 @@ $type = "img";
 $value = $_GET['id'];
 $res = getSongPath($value);
 if ($res == false) {
-    echo '{"code":404,"msg":"404 - 图片不存在"}';
-    http_response_code(404);
+    // echo '{"code":404,"msg":"404 - 图片不存在"}';
+    http_response_code(200);
+    $mimeType = "image/png";
+    header('Content-Type: ' . $mimeType);
+
+    echo file_get_contents("../../static/img/unknown.png");
     return;
 }
 // echo $res;
@@ -24,15 +28,15 @@ $location = $res;
 // 文件路径
 
 if (!is_file($location)) {
-    echo '{"code":404,"msg":"404 - 图片不存在"}';
+    echo '{"code":404,"msg":"404 - 图片消失了！"}';
     http_response_code(404);
     return;
 }
 // 后缀
 
 $extension = substr(strrchr($location, '.'), 1);
-if ($extension != 'png' && $extension != 'jpg') {
-    echo '{"code":404,"msg":"404 - 图片不存在"}';
+if ($extension != 'png' && $extension != 'jpg' && $extension != 'svg') {
+    echo '{"code":404,"msg":"404 - 图片格式错误"}';
     http_response_code(404);
     return;
 }
@@ -58,6 +62,6 @@ $time = date('r', filemtime($location));
 
 include("downloadlib.php");
 
-header("Last-Modified: $time");
+// header("Last-Modified: $time");
 $obj = new FileDownload();
 $obj->download($location, '', true, $mimeType, true);
