@@ -1,0 +1,16 @@
+{
+    "name": "Bamboo Music 竹子音乐",
+    "short_name": "Bamboo Music",
+    "background_color": "#1e1e1e",
+    "icons": [
+        {
+            "src": "./static/img/favicon_512.png",
+            "type": "image/png",
+            "sizes": "256x256"
+        }
+    ],
+    "start_url": "./index.html",
+    "display": "fullscreen",
+    "theme_color": "#1e1e1e",
+    "display_override": ["fullscreen", "minimal-ui"]
+}

@@ -1,10 +1,14 @@
 <?php
+// include("./pinyinlib.php");
+
+
 /*
 文件结构：
 
 >id
 |文件地址
 /名字
+]拼音
 ,封面
 .类型
 <
@@ -70,8 +74,11 @@ function searchHost()
     fclose($openFile);
     fclose($reader);
 }
-function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f')
+function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $pinyin = null)
 {
+    if($pinyin == null){
+        $pinyin = "";
+    }
     /*
     >id
     |文件地址

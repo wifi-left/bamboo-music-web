@@ -58,6 +58,7 @@ function loadLists()
         >id
         |文件地址
         /名字
+        ]拼音
         ,封面
         .类型
         <
@@ -73,6 +74,7 @@ function loadLists()
         $fname = "";
         $fcover = 0;
         $linea = [];
+        $fpinyin = "";
         while (!feof($file)) {
 
             $nline = fgets($file);
@@ -87,6 +89,9 @@ function loadLists()
             } else if ($ntype == '/') {
                 //名字
                 $fname = $content;
+            } else if ($ntype == ']') {
+                //拼音
+                $fpinyin = $content;
             } else if ($ntype == '.') {
                 //类型
                 $ftype = $content;
@@ -98,6 +103,7 @@ function loadLists()
         $linea['name'] = $fname;
         $linea['path'] = $fpath;
         $linea['cover'] = $fcover;
+        $linea['pinyin'] = $fpinyin;
         $flist[$id] = $linea;
         $id_finder[$fpath] = $id;
         if ($ftype == 'f')
