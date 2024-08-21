@@ -562,10 +562,12 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromCont
 
     MusicPlayerPaneState = show_or_hide;
     let ass = document.querySelector(".musicpane-control");
-
+    let wplaying = document.querySelector("#win-playlist");
+    
     if (PlayListPaneState) showPlayList(false);
     if (show_or_hide) {
         ass.classList.add("playing-display")
+        wplaying.classList.add("playing-display");
         // showPlayList(false)
         // slideUpWindow_name("playing");
         musicPaneObj.style.display = "inline-block";
@@ -573,6 +575,8 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromCont
         windowsOnResize();
 
     } else {
+        wplaying.classList.remove("playing-display");
+
         ass.classList.remove("playing-display")
         musicPaneObj.style.display = "none";
         // smallMusicControlPaneObj.style.display = "inline-block";
