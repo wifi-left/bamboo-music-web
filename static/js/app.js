@@ -37,6 +37,7 @@ var orderType = 0; // 0: 顺序; 1:单曲; 2:随机; 3:逆序
 var updateRate = 0.2;
 
 var enableListSaving = true;
+var NetworkSavingMode = false;
 
 var userLoves = {};
 
@@ -69,6 +70,9 @@ function onChangeOrderType(showMessage = true) {
 
 // 判断是否已经读过用户已读
 let hasReadme = localStorage.getItem("hasReadme");
+if(location.search.includes("hasreadme") == true){
+    hasReadme = "true";
+}
 let backgroundImage = localStorage.getItem("backgroundImage");
 if (backgroundImage == null) backgroundImage = "on";
 if (hasReadme != "true") {

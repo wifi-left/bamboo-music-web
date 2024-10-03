@@ -101,9 +101,9 @@
         <div class="musicpane-control">
             <span class="pane-music-name"><span id="pane-music-info-name">无内容播放</span><span
                     id="pane-music-info-singer">无内容播放</span></span>
-            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward" title="播放上一首(Alt+L)"></button>
-            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play" title="暂停(Alt+P)"></button>
-            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward" title="下一首(Alt+N)"></button>
+            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward" title="播放上一首(Shift+L)"></button>
+            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play" title="暂停(Shift+P)"></button>
+            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward" title="下一首(Shift+N)"></button>
 
             <input type="range" class="player-range" id="play-progress" max="1000" min="0" step="1" value="0"
                 onmousedown="cancelTrack()" onmouseup="startTrack()" ontouchstart="cancelTrack()"
@@ -347,6 +347,11 @@
                 <p>当关闭页面时：</p>
                 <button class="button" onclick="enableListSave(1)">保存记录</button>
                 <button class="button" onclick="enableListSave(0)">不保存记录</button>
+                <div class="hr"></div>
+                <h2>节约模式</h2>
+                <p>启用选项后，将不显示专辑图片。</p>
+                <button class="button" onclick="enableNetworkSaving(1)">启用</button>
+                <button class="button" onclick="enableNetworkSaving(0)">禁用</button>
                 <div class="hr"></div>
                 <h2>进度条显示更新频率</h2>
                 <input class="input setting-input" id="setting-rateInput" />

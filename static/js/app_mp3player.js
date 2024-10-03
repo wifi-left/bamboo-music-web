@@ -260,7 +260,7 @@ musicPlayerObj.ondurationchange = function () {
         totalTimeObj.innerText = secondToTime_int(duration);
     }
 }
-	
+
 function updateTime() {
     // let duration = musicPlayerObj.duration;
     // if (!isNaN(duration)) {
@@ -461,7 +461,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         document.getElementById("music-lrc-info-text-name").innerText = title;
         let pic = info.pic;
 
-        if (pic == null) {
+        if (pic == null || NetworkSavingMode) {
             document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd.png";
             pic = FALLBACK_BACKGROUND;
         } else {

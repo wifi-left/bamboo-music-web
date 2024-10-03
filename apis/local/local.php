@@ -84,8 +84,7 @@ function fileListToData($searchValue, $show_match = false)
         $res = $valued->path;
         $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","pic":"","artistid":"","releaseDate":null}');
         $filewithoutext = substr($res, 0, strrpos($res, "."));
-        $mvres = $filewithoutext . '.mp4';
-        if (is_file($mvres)) {
+        if ($valued->extra == 1) {
             $line->hasMv = 1;
         }
         $filebasename = basename($filewithoutext);

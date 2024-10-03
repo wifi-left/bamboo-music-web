@@ -5,6 +5,7 @@ class fileinfo
     public $path = "";
     public $id = 0;
     public $cover = -1;
+    public $extra = "";
 }
 class localfileinfo
 {
@@ -58,7 +59,7 @@ function loadLists()
         >id
         |文件地址
         /名字
-        ]拼音
+        ]额外信息
         ,封面
         .类型
         <
@@ -74,7 +75,7 @@ function loadLists()
         $fname = "";
         $fcover = 0;
         $linea = [];
-        $fpinyin = "";
+        $fextra = "";
         while (!feof($file)) {
 
             $nline = fgets($file);
@@ -91,7 +92,7 @@ function loadLists()
                 $fname = $content;
             } else if ($ntype == ']') {
                 //拼音
-                $fpinyin = $content;
+                $fextra = $content;
             } else if ($ntype == '.') {
                 //类型
                 $ftype = $content;
@@ -103,7 +104,7 @@ function loadLists()
         $linea['name'] = $fname;
         $linea['path'] = $fpath;
         $linea['cover'] = $fcover;
-        $linea['pinyin'] = $fpinyin;
+        $linea['extra'] = $fextra;
         $flist[$id] = $linea;
         $id_finder[$fpath] = $id;
         if ($ftype == 'f')
@@ -145,6 +146,7 @@ function searchForFolder($folder, $limit, $offset)
                 $finfo->filename = $value;
                 $finfo->id = $cid;
                 $finfo->cover = $flist[$cid]['cover'];
+                $finfo->extra = $flist[$cid]['extra'];
                 $res[] = $finfo;
             }
         }
@@ -268,6 +270,7 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
             $finfo->filename = $svalue;
             $finfo->id = $cid;
             $finfo->cover = $info['cover'];
+            $finfo->extra = $info['extra'];
             $GLOBALS['files'][] = $finfo;
             $count++;
             $GLOBALS['total']++;

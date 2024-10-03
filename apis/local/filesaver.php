@@ -17,10 +17,11 @@
 $temp = [];
 $ids = [];
 $idx = 0;
-function generateId($path){
+function generateId($path)
+{
     $wantId = md5($path);
     $i = 0;
-    while(!empty($GLOBALS['ids'][$wantId . $i])){
+    while (!empty($GLOBALS['ids'][$wantId . $i])) {
         $i++;
     }
     return $wantId . $i;
@@ -74,11 +75,8 @@ function searchHost()
     fclose($openFile);
     fclose($reader);
 }
-function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $pinyin = null)
+function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $extra = "")
 {
-    if($pinyin == null){
-        $pinyin = "";
-    }
     /*
     >id
     |文件地址
@@ -87,7 +85,7 @@ function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f'
     .类型
     <
     */
-    $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n<\r\n";
+    $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n]$extra\r\n<\r\n";
     fwrite($writer, $out);
 }
 function remove_ext($path)
@@ -121,12 +119,13 @@ function searchLocalFiles($path, $writer)
             if (is_dir($path . '\\' . $value)) {
                 $tresult = searchLocalFiles($path . '\\' . $value, $writer); //继续遍历
             } else {
+                $filename = $path . '\\' . $value;
                 $coverd = $cover;
 
                 $flag = false;
-                $pathwithoutext = remove_ext($path . '\\' . $value);
+                $pathwithoutext = remove_ext($filename);
                 // echo $pathwithoutext . "\n";
-                if (fnmatch("*.mp3", $path . '\\' . $value)) {
+                if (fnmatch("*.mp3", $filename)) {
                     $flag = true;
                 }
                 if (file_exists($pathwithoutext . '.jpg')) {
@@ -148,7 +147,11 @@ function searchLocalFiles($path, $writer)
                 if ($end > 0) {
                     $name = substr($value, 0, $end);
                 }
-                writeFileInfo($writer, $id, $path . '\\' . $value, $name, $coverd);
+                $hasMv = 0;
+                if (file_exists($pathwithoutext . '.mp4')) {
+                    $hasMv = 1;
+                }
+                writeFileInfo($writer, $id, $filename, $name, $coverd, 'f', $hasMv);
             }
         }
     }

@@ -609,12 +609,20 @@ function set_globle_css_var() {
     // --selfontsize: 24px;
 }
 function loadLrcConfig() {
+    let networkSavingMode = localStorage.getItem("NetworkSavingMode");
     let enableList = localStorage.getItem("enableListSaving");
     if (enableList != "" && enableList != null) {
         try {
             enableListSaving = JSON.parse(enableList);
         } catch (e) {
             enableListSaving = true;
+        }
+    }
+    if (networkSavingMode != "" && networkSavingMode != null) {
+        try {
+            NetworkSavingMode = JSON.parse(networkSavingMode);
+        } catch (e) {
+            NetworkSavingMode = false;
         }
     }
     let m = localStorage.getItem("lrc_settings");
@@ -652,6 +660,10 @@ function loadLrcConfig() {
 function enableListSave(flag) {
     enableListSaving = flag;
     localStorage.setItem("enableListSaving", (flag));
+}
+function enableNetworkSaving(flag) {
+    NetworkSavingMode = flag;
+    localStorage.setItem("NetworkSavingMode", (flag));
 }
 function saveRate() {
     updateRate = parseFloat(document.getElementById("setting-rateInput").value);
@@ -1059,7 +1071,7 @@ function treat_star_detail(ppid) {
             let addition = linedata['addition'];
 
             let pic = linedata['pic'];
-            if (pic == null || pic == "") {
+            if (pic == null || pic == "" || NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("songid", id);
@@ -1215,7 +1227,7 @@ function saveWYCookie() {
 
 // Shortcut keys
 document.onkeydown = function (ev) {
-    if (ev.altKey) {
+    if (ev.shiftKey) {
         if (ev.code === 'KeyN') {
             play_next_music();
             ev.preventDefault();

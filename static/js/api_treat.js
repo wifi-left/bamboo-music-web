@@ -20,7 +20,7 @@ function deal_data_search_playlist(data, clean = true) {
                 singer = "未知";
             }
             let pic = linedata['pic'];
-            if (pic == null || pic == "") {
+            if (pic == null || pic == "" || NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("singer", singer);
@@ -172,7 +172,7 @@ function deal_data_search(data, clean = true, nomore = false) {
             let addition = linedata['addition'];
 
             let pic = linedata['pic'];
-            if (pic == null || pic == "") {
+            if (pic == null || pic == "" || NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("songid", id);
@@ -484,7 +484,7 @@ function deal_data_suggest_video(data, clean = true) {
             let addition = linedata['addition'];
 
             let pic = linedata['pic'];
-            if (pic == null || pic == "") {
+            if (pic == null || pic == "" || NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("songid", id);
@@ -763,7 +763,7 @@ function deal_data_playlist_content(data, clean = true) {
             let addition = linedata['addition'];
 
             let pic = linedata['pic'];
-            if (pic == null || pic == "") {
+            if (pic == null || pic == "" || NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("songid", id);
