@@ -70,7 +70,7 @@ function onChangeOrderType(showMessage = true) {
 
 // 判断是否已经读过用户已读
 let hasReadme = localStorage.getItem("hasReadme");
-if(location.search.includes("hasreadme") == true){
+if (location.search.includes("hasreadme") == true) {
     hasReadme = "true";
 }
 let backgroundImage = localStorage.getItem("backgroundImage");
@@ -327,7 +327,7 @@ function removeFromList(idx) {
             highlight_playing_list_ele();
         } else if (playing_idx == idx) {
             // playing_idx;
-            play_idx_music(idx);
+            play_idx_music(idx,false,true);
         }
     } catch (e) {
 
@@ -365,7 +365,7 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preven
         if (playing_list[playing_idx]['id'] == info['id']) {
             show_msg("歌曲已在播放中", 1000);
             return playing_idx;
-        } else if (preventRepeat) {
+        } else if (preventRepeat && forcePlayNow) {
             for (let i = 0; i < playing_list.length; i++) {
                 if (playing_list[i]['id'] == info.id) {
                     play_idx_music(i, openGUI);
@@ -381,7 +381,7 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preven
         // playing_idx = idx;
         play_idx_music(idx, openGUI);
     }
-    reloadPlayingList(openGUI, forcePlayNow);
+    reloadPlayingList(openGUI, forcePlayNow, !(playing_list.length <= 0));
     saveUserLoves();
     return idx;
 }
@@ -432,8 +432,6 @@ function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) 
     if (autoplay && !forcePlay && playing_list.length > 0) {
         if (playing_idx == -1) {
             play_next_music(openGUI, true);
-        } else if (musicPlayerObj.paused) {
-            play_next_music(openGUI);
         }
     }
 

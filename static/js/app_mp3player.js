@@ -113,9 +113,21 @@ function play_next_music(openGUI = false, isauto = false) {
     play_idx_music(target_idx, openGUI);
 
 }
-function play_idx_music(target_idx = 0, openGUI = false) {
+function backToVoidState() {
+    musicPlayerObj.pause();
+    playing_idx = -1;
+    change_music("无内容播放", "无内容播放", "", false, {}, false);
+    oLRC.ms = []
+    document.getElementById("pane-download-music").onclick = function(){}
+    init_lrc_pane();
+}
+function play_idx_music(target_idx = 0, openGUI = false, fromPlayingList = false) {
     if (playing_list.length <= 0) {
-        enterAudioStation(true);
+        if (fromPlayingList) {
+            backToVoidState();
+        } else {
+            enterAudioStation(true);
+        }
         return;
     }
     if (location.hash === "#station") location.hash = "";
@@ -448,7 +460,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
     document.getElementById("page-info-singer").innerText = singer;
     document.getElementById("pane-music-info-name").innerText = title;
     document.getElementById("pane-music-info-singer").innerText = singer;
-    show_msg(`正在播放：${singer} - ${title}`, 1000);
+    if (url != "") show_msg(`正在播放：${singer} - ${title}`, 1000);
     musicPlayerObj.src = url;
 
     if (info != undefined) {

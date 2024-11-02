@@ -5,6 +5,7 @@
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
     <title>下载歌曲</title>
+    <script src="../static/js/gbk2.min.js"></script>
 </head>
 
 <body>
@@ -29,11 +30,17 @@
     <h1 style="-webkit-user-select: none; -moz-user-select: none; user-select: none;">下载地址：</h1>
     <a target="_blank" id="url" href='#' download="<?php echo $filename; ?>.mp3">加载中</a>
     <h1>歌词</h1>
-    <a target="_blank" id="lrcdown" href='#' download="<?php echo $filename; ?>.lrc">暂无歌词</a>
+    编码 UTF-8：
+    <a target="_blank" id="lrcdown" href='#' download="<?php echo $filename; ?>.lrc">暂无歌词</a><br />
+    编码 GBK（老旧设备请使用此版本歌词）：
+    <a target="_blank" id="lrcdown_gbk" href='#' download="<?php echo $filename; ?>.lrc">暂无歌词</a>
     <br />
     <br />
     <textarea style="width: 100%; height:400px;" id="lrcshow"></textarea>
     <script>
+        function utf8toGbk(text){
+            return new Uint8Array(GBK.encode(text)).buffer;
+        }
         var url = `<?php echo $url; ?>`;
         document.getElementById("url").innerHTML = url;
         document.getElementById("url").href = url;
@@ -46,12 +53,26 @@
             lrc = JsonToLrc(lrc['ms']);
         }
         var aFileParts = [lrc]; // 一个包含 DOMString 的数组
+
         var oMyBlob = new Blob(aFileParts, {
-            type: 'text/plain'
+            type: 'text/plain;charset=utf-8'
         });
+
         var lrcUrl = URL.createObjectURL(oMyBlob);
         document.getElementById("lrcdown").href = lrcUrl;
         document.getElementById("lrcdown").innerText = lrcUrl;
+        try {
+            var aFileParts_gbk = [utf8toGbk(lrc)]; // 一个包含 DOMString 的数组
+            var oMyBlob_gbk = new Blob(aFileParts_gbk, {
+                type: 'text/plain;charset=gbk'
+            });
+            var lrcUrl_gbk = URL.createObjectURL(oMyBlob_gbk);
+            document.getElementById("lrcdown_gbk").href = lrcUrl_gbk;
+            document.getElementById("lrcdown_gbk").innerText = lrcUrl_gbk;
+        } catch (e) {
+            document.getElementById("lrcdown_gbk").href = "";
+            document.getElementById("lrcdown_gbk").innerText = "无法转换编码："+e.message;
+        }
         lrcshow.value = lrc;
 
         function to_string(s) {
