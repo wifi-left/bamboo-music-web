@@ -120,6 +120,9 @@ function backToVoidState() {
     oLRC.ms = []
     document.getElementById("pane-download-music").onclick = function(){}
     init_lrc_pane();
+    musicPlayerObj.removeAttribute("src");
+    changePauseBtnStatus(true);
+
 }
 function play_idx_music(target_idx = 0, openGUI = false, fromPlayingList = false) {
     if (playing_list.length <= 0) {
