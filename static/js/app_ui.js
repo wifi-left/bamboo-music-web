@@ -408,7 +408,7 @@ function btn_watchVideo(ele, isRootNode = false, reloadSuggest = true) {
 
     let hasmv = infoele.getAttribute("hasmv");
     let songid = hasmv
-    if (!(hasmv != false && hasmv != "false" && hasmv != null && hasmv != "null" && hasmv != "")) {
+    if (!(hasmv != false && hasmv != "false" && hasmv != null && hasmv != "null" && hasmv != "" && hasmv != 1 && hasmv != true && hasmv != "true")) {
         songid = infoele.getAttribute("songid");
     }
     let songname = infoele.getAttribute("songname");
