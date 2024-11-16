@@ -60,13 +60,16 @@ if (!empty($_GET['key'])) {
 
 <body>
     <div class="app-root">
-
-        <h1>请输入API使用密码</h1>
+		<?php
+		$verified_part = '<h1>请输入API使用密码</h1>
         <div class="content">
             <form action="try_access.php" method="get">
                 <input id="psw" class="input" name="key" />
                 <button class="button-green" type="submit" id="allowbutton">确认</button>
-            </form>
+            </form>';
+         if ($verified != 2) echo $verified_part;
+		?>
+        
             <?php
             if ($verified == 1) {
                 echo '<h1>密码错误，请重试。</h1>';

@@ -405,7 +405,12 @@ function btn_watchVideo(ele, isRootNode = false, reloadSuggest = true) {
     }
     else infoele = ele.parentNode.parentNode.parentNode;
     // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
+
+    let hasmv = infoele.getAttribute("hasmv");
+    let songid = hasmv
+    if (!(hasmv != false && hasmv != "false" && hasmv != null && hasmv != "null" && hasmv != "")) {
+        songid = infoele.getAttribute("songid");
+    }
     let songname = infoele.getAttribute("songname");
     let singer = infoele.getAttribute("singer");
     let singerid = infoele.getAttribute("singerid");
@@ -563,7 +568,7 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromCont
     MusicPlayerPaneState = show_or_hide;
     let ass = document.querySelector(".musicpane-control");
     let wplaying = document.querySelector("#win-playlist");
-    
+
     if (PlayListPaneState) showPlayList(false);
     if (show_or_hide) {
         ass.classList.add("playing-display")
@@ -1082,6 +1087,8 @@ function treat_star_detail(ppid) {
             liele.setAttribute("albumid", albumid);
             liele.setAttribute("releasedata", releasedata);
             liele.setAttribute("starid", ppid);
+            liele.setAttribute("hasmv", hasmv);
+
             // 显示信息
             // 左侧：图片
             let leftpart = document.createElement("div");
@@ -1118,7 +1125,7 @@ function treat_star_detail(ppid) {
                 if (hasaudio)
                     btn_playMusic(this, true);
                 else
-                    if (hasmv) {
+                    if ((hasmv != "" && hasmv != null && hasmv != false)) {
                         btn_watchVideo(this);
                     }
             }
@@ -1163,13 +1170,13 @@ function treat_star_detail(ppid) {
             if (hasaudio) {
                 actioncode += `<button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" onclick="btn_addtoList(this);"></button>`;
                 actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="btn_playMusic(this,false);">`;
-                if (hasmv) {
+                if ((hasmv != "" && hasmv != null && hasmv != false)) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                 }
                 actioncode += `<button title="添加到其他收藏夹" class="button fa fa-star" onclick="btn_addStar(this,'music');"></button>`;
 
             } else {
-                if (hasmv) {
+                if ((hasmv != "" && hasmv != null && hasmv != false)) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                 }
             }

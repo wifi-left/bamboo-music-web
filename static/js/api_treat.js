@@ -28,6 +28,7 @@ function deal_data_search_playlist(data, clean = true) {
             liele.setAttribute("album", name);
             liele.setAttribute("albumid", id);
             liele.setAttribute("releasedata", releasedata);
+            // liele.setAttribute("hasmv", hasmv);
             // 显示信息
             // 左侧：图片
             let leftpart = document.createElement("div");
@@ -182,6 +183,8 @@ function deal_data_search(data, clean = true, nomore = false) {
             liele.setAttribute("album", album);
             liele.setAttribute("albumid", albumid);
             liele.setAttribute("releasedata", releasedata);
+            liele.setAttribute("hasmv", hasmv);
+
             // 显示信息
             // 左侧：图片
             let leftpart = document.createElement("div");
@@ -218,7 +221,7 @@ function deal_data_search(data, clean = true, nomore = false) {
                     btn_playMusic(this, true);
                 }
             } else {
-                if (hasmv) {
+                if (hasmv != "" && hasmv != null && hasmv != false) {
                     songnameobj.onclick = function () {
                         btn_watchVideo(this);
                     }
@@ -266,13 +269,13 @@ function deal_data_search(data, clean = true, nomore = false) {
             if (hasaudio) {
                 actioncode += `<button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" onclick="btn_addtoList(this);"></button>`;
                 actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="btn_playMusic(this,false);">`;
-                if (hasmv) {
+                if ((hasmv != "" && hasmv != null && hasmv != false)) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                 }
                 actioncode += `<button title="添加到收藏" class="button fa fa-star" onclick="btn_addStar(this,'music');"></button>`;
 
             } else {
-                if (hasmv) {
+                if ((hasmv != "" && hasmv != null && hasmv != false)) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                     actioncode += `<button title="添加到收藏" class="button fa fa-star" onclick="btn_addStar(this,'video');"></button>`;
                 }
@@ -473,7 +476,7 @@ function deal_data_suggest_video(data, clean = true) {
                 liele.classList.add("playing")
             }
             let hasmv = linedata['hasMv'];
-            if (!hasmv) continue;
+            if (!(hasmv != "" && hasmv != null && hasmv != false)) continue;
             addcount++;
             let name = linedata['name'];
             let singer = linedata['artist'];
@@ -494,6 +497,8 @@ function deal_data_suggest_video(data, clean = true) {
             liele.setAttribute("album", album);
             liele.setAttribute("albumid", albumid);
             liele.setAttribute("releasedata", releasedata);
+            liele.setAttribute("hasmv", hasmv);
+
             if (releasedata == "") releasedata = undefined;
             if (album == "") album = undefined;
             // 显示信息
@@ -773,6 +778,7 @@ function deal_data_playlist_content(data, clean = true) {
             liele.setAttribute("album", album);
             liele.setAttribute("albumid", albumid);
             liele.setAttribute("releasedata", releasedata);
+            liele.setAttribute("hasmv", hasmv);
             // 显示信息
             // 左侧：图片
             let leftpart = document.createElement("div");
@@ -810,7 +816,7 @@ function deal_data_playlist_content(data, clean = true) {
                 if (hasaudio)
                     btn_playMusic(this, true);
                 else
-                    if (hasmv) {
+                    if (hasmv != "" && hasmv != null && hasmv != false) {
                         btn_watchVideo(this);
                     }
             }
@@ -855,13 +861,13 @@ function deal_data_playlist_content(data, clean = true) {
             if (hasaudio) {
                 actioncode += `<button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" onclick="btn_addtoList(this);"></button>`;
                 actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="btn_playMusic(this,false);">`;
-                if (hasmv) {
+                if (hasmv != "" && hasmv != null && hasmv != false) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                 }
                 actioncode += `<button title="添加到收藏" class="button fa fa-star" onclick="btn_addStar(this,'music');"></button>`;
 
             } else {
-                if (hasmv) {
+                if (hasmv != "" && hasmv != null && hasmv != false) {
                     actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
                     actioncode += `<button title="添加到收藏" class="button fa fa-star" onclick="btn_addStar(this,'video');"></button>`;
                 }

@@ -20,13 +20,15 @@ const localUrlRoot = "./apis/local/";
 const videoUrlRoot = "./apis/video/";
 const onlineAUrlRoot = "./apis/onlinea/";
 const onlineBUrlRoot = "./apis/onlineb/";
+const onlineDUrlRoot = "./apis/onlined/";
 const FALLBACK_BACKGROUND = "./static/img/default.jpg";
 const search_types = [
     { "name": "音频", "id": "audio", "type": "audio" },
     { "name": "专辑", "id": "album", "type": "playlist" },
     { "name": "视频", "id": "video", "type": "video" },
     { "name": "在线A", "id": "onlinea", "type": "audio" },
-    { "name": "在线B", "id": "onlineb", "type": "audio" }
+    { "name": "在线B", "id": "onlineb", "type": "audio" },
+    { "name": "在线D", "id": "onlined", "type": "audio" }
 ]
 
 // 建议词补全，${KEY}替代搜索内容
@@ -42,6 +44,8 @@ function get_api_suggest_key(type) {
             return onlineBUrlRoot + "main.php?type=suggestKey&value=${KEY}"
         case 'onlineb':
             return onlineBUrlRoot + "main.php?type=suggestKey&value=${KEY}"
+        case 'onlined':
+            return onlineDUrlRoot + "main.php?type=suggestKey&value=${KEY}"
     }
     return localUrlRoot + "local.php?type=suggestKey&value=${KEY}";
 }
@@ -62,6 +66,8 @@ function get_api_url(key, typeid, page) {
         return onlineAUrlRoot + `onlinea.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     } else if (typeid == 'onlineb') {
         return onlineBUrlRoot + `main.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
+    } else if (typeid == 'onlined') {
+        return onlineDUrlRoot + `main.php?type=search&value=${key}&offset=${page}&limit=${PAGESIZE}`;
     }
     return localUrlRoot + `local.php?type=searchAlbum&value=&offset=${page}&limit=${PAGESIZE}`;
 }
@@ -83,6 +89,13 @@ function get_api_play_url(id, type) {
                         return (`${onlineBUrlRoot}main.php?type=url&value=${id}`);
                     case 'video':
                         return (`${onlineBUrlRoot}main.php?type=mv&value=${id}`);
+                }
+            case 'D_':
+                switch (type) {
+                    case 'music':
+                        return (`${onlineDUrlRoot}main.php?type=url&value=${id}`);
+                    case 'video':
+                        return (`${onlineDUrlRoot}main.php?type=mv&value=${id}`);
                 }
             case 'V_':
                 return (`${videoUrlRoot}video.php?type=url&value=${id}`);
@@ -106,6 +119,8 @@ function get_api_info(id, type) {
                 return (`${onlineAUrlRoot}onlinea.php?type=info&value=${id}`);
             case 'B_':
                 return (`${onlineBUrlRoot}main.php?type=info&value=${id}`);
+            case 'D_':
+                return (`${onlineDUrlRoot}main.php?type=info&value=${id}`);
             case 'V_':
                 return (`${videoUrlRoot}video.php?type=info&value=${id}`);
             default:
@@ -128,6 +143,7 @@ function get_api_suggest_url(sid, albumid, type, pageid) {
     }
     if (type == 'video') {
         if (albumid.substring(0, 2) == 'V_') return `${videoUrlRoot}video.php?type=album&value=${albumid}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`;
+        if (albumid.substring(0, 2) == 'D_') return `./apis/void.json`;
         return (`${localUrlRoot}local.php?type=album&value=${albumid}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
     }
 }
@@ -157,6 +173,17 @@ function get_api_alarm_list(albumid, pageid, type = "playlist") {
                         return (`${onlineBUrlRoot}main.php?type=singer&value=${encodeURIComponent(albumid)}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
                     case 'keyword':
                         return (`${onlineBUrlRoot}main.php?type=search&value=${encodeURIComponent(albumid)}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
+                }
+            case 'D_':
+                switch (type) {
+                    case 'album':
+                        return (`${onlineDUrlRoot}main.php?type=album&value=${albumid}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
+                    case 'playlist':
+                        return (`${onlineDUrlRoot}main.php?type=playlist&value=${albumid}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
+                    case 'singer':
+                        return (`${onlineDUrlRoot}main.php?type=singer&value=${encodeURIComponent(albumid)}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
+                    case 'keyword':
+                        return (`${onlineDUrlRoot}main.php?type=search&value=${encodeURIComponent(albumid)}&offset=${pageid}&stype=${type}&limit=${PAGESIZE}`);
                 }
             case 'V_':
                 switch (type) {
