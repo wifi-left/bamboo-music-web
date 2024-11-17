@@ -56,6 +56,13 @@ $prefix = "";
 if (!empty($_GET['prefix'])) {
     $prefix = $_GET['prefix'];
 }
+$br = "mp3";
+if (!empty($_GET['br'])) {
+    $br = $_GET['br'];
+    if ($br == '128kmp3') $br = "mp3";
+    if ($br == '320kmp3') $br = "mp3";
+    else if ($br == '2000kflac') $br = "flac";
+}
 // $url = str_replace("\~", "%7E", $url);
 $headers = "";
 $value = urldecode($value);
@@ -157,7 +164,7 @@ $uri = $_SERVER['REQUEST_URI'];
 $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $url = $protocol . $_SERVER['HTTP_HOST'] . $uri;
 // echo $offsets;
-function getLocalMusicUrl($value, $redirect = false)
+function getLocalMusicUrl($value, $redirect = false, $br = "mp3")
 {
     $res = getSongPath($value);
     if ($res == false) {
@@ -177,7 +184,7 @@ function getLocalMusicUrl($value, $redirect = false)
         }
     }
     $ran = time() . "" . mt_rand(0, 65535);
-    return dirname($GLOBALS['url']) . "/getlocalmusic.php?id=" . ($redirect ? "D" : "") . $value . "&type=music&d=" . date('Y-m-d') . "&t=" . base64_encode(crypt(($redirect ? "D" : "") . $value . "_" . date('Y-m-d') . $ran, $GLOBALS['salt'])) . "&r=" . $ran . "&ios=" . ($GLOBALS['ios'] ? "true" : "false");
+    return dirname($GLOBALS['url']) . "/getlocalmusic.php?id=" . ($redirect ? "D" : "") . $value . "&type=music&d=" . date('Y-m-d') . "&t=" . base64_encode(crypt($br . "_" . ($redirect ? "D" : "") . $value . "_" . date('Y-m-d') . $ran, $GLOBALS['salt'])) . "&r=" . $ran . "&br=" . $br;
 }
 $redirect = false;
 switch ($type) {
@@ -494,11 +501,11 @@ switch ($type) {
                 return;
             }
         }
-        $html = dirname($url) . "/apis/local/getlocalmusic.php?type=mp4&id=" . $value;
+        $html = getLocalMusicUrl($value, false, "mp4");
         break;
     case 'url':
 
-        $html = getLocalMusicUrl($value);
+        $html = getLocalMusicUrl($value, false, $br);
         // echo $html;
         break;
     case 'listen':

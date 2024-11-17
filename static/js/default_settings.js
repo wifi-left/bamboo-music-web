@@ -72,39 +72,39 @@ function get_api_url(key, typeid, page) {
     return localUrlRoot + `local.php?type=searchAlbum&value=&offset=${page}&limit=${PAGESIZE}`;
 }
 
-function get_api_play_url(id, type) {
+function get_api_play_url(id, type, quality) {
     if (id != undefined) {
         id = "" + id;
         switch (id.substring(0, 2)) {
             case 'A_':
                 switch (type) {
                     case 'music':
-                        return (`${onlineAUrlRoot}onlinea.php?type=url&value=${id}`);
+                        return (`${onlineAUrlRoot}onlinea.php?type=url&value=${id}&br=${quality}`);
                     case 'video':
-                        return (`${onlineAUrlRoot}videourl.php?type=mv&value=${id}`);
+                        return (`${onlineAUrlRoot}videourl.php?type=mv&value=${id}&br=${quality}`);
                 }
             case 'B_':
                 switch (type) {
                     case 'music':
-                        return (`${onlineBUrlRoot}main.php?type=url&value=${id}`);
+                        return (`${onlineBUrlRoot}main.php?type=url&value=${id}&br=${quality}`);
                     case 'video':
-                        return (`${onlineBUrlRoot}main.php?type=mv&value=${id}`);
+                        return (`${onlineBUrlRoot}main.php?type=mv&value=${id}&br=${quality}`);
                 }
             case 'D_':
                 switch (type) {
                     case 'music':
-                        return (`${onlineDUrlRoot}main.php?type=url&value=${id}`);
+                        return (`${onlineDUrlRoot}main.php?type=url&value=${id}&br=${quality}`);
                     case 'video':
-                        return (`${onlineDUrlRoot}main.php?type=mv&value=${id}`);
+                        return (`${onlineDUrlRoot}main.php?type=mv&value=${id}&br=${quality}`);
                 }
             case 'V_':
-                return (`${videoUrlRoot}video.php?type=url&value=${id}`);
+                return (`${videoUrlRoot}video.php?type=url&value=${id}&br=${quality}`);
             default:
                 switch (type) {
                     case 'music':
-                        return (`${localUrlRoot}local.php?type=url&value=${id}`);
+                        return (`${localUrlRoot}local.php?type=url&value=${id}&br=${quality}`);
                     case 'video':
-                        return (`${localUrlRoot}local.php?type=mv&value=${id}`);
+                        return (`${localUrlRoot}local.php?type=mv&value=${id}&br=${quality}`);
                 }
         }
     }

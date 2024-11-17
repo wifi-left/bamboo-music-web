@@ -309,6 +309,10 @@
 
             <div id="win-setting" class="app-content-window">
                 <h1 class="fa fa-gears win-fronter">设置</h1>
+                <h2>音质设定（仅针对部分支持音源）</h2>
+                <button class="button" onclick="setMusicSourceQuality('2000kflac')">高品质 FLAC(不定)</button>
+                <button class="button" onclick="setMusicSourceQuality('320kmp3')">中品质 MP3(320k)</button>
+                <button class="button" onclick="setMusicSourceQuality('128kmp3')">流畅品质 MP3(128k)</button>
                 <h2>音量设置</h2>
                 <p>提示：此处的音量设置并非实时与进度条同步</p>
                 <input class="input setting-input" id="setting-volumeInput" /><span>%</span>

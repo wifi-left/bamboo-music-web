@@ -43,9 +43,29 @@ function formatDateTime(date) {
 function pad(num) {
     return num.toString().padStart(2, "0");
 }
-function HTML_encode(text){
+function HTML_encode(text) {
     let e = document.createElement("span");
     e.innerText = text;
     let result = e.innerHTML;
     return result;
 }
+class LocalSettings {
+    constructor() {
+        this.setItem = function (item, value) {
+            localStorage.setItem(item, value);
+        };
+        this.getItem = function (item, default_value = null) {
+            let value = localStorage.getItem(item);
+            if (value == null) return default_value;
+            return value;
+        };
+        this.removeItem = function (item) {
+            localStorage.removeItem(item);
+        };
+        this.clear = function (sure = false) {
+            if (sure)
+                localStorage.clear();
+        };
+    }
+}
+const localSettings = new LocalSettings();

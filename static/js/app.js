@@ -44,7 +44,11 @@ var userLoves = {};
 var mp = null;
 
 // 播放顺序
-orderType = parseInt(localStorage.getItem("music-play-order"));
+orderType = parseInt(localSettings.getItem("music-play-order", 0));
+
+// 音质
+var MusicSourceQuality = localSettings.getItem("MusicSourceQuality", "128kmp3");
+
 if (orderType == null || isNaN(orderType)) orderType = 0;
 // var show_msg = function(data,time){console.log("The log function hasn't be inited yet...",data)};
 onChangeOrderType(false);
@@ -69,11 +73,11 @@ function onChangeOrderType(showMessage = true) {
 };
 
 // 判断是否已经读过用户已读
-let hasReadme = localStorage.getItem("hasReadme");
+let hasReadme = localSettings.getItem("hasReadme");
 if (location.search.includes("hasreadme") == true) {
     hasReadme = "true";
 }
-let backgroundImage = localStorage.getItem("backgroundImage");
+let backgroundImage = localSettings.getItem("backgroundImage");
 if (backgroundImage == null) backgroundImage = "on";
 if (hasReadme != "true") {
     location = "./readme.html?return=" + encodeURIComponent(location.href);
@@ -89,7 +93,7 @@ if (backgroundImage != "") {
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
-var Kuroshiro_state = (localStorage.getItem("kuroshiro") == "true");
+var Kuroshiro_state = (localSettings.getItem("kuroshiro") == "true");
 const KURO = new Kuroshiro.default();
 if (allow_Kuroshiro) {
     if (Kuroshiro_state) {
@@ -247,7 +251,7 @@ function list_singer_gui(singer, singerid, clean = true) {
 
 function play_music_id(songid, openGUI = false, whetherAddToList = false, preventRepeat = false) {
     playing_id = songid;
-    let url = get_api_play_url(songid, "music");
+    let url = get_api_play_url(songid, "music", MusicSourceQuality);
     if (openGUI)
         document.getElementById("video-musicplayer-loading-pane").style.display = "inline-block";
     fetchi(url, "text", (data) => {
@@ -285,7 +289,7 @@ function play_music_id(songid, openGUI = false, whetherAddToList = false, preven
             document.getElementById("video-musicplayer-loading-pane").style.display = "none";
             try {
                 document.querySelector("#pane-download-music").onclick = function () {
-                    localStorage.setItem("songlrc", JSON.stringify(oLRC));
+                    localSettings.setItem("songlrc", JSON.stringify(oLRC));
                     window.open(`./apis/download.php?url=${btoa(playurl)}&filename=${btoa(encodeURI(`${singer} - ${name}`))}`);
                 }
                 document.querySelector("#pane-share").onclick = function () {
@@ -327,7 +331,7 @@ function removeFromList(idx) {
             highlight_playing_list_ele();
         } else if (playing_idx == idx) {
             // playing_idx;
-            play_idx_music(idx,false,true);
+            play_idx_music(idx, false, true);
         }
     } catch (e) {
 
@@ -437,17 +441,17 @@ function reloadPlayingList(openGUI = false, forcePlay = false, autoplay = true) 
 
 }
 function saveOrderType() {
-    localStorage.setItem("music-play-order", orderType);
+    localSettings.setItem("music-play-order", orderType);
 }
 function loadUserLoves() {
 
     try {
-        userLoves = JSON.parse(localStorage.getItem("user-loves"));
+        userLoves = JSON.parse(localSettings.getItem("user-loves"));
         if (Array.isArray(userLoves)) {
             userLoves = {};
         }
         if (enableListSaving) {
-            playing_list = JSON.parse(localStorage.getItem("playing-list"));
+            playing_list = JSON.parse(localSettings.getItem("playing-list"));
         }
     } catch (e) {
         userLoves = {};
@@ -463,8 +467,8 @@ function loadUserLoves() {
     reloadPlayingList(false, false, false);
 }
 function saveUserLoves() {
-    localStorage.setItem("user-loves", JSON.stringify(userLoves));
-    localStorage.setItem("playing-list", JSON.stringify(playing_list));
+    localSettings.setItem("user-loves", JSON.stringify(userLoves));
+    localSettings.setItem("playing-list", JSON.stringify(playing_list));
     ReloadLoveListUI();
 }
 

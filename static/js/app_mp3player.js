@@ -19,8 +19,8 @@ isIphone = function () {
 }();
 
 // let muted = false;
-let volm = parseFloat(localStorage.getItem("mvolume"));
-let vol = parseFloat(localStorage.getItem("avolume"));
+let volm = parseFloat(localSettings.getItem("mvolume"));
+let vol = parseFloat(localSettings.getItem("avolume"));
 if (isNaN(vol)) vol = 1;
 if (isNaN(volm)) volm = 1;
 musicPlayerObj.volume = vol;
@@ -31,7 +31,7 @@ changePos(volumeobj);
 document.getElementById("setting-volumeInput").value = volumeobj.value;
 
 videoPlayerObj.onvolumechange = function () {
-    localStorage.setItem("mvolume", this.volume);
+    localSettings.setItem("mvolume", this.volume);
 }
 
 function secondToTime_int(second) {
@@ -306,7 +306,7 @@ volumeobj.onchange = function () {
     let volumes = parseInt(volumeobj.value) / 100;
     musicPlayerObj.volume = volumes;
     // mui-player
-    localStorage.setItem("avolume", volumes);
+    localSettings.setItem("avolume", volumes);
 };
 
 function muteVolume(ele) {
@@ -489,7 +489,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         if (hasmv) {
             document.getElementById("music-lrc-info-tv").style.display = "inline-block";
             document.getElementById("music-lrc-info-tv").onclick = function () {
-                watchVideo(id, title, singer, singerid, albumid, true);
+                watchVideo(hasmv, title, singer, singerid, albumid, true);
                 showHideMusicPlayerPane(false);
                 changeWindow('search');
             };

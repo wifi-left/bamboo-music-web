@@ -614,8 +614,8 @@ function set_globle_css_var() {
     // --selfontsize: 24px;
 }
 function loadLrcConfig() {
-    let networkSavingMode = localStorage.getItem("NetworkSavingMode");
-    let enableList = localStorage.getItem("enableListSaving");
+    let networkSavingMode = localSettings.getItem("NetworkSavingMode");
+    let enableList = localSettings.getItem("enableListSaving");
     if (enableList != "" && enableList != null) {
         try {
             enableListSaving = JSON.parse(enableList);
@@ -630,7 +630,7 @@ function loadLrcConfig() {
             NetworkSavingMode = false;
         }
     }
-    let m = localStorage.getItem("lrc_settings");
+    let m = localSettings.getItem("lrc_settings");
     if (m != "" && m != null) {
         try {
             m = JSON.parse(m);
@@ -644,7 +644,7 @@ function loadLrcConfig() {
             console.error(e);
         }
     }
-    let rate = parseFloat(localStorage.getItem("update-rate"));
+    let rate = parseFloat(localSettings.getItem("update-rate"));
     if (rate == "" || rate == null || isNaN(rate)) {
         rate = 0.2;
     }
@@ -661,14 +661,17 @@ function loadLrcConfig() {
     document.getElementById("selfontsize").value = lrc_selected_font_size;
     set_globle_css_var();
 }
-
+function setMusicSourceQuality(quality){
+    MusicSourceQuality = quality;
+    localSettings.setItem("MusicSourceQuality", (quality));
+}
 function enableListSave(flag) {
     enableListSaving = flag;
-    localStorage.setItem("enableListSaving", (flag));
+    localSettings.setItem("enableListSaving", (flag));
 }
 function enableNetworkSaving(flag) {
     NetworkSavingMode = flag;
-    localStorage.setItem("NetworkSavingMode", (flag));
+    localSettings.setItem("NetworkSavingMode", (flag));
 }
 function saveRate() {
     updateRate = parseFloat(document.getElementById("setting-rateInput").value);
@@ -676,7 +679,7 @@ function saveRate() {
         updateRate = 0.2;
         document.getElementById("setting-rateInput").value = updateRate;
     }
-    localStorage.setItem("update-rate", updateRate);
+    localSettings.setItem("update-rate", updateRate);
 }
 function saveVolume() {
     let volume = parseFloat(document.getElementById("setting-volumeInput").value) / 100;
@@ -705,17 +708,17 @@ function saveLrcConfig() {
         'selected-font-size': lrc_selected_font_size
     }
 
-    localStorage.setItem("lrc_settings", JSON.stringify(m));
+    localSettings.setItem("lrc_settings", JSON.stringify(m));
     set_globle_css_var();
 };
 // kuroshiro
 function enableKuromaji(flag) {
     if (flag == true) {
-        localStorage.setItem("kuroshiro", true);
+        localSettings.setItem("kuroshiro", true);
         Kuroshiro_state = true;
         alert("您需要重新刷新才能生效");
     } else {
-        localStorage.setItem("kuroshiro", false);
+        localSettings.setItem("kuroshiro", false);
         Kuroshiro_state = false;
     }
 }
@@ -754,7 +757,7 @@ document.querySelector(".lrc-left-part").onclick = function () {
 
 function saveBackgroundImage() {
     let ele = document.getElementById("setting-background-image");
-    localStorage.setItem("backgroundImage", ele.value);
+    localSettings.setItem("backgroundImage", ele.value);
     backgroundImage = ele.value;
     if (backgroundImage != "") {
         if (backgroundImage != "on") {
