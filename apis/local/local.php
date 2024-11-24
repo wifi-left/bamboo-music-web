@@ -188,6 +188,10 @@ function getLocalMusicUrl($value, $redirect = false, $br = "mp3")
 }
 $redirect = false;
 switch ($type) {
+    case 'status':
+        $count = count($filelist);
+        echo '{"success":"ok","code":200,"status":"ok","total_songs":"'.$count.'"}';
+        break;
     case 'random_url':
         header('Cache-Control:no-cache,must-revalidate');
         header('Pragma:no-cache');
@@ -607,7 +611,7 @@ switch ($type) {
         echo json_encode($resu);
         break;
     default:
-        echo '{"success":"fail","code":404,"message":"未知的参数","code":1}';
+        echo '{"success":"fail","code":404,"message":"未知的参数"}';
         http_response_code(200);
         return;
 }
