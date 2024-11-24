@@ -84,7 +84,8 @@ function play_next_music(openGUI = false, isauto = false) {
         musicPlayerObj.currentTime = 0;
         musicPlayerObj.play();
         document.querySelector("#pane-next-music").removeAttribute("disabled");
-
+        document.querySelector("#pane-next-music").removeAttribute("disabled", true);
+        document.querySelector("#pane-last-music").removeAttribute("disabled", true);
         return;
     }
     if (playing_list.length <= 0) {
@@ -141,7 +142,8 @@ function play_idx_music(target_idx = 0, openGUI = false, fromPlayingList = false
             if (playing_id == playing_list[target_idx].id) {
                 musicPlayerObj.currentTime = 0;
                 musicPlayerObj.play();
-
+                document.querySelector("#pane-next-music").removeAttribute("disabled", true);
+                document.querySelector("#pane-last-music").removeAttribute("disabled", true);
                 return;
             }
         } catch (e) {
