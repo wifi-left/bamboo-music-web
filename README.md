@@ -3,7 +3,7 @@
 
 ## 开始使用
 ### 初始化设置（需要文件访问权限）
-本框架自带本地API，您可以在 `apis/cache/location.txt.bamboomusic` 设置地址
+本框架自带本地API，您可以在 `/apis/cache/location.txt.bamboomusic` 设置地址（若文件不存在，请自行创建此文件。）
 
 格式为：
 ```
@@ -12,7 +12,9 @@
 地址3
 ```
 
-您还需要修改 `static/js/default_settings.js`，将下面代码改为您的api：
+创建完毕后，您可以访问 `/manager/index.html` 对缓存进行刷新、修改文件夹别名等
+
+您还需要修改 `/static/js/default_settings.js`，将下面代码改为您的api：
 ```JavaScript
 const search_types = [
     { "name": "音频", "id": "audio", "type": "audio" },
