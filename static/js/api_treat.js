@@ -16,6 +16,10 @@ function deal_data_search_playlist(data, clean = true) {
             let singerid = linedata['artistid'];
             let releasedata = linedata['releaseDate'];
             let addition = linedata['addition'];
+            let warning = linedata['warning'];
+            if (warning == undefined) warning = "";
+            if (addition == undefined) addition = "";
+
             if (singer == undefined) {
                 singer = "未知";
             }
@@ -71,10 +75,19 @@ function deal_data_search_playlist(data, clean = true) {
             dataobj.classList.add("release-date");
             dataobj.innerText = releasedata;
             let additionobj = document.createElement("span");
-            additionobj.classList.add("adition-msg");
+            additionobj.classList.add("addition-msg");
             additionobj.innerText = addition;
             // 添加文本
             additionele.appendChild(additionobj);
+            if (addition != "" && warning != "") {
+                let br = document.createElement("br");
+                additionele.appendChild(br);
+            }
+            let warningobj = document.createElement("span");
+            warningobj.classList.add("warning-msg");
+            warningobj.innerText = warning;
+            // 添加文本
+            additionele.appendChild(warningobj);
             nameele.appendChild(songnameobj);
             singerele.appendChild(singernameobj);
             dataele.appendChild(dataobj);
@@ -83,7 +96,7 @@ function deal_data_search_playlist(data, clean = true) {
             rightpart.appendChild(singerele);
             if (releasedata != undefined && releasedata != "")
                 rightpart.appendChild(dataele);
-            if (addition != undefined && addition != "")
+            if (addition != undefined && addition != "" || warning != "")
                 rightpart.appendChild(additionele);
 
             // 控制按钮
@@ -171,6 +184,9 @@ function deal_data_search(data, clean = true, nomore = false) {
             if (hasaudio == undefined) hasaudio = true;
             let hasmv = linedata['hasMv'];
             let addition = linedata['addition'];
+            let warning = linedata['warning'];
+            if (warning == undefined) warning = "";
+            if (addition == undefined) addition = "";
 
             let pic = linedata['pic'];
             if (pic == null || pic == "" || NetworkSavingMode) {
@@ -245,10 +261,20 @@ function deal_data_search(data, clean = true, nomore = false) {
             dataobj.classList.add("release-date");
             dataobj.innerText = releasedata;
             let additionobj = document.createElement("span");
-            additionobj.classList.add("adition-msg");
+            additionobj.classList.add("addition-msg");
             additionobj.innerText = addition;
             // 添加文本
             additionele.appendChild(additionobj);
+            if (addition != "" && warning != "") {
+                let br = document.createElement("br");
+                additionele.appendChild(br);
+            }
+            let warningobj = document.createElement("span");
+            warningobj.classList.add("warning-msg");
+            warningobj.innerText = warning;
+            // 添加文本
+            additionele.appendChild(warningobj);
+
             nameele.appendChild(songnameobj);
             singerele.appendChild(singernameobj);
             albumele.appendChild(albumobj);
@@ -259,7 +285,7 @@ function deal_data_search(data, clean = true, nomore = false) {
             rightpart.appendChild(albumele);
             if (releasedata != undefined && releasedata != "")
                 rightpart.appendChild(dataele);
-            if (addition != undefined && addition != "")
+            if (addition != undefined && addition != "" || warning != "")
                 rightpart.appendChild(additionele);
 
             // 控制按钮
@@ -485,6 +511,9 @@ function deal_data_suggest_video(data, clean = true) {
             let albumid = linedata['albumid'];
             let releasedata = linedata['releaseDate'];
             let addition = linedata['addition'];
+            let warning = linedata['warning'];
+            if (warning == undefined) warning = "";
+            if (addition == undefined) addition = "";
 
             let pic = linedata['pic'];
             if (pic == null || pic == "" || NetworkSavingMode) {
@@ -526,16 +555,25 @@ function deal_data_suggest_video(data, clean = true) {
             singernameobj.classList.add("singer-name");
             singernameobj.innerText = singer;
             let additionobj = document.createElement("span");
-            additionobj.classList.add("adition-msg");
+            additionobj.classList.add("addition-msg");
             additionobj.innerText = addition;
             // 添加文本
             additionele.appendChild(additionobj);
+            if (addition != "" && warning != "") {
+                let br = document.createElement("br");
+                additionele.appendChild(br);
+            }
+            let warningobj = document.createElement("span");
+            warningobj.classList.add("warning-msg");
+            warningobj.innerText = warning;
+            // 添加文本
+            additionele.appendChild(warningobj);
             nameele.appendChild(songnameobj);
             singerele.appendChild(singernameobj);
             // 添加对象
             rightpart.appendChild(nameele);
             rightpart.appendChild(singerele);
-            if (addition != undefined && addition != "")
+            if (addition != undefined && addition != "" || warning != "")
                 rightpart.appendChild(additionele);
             if (album != undefined)
                 dataele.querySelector(".album-name").innerText = album;
@@ -766,6 +804,10 @@ function deal_data_playlist_content(data, clean = true) {
             if (hasaudio == undefined) hasaudio = true;
             let hasmv = linedata['hasMv'];
             let addition = linedata['addition'];
+            let warning = linedata['warning'];
+            if (warning == undefined) warning = "";
+            if (addition == undefined) addition = "";
+
 
             let pic = linedata['pic'];
             if (pic == null || pic == "" || NetworkSavingMode) {
@@ -837,10 +879,20 @@ function deal_data_playlist_content(data, clean = true) {
             dataobj.classList.add("release-date");
             dataobj.innerText = releasedata;
             let additionobj = document.createElement("span");
-            additionobj.classList.add("adition-msg");
+            additionobj.classList.add("addition-msg");
             additionobj.innerText = addition;
             // 添加文本
             additionele.appendChild(additionobj);
+            if (addition != "" && warning != "") {
+                let br = document.createElement("br");
+                additionele.appendChild(br);
+            }
+            let warningobj = document.createElement("span");
+            warningobj.classList.add("warning-msg");
+            warningobj.innerText = warning;
+            // 添加文本
+            additionele.appendChild(warningobj);
+
             nameele.appendChild(songnameobj);
             singerele.appendChild(singernameobj);
             albumele.appendChild(albumobj);
@@ -851,7 +903,7 @@ function deal_data_playlist_content(data, clean = true) {
             rightpart.appendChild(albumele);
             if (releasedata != undefined && releasedata != "")
                 rightpart.appendChild(dataele);
-            if (addition != undefined && addition != "")
+            if (addition != undefined && addition != "" || warning != "")
                 rightpart.appendChild(additionele);
 
             // 控制按钮

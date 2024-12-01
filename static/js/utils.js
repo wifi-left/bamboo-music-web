@@ -1,3 +1,27 @@
+function checkLanguage(name) {
+    var result = 0; //未知 / 英文
+    var reg = /[\u4E00-\u9FA5\uF900-\uFA2D]/;
+    if (name.search(reg) != -1) {
+        result = 1; //中文
+    }
+
+    var reg = /[\u3040-\u309F\u30A0-\u30FF]/;
+    if (name.search(reg) != -1) {
+        result = 2; //日文
+    }
+
+    var reg = /[\uac00-\ud7ff]/;
+    if (name.search(reg) != -1) {
+        result = 3; //韩文
+    }
+
+    var reg = /[а-яА-Я]/;
+    if (name.search(reg) != -1) {
+        result = 4; //俄语
+    }
+
+    return result;
+}
 function fetchi(url, type = 'text', callback, fallbackfunc, fallback = 3) {
     if (fallback <= 0) {
         fallbackfunc(e);

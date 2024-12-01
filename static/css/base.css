@@ -859,7 +859,11 @@ body {
     font-weight: bold;
 }
 
-.adition-msg {
+.addition-msg {
+    font-size: 14px;
+    color: var(--main-text-color);
+}
+.warning-msg {
     font-size: 14px;
     color: rgb(252, 88, 88);
 }

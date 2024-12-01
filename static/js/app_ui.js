@@ -1077,6 +1077,7 @@ function treat_star_detail(ppid) {
             let hasaudio = true;
             let hasmv = linedata['hasMv'];
             let addition = linedata['addition'];
+            // let warning = linedata['warning'];
 
             let pic = linedata['pic'];
             if (pic == null || pic == "" || NetworkSavingMode) {
@@ -1149,7 +1150,7 @@ function treat_star_detail(ppid) {
             dataobj.classList.add("release-date");
             dataobj.innerText = releasedata;
             let additionobj = document.createElement("span");
-            additionobj.classList.add("adition-msg");
+            additionobj.classList.add("addition-msg");
             additionobj.innerText = addition;
             // 添加文本
             additionele.appendChild(additionobj);
