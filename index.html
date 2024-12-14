@@ -24,7 +24,7 @@
 
 <body>
     <audio id="music-player-audio" style="display:none;" preload="auto"></audio>
-    <div class="app-root">
+    <div class="app-root" id="app-root">
         <div class="promptBlock"><span id="prompt-content"></span></div>
         <!-- Dialogs: Stars -->
         <div id="dialog-root" class="dialog-root">
@@ -127,6 +127,8 @@
                     <div class="page-head-musicinfo">
                         <span id="page-info-name">无内容播放</span><br /><span id="page-info-singer">无内容播放</span>
                     </div>
+                    <button id="righten-mode-playing-page" onclick="rightenMusicPlayer(null);"
+                        class="button fa fa-chevron-right"></button>
                     <button id="close-playing-page" onclick="showHideMusicPlayerPane(false);"
                         class="button fa fa-close"></button>
                     <button id="close-playing-page2" onclick="showHideMusicPlayerPane(false,true);"

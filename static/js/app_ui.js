@@ -1,4 +1,4 @@
-
+const APP_ROOT = document.getElementById("app-root");
 var SlideDownTimeoutFunc = 0;
 var PromptTimeoutId = -1;
 var hashChanged = false;
@@ -550,9 +550,25 @@ var MusicPlayerPaneState = false;
 function preventPopUp(e) {
     e.stopPropagation();
 }
+function detectWhetherRightenMode(){
+    return APP_ROOT.classList.contains("righten-mode");
+}
+function rightenMusicPlayer(flag){
+    if(flag == null) flag = !detectWhetherRightenMode();
+    if(flag) APP_ROOT.classList.add("righten-mode");
+    else APP_ROOT.classList.remove("righten-mode");
+}
 
 function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromControlPane = false) {
+
     suggestKeyRootObj.style.display = "none";
+
+    if(show_or_hide == false){
+        if(detectWhetherRightenMode()){
+            rightenMusicPlayer(false)
+        }
+    }
+
     if (isFullScreen()) {
         document.exitFullscreen()
         if (exit_fullscreen) {

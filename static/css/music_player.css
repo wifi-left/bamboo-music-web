@@ -677,14 +677,66 @@ input[type=range]::-webkit-slider-thumb:active {
         height: 120px;
         width: 120px;
     }
-    #music-lrc-info-text-name{
-        font-size:16px;
+
+    #music-lrc-info-text-name {
+        font-size: 16px;
     }
+}
+
+/* 右边栏模式 */
+.righten-mode #close-playing-page2 {
+    display: none;
+}
+
+.righten-mode #show-playing-other-control {
+    display: inline-block;
+}
+.righten-mode #playing-lrc-area .lrc-left-part {
+    /* width: calc(40% - 4px); */
+    /* width: 560px;
+     */
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    width: calc(100% - 16px);
+    top: 0;
+    left: 12px;
+    z-index: 1;
+    display: inline-block;
+    opacity: 0;
+    transition: 100ms;
+    pointer-events: none;
+}
+
+.righten-mode #playing-lrc-area .lrc-left-part.active {
+    /* display: inline-block; */
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.righten-mode #playing-lrc-area .lrc-right-part {
+    opacity: 1;
+}
+
+.righten-mode #playing-lrc-area .lrc-right-part.active {
+    opacity: 0;
+}
+
+.righten-mode #playing-lrc-area .lrc-right-part {
+    width: calc(100% - 16px);
+    top: 0;
+    left: 12px;
+}
+.righten-mode #win-playlist{
+    /* display: none; */
+    left: 0px;
+    width: 100%;
 }
 
 /* 给移动设备做适配 */
 @media only screen and (max-width: 948px) {
-    #close-playing-page2 {
+
+    #close-playing-page2,
+    #righten-mode-playing-page {
         display: none;
     }
 

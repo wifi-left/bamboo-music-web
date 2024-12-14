@@ -687,6 +687,17 @@ body {
     background-color: var(--main-bg-color);
 }
 
+.righten-mode .app-content-window {
+    width: calc(50% - 8px);
+}
+
+.righten-mode #win-playing {
+    width: calc(50% - 108px);
+    /* position: absolute; */
+    /* left: 50%; */
+    left: calc(50% + 100px);
+}
+
 .hr {
     display: block;
     width: calc(100% - 8px);
@@ -863,6 +874,7 @@ body {
     font-size: 14px;
     color: var(--main-text-color);
 }
+
 .warning-msg {
     font-size: 14px;
     color: rgb(252, 88, 88);
@@ -1155,6 +1167,19 @@ body {
     padding: 0;
 }
 
+#righten-mode-playing-page {
+    position: absolute;
+    right: 52px;
+    top: 4px;
+    height: 38px;
+    width: 38px;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 38px;
+    text-align: center;
+    padding: 0;
+}
+
 .page-head-music-player {
     position: absolute;
     top: 4px;
@@ -1194,7 +1219,7 @@ body {
 }
 
 #win-playing {
-    background-color: (white);
+    /* background-color: (white); */
     transition: 200ms;
     z-index: 100;
     height: calc(100% - 84px);

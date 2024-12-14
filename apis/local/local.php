@@ -91,13 +91,13 @@ function fileListToData($searchValue, $show_match = false)
         $res = $valued->path;
         $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","pic":"","artistid":"","releaseDate":null}');
         $filewithoutext = substr($res, 0, strrpos($res, "."));
-        if ($valued->extra == 1) {
-            $line->hasMv = 1;
-        }
+        
         $filebasename = basename($filewithoutext);
         $filepath = dirname($res);
         $musicid = $valued->id;
-
+        if ($valued->extra == 1) {
+            $line->hasMv = $musicid;
+        }
 
         $cover = $valued->cover;
         $pathid = getId($filepath);
@@ -236,9 +236,7 @@ switch ($type) {
                 $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null}');
                 $filewithoutext = substr($res, 0, strrpos($res, "."));
                 $mvres = $filewithoutext . '.mp4';
-                if (is_file($mvres)) {
-                    $line->hasMv = 1;
-                }
+                
 
 
                 if ($ress['cover'] != -1)
@@ -246,6 +244,9 @@ switch ($type) {
                 $filebasename = basename($filewithoutext);
                 $filepath = dirname($res);
                 $musicid = $resid;
+                if (is_file($mvres)) {
+                    $line->hasMv = $musicid;
+                }
                 $pathid = getId($filepath);
                 $singer = substr($filebasename, 0, strpos($filebasename, " - "));
                 if ($singer == "") $singer = "匿名";
@@ -318,7 +319,7 @@ switch ($type) {
 
         $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null,"pic":null}');
         if (is_file($mvres)) {
-            $line->hasMv = 1;
+            $line->hasMv = $value;
         }
         $filebasename = basename($filewithoutext);
 
@@ -452,7 +453,7 @@ switch ($type) {
             $musicid = $valued->id;
             $mvres = $filepath . '\\' . $filewithoutext . '.mp4';
             if (is_file($mvres)) {
-                $line->hasMv = 1;
+                $line->hasMv = $musicid;
             }
             $pathid = getId($filepath);
 

@@ -475,6 +475,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         // console.log(info.albumid)
         let albumid = info.albumid;
         let hasmv = info.hasMv;
+        
         document.getElementById("music-lrc-info-text-name").innerText = title;
         let pic = info.pic;
 
@@ -491,6 +492,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         if (hasmv) {
             document.getElementById("music-lrc-info-tv").style.display = "inline-block";
             document.getElementById("music-lrc-info-tv").onclick = function () {
+                if(hasmv == "" || hasmv == null || hasmv == 1) hasmv = id;
                 watchVideo(hasmv, title, singer, singerid, albumid, true);
                 showHideMusicPlayerPane(false);
                 changeWindow('search');
