@@ -1,3 +1,7 @@
+const WEB_TITLE = document.getElementById("web-title");
+function change_web_title(title){
+    WEB_TITLE.innerText = title;
+}
 function checkLanguage(name) {
     var result = 0; //未知 / 英文
     var reg = /[\u4E00-\u9FA5\uF900-\uFA2D]/;
@@ -73,23 +77,50 @@ function HTML_encode(text) {
     let result = e.innerHTML;
     return result;
 }
+class TemporaryLocalStorage {
+
+    constructor() {
+        this.items = {};
+    }
+    setItem(item, value) {
+        this.items[item] = value;
+    };
+    getItem(item, default_value = null) {
+        let value = this.items[item];
+        if (value == null) return default_value;
+        return value;
+    };
+    removeItem(item) {
+        // localStorage.removeItem(item);
+        delete this.items[item];
+    };
+    clear(sure = false) {
+        if (sure)
+            this.items = {};
+    };
+}
 class LocalSettings {
     constructor() {
-        this.setItem = function (item, value) {
-            localStorage.setItem(item, value);
-        };
-        this.getItem = function (item, default_value = null) {
-            let value = localStorage.getItem(item);
-            if (value == null) return default_value;
-            return value;
-        };
-        this.removeItem = function (item) {
-            localStorage.removeItem(item);
-        };
-        this.clear = function (sure = false) {
-            if (sure)
-                localStorage.clear();
-        };
+
     }
+    setItem(item, value) {
+        localStorage.setItem(item, value);
+    };
+    getItem(item, default_value = null) {
+        let value = localStorage.getItem(item);
+        if (value == null) return default_value;
+        return value;
+    };
+    removeItem(item) {
+        localStorage.removeItem(item);
+    };
+    clear(sure = false) {
+        if (sure)
+            localStorage.clear();
+    };
+}
+if (localStorage == null) {
+    var localStorage = new TemporaryLocalStorage();
+    console.warn("正在使用虚拟localStorage，您是否没有启用本地存储权限？")
 }
 const localSettings = new LocalSettings();

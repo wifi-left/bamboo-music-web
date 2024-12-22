@@ -1,4 +1,8 @@
+// 标题
+change_web_title(BAMBOOMUSIC.name);
+
 // 搜索缓存
+
 var s_total = -1;
 var s_searchkey = "";
 var s_page = -1;
@@ -73,11 +77,11 @@ function onChangeOrderType(showMessage = true) {
 };
 
 // 判断是否已经读过用户已读
-let hasReadme = localSettings.getItem("hasReadme");
+var hasReadme = localSettings.getItem("hasReadme");
 if (location.search.includes("hasreadme") == true) {
     hasReadme = "true";
 }
-let backgroundImage = localSettings.getItem("backgroundImage");
+var backgroundImage = localSettings.getItem("backgroundImage");
 if (backgroundImage == null) backgroundImage = "on";
 if (hasReadme != "true") {
     location = "./readme.html?return=" + encodeURIComponent(location.href);
@@ -173,6 +177,8 @@ function auto_search(key) {
 
 function watchVideo(songid, songname = "一个视频", singer = "未知上传者", singerid = "0", albumid = undefined, reloadSuggest = true) {
     // location.hash = "";
+    change_web_title(`${songname} - 在线观看 - ${BAMBOOMUSIC.name}`);
+
     musicPlayerObj.pause();
     document.getElementById("win-video-player").scrollTop = 0;
     document.getElementById("video-player-title").innerText = songname;
@@ -303,8 +309,9 @@ function play_music_id(songid, openGUI = false, whetherAddToList = false, preven
         }, e => {
             change_music("获取歌曲信息失败", "无法获取到信息", playurl, true, undefined, openGUI);
             console.error(e);
+
             document.getElementById("video-musicplayer-loading-pane").style.display = "none";
-            show_msg("无法获取歌曲信息，但歌曲可以播放。", 3000);
+            show_msg("无法获取歌曲信息，但歌曲可以播放。"+e, 3000);
 
             document.querySelector("#pane-next-music").removeAttribute("disabled");
             document.querySelector("#pane-last-music").removeAttribute("disabled");
@@ -357,6 +364,9 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preven
                 if (forcePlayNow) {
                     play_idx_music(playing_list.length - 1, openGUI);
                 }
+                if (openGUI) {
+                    showHideMusicPlayerPane(true);
+                }
                 return playing_list.length - 1;
             }
         }
@@ -368,6 +378,9 @@ function addToList(info, idx = -1, forcePlayNow = false, openGUI = false, preven
 
         if (playing_list[playing_idx]['id'] == info['id']) {
             show_msg("歌曲已在播放中", 1000);
+            if (openGUI) {
+                showHideMusicPlayerPane(true);
+            }
             return playing_idx;
         } else if (preventRepeat && forcePlayNow) {
             for (let i = 0; i < playing_list.length; i++) {

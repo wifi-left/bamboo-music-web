@@ -119,7 +119,7 @@ function backToVoidState() {
     playing_idx = -1;
     change_music("无内容播放", "无内容播放", "", false, {}, false);
     oLRC.ms = []
-    document.getElementById("pane-download-music").onclick = function(){}
+    document.getElementById("pane-download-music").onclick = function () { }
     init_lrc_pane();
     musicPlayerObj.removeAttribute("src");
     changePauseBtnStatus(true);
@@ -466,6 +466,12 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
     document.getElementById("pane-music-info-name").innerText = title;
     document.getElementById("pane-music-info-singer").innerText = singer;
     if (url != "") show_msg(`正在播放：${singer} - ${title}`, 1000);
+    if(url == ""){
+        change_web_title(BAMBOOMUSIC.name);
+    }else{
+        change_web_title(`${title} - ${singer} - 正在播放 - ${BAMBOOMUSIC.name}`);
+    }
+
     musicPlayerObj.src = url;
 
     if (info != undefined) {
@@ -475,7 +481,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         // console.log(info.albumid)
         let albumid = info.albumid;
         let hasmv = info.hasMv;
-        
+
         document.getElementById("music-lrc-info-text-name").innerText = title;
         let pic = info.pic;
 
@@ -485,14 +491,16 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         } else {
             document.getElementById("music-lrc-info-pic").src = pic;
         }
-        if (backgroundImage == "on") {
-            document.getElementById("win-playing").style.backgroundImage = "url(" + encodeURI(pic) + ")";
-        }
+        if (backgroundImage != null)
+            if (backgroundImage == "on") {
+                document.getElementById("win-playing").style.backgroundImage = "url(" + encodeURI(pic) + ")";
+            }
+
         // console.log(info);
         if (hasmv) {
             document.getElementById("music-lrc-info-tv").style.display = "inline-block";
             document.getElementById("music-lrc-info-tv").onclick = function () {
-                if(hasmv == "" || hasmv == null || hasmv == 1) hasmv = id;
+                if (hasmv == "" || hasmv == null || hasmv == 1) hasmv = id;
                 watchVideo(hasmv, title, singer, singerid, albumid, true);
                 showHideMusicPlayerPane(false);
                 changeWindow('search');

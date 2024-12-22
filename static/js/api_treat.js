@@ -757,15 +757,22 @@ function api_list_alarm(albumid, type, clean = true, page = 1) {
         console.log("Cooldown...");
         return; // 冷却中
     }
+
     if (type == 'star') {
-        if (clean)
-            treat_star_detail(albumid);
+        if (clean) {
+            document.getElementById("playlist-item-head").scrollTo(0, 0);
+            document.getElementById("playlist-item-head").innerHTML = "";
+        }
+        treat_star_detail(albumid, type, clean, page);
         return;
     }
     l_type = type;
     l_playlistid = albumid;
     l_cooldown = true;
     l_page = page;
+    MusicListLoadingPaneObj.style.display = "inline-block";
+    if (clean)
+        document.getElementById("playlist-item-head").scrollTo(0, 0);
     if (clean) {
         document.getElementById("playlist-item-head").innerHTML = "";
     }
@@ -778,11 +785,16 @@ function api_list_alarm(albumid, type, clean = true, page = 1) {
             console.error(e);
             deal_data_playlist_content(DEFAULT_FALLBACK, clean);
             l_cooldown = false;
+            MusicListLoadingPaneObj.style.display = "none";
+
         })
     } catch (e) {
         console.error(e);
         l_cooldown = false;
+        MusicListLoadingPaneObj.style.display = "none";
+
     }
+
 }
 function deal_data_playlist_content(data, clean = true) {
     let listRootObj = document.getElementById("playlist-item-head");
@@ -973,6 +985,8 @@ function deal_data_playlist_content(data, clean = true) {
     } catch (e) {
     }
     l_cooldown = false;
+    MusicListLoadingPaneObj.style.display = "none";
+
 }
 
 // api_search("", search_types[0]['id']);

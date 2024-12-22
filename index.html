@@ -6,13 +6,13 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
-    <title>Bamboo Music 竹子音乐</title>
+    <title id="web-title">Bamboo Music 竹子音乐</title>
     <script src="./static/js/kuroshiro/kuroshiro.min.js"></script>
     <script src="./static/js/kuroshiro/kuroshiro-analyzer-kuromoji.min.js" type="text/javascript"
         charset="utf-8"></script>
     <script src="./static/js/checkie.js"></script>
     <script src="./static/js/gquery.min.js"></script>
-    <script src="./static/js/default_settings.js"></script>
+    <script src="./default_settings.js"></script>
     <link href="./static/css/element_style.css" rel="stylesheet" />
     <link href="./static/css/font-awesome.min.css" rel="stylesheet" />
     <link href="./static/css/base.css" rel="stylesheet" />
@@ -219,6 +219,12 @@
                         </span>
                     </div>
                     <div class="page-musiclist-list">
+                        <div id="musiclist-loading-pane" class="loading-pane">
+                            <div class="loading-pane-middle">
+                                <div class="loader"></div><b class="unable-sel"
+                                    style="margin-left:16px;font-size:16px;">正在缓冲中...</b>
+                            </div>
+                        </div>
                         <ul id="playlist-item-head">
 
                         </ul>

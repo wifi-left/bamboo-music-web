@@ -44,6 +44,7 @@ const smallMusicControlPaneObj = document.querySelector(".small-music-control");
 const musicPlayerObj = document.getElementById("music-player-audio");
 // 获取固定加载 HTML 对象
 const searchLoadingPaneObj = document.getElementById("search-loading-pane");
+const MusicListLoadingPaneObj = document.getElementById("musiclist-loading-pane");
 const LRC_root_obj = document.querySelector(".lrc-right-part");
 const listRootObj = document.querySelector("#list-item-head");
 const orderTypeObj = document.getElementById("obj-order-type");
@@ -326,6 +327,7 @@ document.getElementById("playlist-item-head").addEventListener('scroll', functio
         if (l_page * PAGESIZE < l_total) {
             if (this.scrollTop > this.scrollHeight - this.clientHeight * 1.5) {
                 api_list_alarm(l_playlistid, l_type, false, l_page + 1);
+                // console.log(1)
             }
         };
 });
@@ -550,12 +552,12 @@ var MusicPlayerPaneState = false;
 function preventPopUp(e) {
     e.stopPropagation();
 }
-function detectWhetherRightenMode(){
+function detectWhetherRightenMode() {
     return APP_ROOT.classList.contains("righten-mode");
 }
-function rightenMusicPlayer(flag){
-    if(flag == null) flag = !detectWhetherRightenMode();
-    if(flag) APP_ROOT.classList.add("righten-mode");
+function rightenMusicPlayer(flag) {
+    if (flag == null) flag = !detectWhetherRightenMode();
+    if (flag) APP_ROOT.classList.add("righten-mode");
     else APP_ROOT.classList.remove("righten-mode");
 }
 
@@ -563,8 +565,8 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromCont
 
     suggestKeyRootObj.style.display = "none";
 
-    if(show_or_hide == false){
-        if(detectWhetherRightenMode()){
+    if (show_or_hide == false) {
+        if (detectWhetherRightenMode()) {
             rightenMusicPlayer(false)
         }
     }
@@ -677,7 +679,7 @@ function loadLrcConfig() {
     document.getElementById("selfontsize").value = lrc_selected_font_size;
     set_globle_css_var();
 }
-function setMusicSourceQuality(quality){
+function setMusicSourceQuality(quality) {
     MusicSourceQuality = quality;
     localSettings.setItem("MusicSourceQuality", (quality));
 }
@@ -1067,19 +1069,22 @@ function show_star_detail_id(id) {
         changeWindow("search", true);
     }
     showWindow("musiclist", false);
-    treat_star_detail(id);
+    api_list_alarm(id, "star", true, 1);
 }
-function treat_star_detail(ppid) {
-    let clean = true;
+function treat_star_detail(ppid, type, clean = true, page = 1) {
+    // let clean = true;
     let listRootObj = document.getElementById("playlist-item-head");
-    listRootObj.scrollTo(0, 0);
-    listRootObj.innerHTML = "";
+    // listRootObj.innerHTML = "";
     l_playlistid = ppid;
     l_type = "star";
+    l_page = page;
+    // console.log(page)
     try {
-        l_total = 0;
         let keys = userLoves[ppid].lists;
+        l_total = keys.length;
         for (var i in keys) {
+            if (i < (page - 1) * PAGESIZE) continue;
+            if (i >= (page) * PAGESIZE) break;
             let liele = document.createElement("li");
             // 存储信息
             let linedata = keys[i];
@@ -1219,7 +1224,7 @@ function treat_star_detail(ppid) {
         if (keys.length == 0) {
             if (clean) {
                 let ele = document.createElement("div");
-                ele.innerHTML = `<span class="text-not-found-error">很抱歉，什么都没有找到。请重试或者更换关键词。</span>`
+                ele.innerHTML = `<span class="text-not-found-error">很抱歉，什么都没有找到。这个收藏夹也许是空的。</span>`
                 listRootObj.appendChild(ele);
             } else {
                 let ele = document.createElement("div");
@@ -1229,10 +1234,13 @@ function treat_star_detail(ppid) {
             }
 
         } else {
-            let ele = document.createElement("div");
-            ele.classList.add("list-no-more");
-            ele.innerHTML = "<span>没有更多了。</span>"
-            listRootObj.appendChild(ele);
+            if (l_page * PAGESIZE >= l_total) {
+                let ele = document.createElement("div");
+                ele.classList.add("list-no-more");
+                ele.innerHTML = "<span>没有更多了。</span>"
+                listRootObj.appendChild(ele);
+            }
+
         }
         // console.log(keys)
     } catch (e) {
