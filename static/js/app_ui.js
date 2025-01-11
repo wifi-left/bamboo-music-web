@@ -632,22 +632,8 @@ function set_globle_css_var() {
     // --selfontsize: 24px;
 }
 function loadLrcConfig() {
-    let networkSavingMode = localSettings.getItem("NetworkSavingMode");
-    let enableList = localSettings.getItem("enableListSaving");
-    if (enableList != "" && enableList != null) {
-        try {
-            enableListSaving = JSON.parse(enableList);
-        } catch (e) {
-            enableListSaving = true;
-        }
-    }
-    if (networkSavingMode != "" && networkSavingMode != null) {
-        try {
-            NetworkSavingMode = JSON.parse(networkSavingMode);
-        } catch (e) {
-            NetworkSavingMode = false;
-        }
-    }
+    let enableListSaving = SETTING_VAR.enableListSaving;
+
     let m = localSettings.getItem("lrc_settings");
     if (m != "" && m != null) {
         try {
@@ -678,18 +664,6 @@ function loadLrcConfig() {
     document.getElementById("sellineheight").value = lrc_selected_line_height;
     document.getElementById("selfontsize").value = lrc_selected_font_size;
     set_globle_css_var();
-}
-function setMusicSourceQuality(quality) {
-    MusicSourceQuality = quality;
-    localSettings.setItem("MusicSourceQuality", (quality));
-}
-function enableListSave(flag) {
-    enableListSaving = flag;
-    localSettings.setItem("enableListSaving", (flag));
-}
-function enableNetworkSaving(flag) {
-    NetworkSavingMode = flag;
-    localSettings.setItem("NetworkSavingMode", (flag));
 }
 function saveRate() {
     updateRate = parseFloat(document.getElementById("setting-rateInput").value);
@@ -730,16 +704,6 @@ function saveLrcConfig() {
     set_globle_css_var();
 };
 // kuroshiro
-function enableKuromaji(flag) {
-    if (flag == true) {
-        localSettings.setItem("kuroshiro", true);
-        Kuroshiro_state = true;
-        alert("您需要重新刷新才能生效");
-    } else {
-        localSettings.setItem("kuroshiro", false);
-        Kuroshiro_state = false;
-    }
-}
 
 function showPlayingMenu(control) {
     let eme = document.querySelector(".lrc-left-part")
@@ -1101,7 +1065,7 @@ function treat_star_detail(ppid, type, clean = true, page = 1) {
             // let warning = linedata['warning'];
 
             let pic = linedata['pic'];
-            if (pic == null || pic == "" || NetworkSavingMode) {
+            if (pic == null || pic == "" || SETTING_VAR.NetworkSavingMode) {
                 pic = "./static/img/default_cd.png";
             }
             liele.setAttribute("songid", id);

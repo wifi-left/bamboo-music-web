@@ -707,6 +707,18 @@ body {
     margin-top: 16px;
     margin-bottom: 16px;
 }
+#setting-frame-father{
+    display: inline-block;
+}
+.hr2{
+    display: block;
+    width: calc(100% - 8px);
+    height: 1px;
+    background-color: rgb(53, 53, 53);
+    border: none;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
 
 .final-ele {
     display: inline-block;

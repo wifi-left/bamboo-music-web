@@ -40,9 +40,6 @@ var orderType = 0; // 0: 顺序; 1:单曲; 2:随机; 3:逆序
 
 var updateRate = 0.2;
 
-var enableListSaving = true;
-var NetworkSavingMode = false;
-
 var userLoves = {};
 
 var mp = null;
@@ -51,7 +48,7 @@ var mp = null;
 orderType = parseInt(localSettings.getItem("music-play-order", 0));
 
 // 音质
-var MusicSourceQuality = localSettings.getItem("MusicSourceQuality", "128kmp3");
+
 
 if (orderType == null || isNaN(orderType)) orderType = 0;
 // var show_msg = function(data,time){console.log("The log function hasn't be inited yet...",data)};
@@ -97,7 +94,7 @@ if (backgroundImage != "") {
     document.getElementById("win-playing-host").classList.add("color");
 }
 // 初始化 kuroshiro
-var Kuroshiro_state = (localSettings.getItem("kuroshiro") == "true");
+var Kuroshiro_state = SETTING_VAR.kuroshiro
 const KURO = new Kuroshiro.default();
 if (allow_Kuroshiro) {
     if (Kuroshiro_state) {
@@ -257,7 +254,7 @@ function list_singer_gui(singer, singerid, clean = true) {
 
 function play_music_id(songid, openGUI = false, whetherAddToList = false, preventRepeat = false) {
     playing_id = songid;
-    let url = get_api_play_url(songid, "music", MusicSourceQuality);
+    let url = get_api_play_url(songid, "music", SETTING_VAR.MusicSourceQuality);
     if (openGUI)
         document.getElementById("video-musicplayer-loading-pane").style.display = "inline-block";
     fetchi(url, "text", (data) => {
@@ -311,7 +308,7 @@ function play_music_id(songid, openGUI = false, whetherAddToList = false, preven
             console.error(e);
 
             document.getElementById("video-musicplayer-loading-pane").style.display = "none";
-            show_msg("无法获取歌曲信息，但歌曲可以播放。"+e, 3000);
+            show_msg("无法获取歌曲信息，但歌曲可以播放。" + e, 3000);
 
             document.querySelector("#pane-next-music").removeAttribute("disabled");
             document.querySelector("#pane-last-music").removeAttribute("disabled");
@@ -458,6 +455,7 @@ function saveOrderType() {
 }
 function loadUserLoves() {
 
+    let enableListSaving = SETTING_VAR.enableListSaving;
     try {
         userLoves = JSON.parse(localSettings.getItem("user-loves"));
         if (Array.isArray(userLoves)) {

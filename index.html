@@ -17,6 +17,7 @@
     <link href="./static/css/font-awesome.min.css" rel="stylesheet" />
     <link href="./static/css/base.css" rel="stylesheet" />
     <link href="./static/css/music_player.css" rel="stylesheet" />
+    <link href="./static/css/settings_ui.css" rel="stylesheet" />
     <style>
     </style>
 
@@ -101,9 +102,12 @@
         <div class="musicpane-control">
             <span class="pane-music-name"><span id="pane-music-info-name">无内容播放</span><span
                     id="pane-music-info-singer">无内容播放</span></span>
-            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward" title="播放上一首(Shift+L)"></button>
-            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play" title="暂停(Shift+P)"></button>
-            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward" title="下一首(Shift+N)"></button>
+            <button id="pane-last-music" onclick="play_last_music();" class="button fa fa-step-backward"
+                title="播放上一首(Shift+L)"></button>
+            <button id="pane-pause-music" onclick="pause_music();" class="button fa fa-play"
+                title="暂停(Shift+P)"></button>
+            <button id="pane-next-music" onclick="play_next_music();" class="button fa fa-step-forward"
+                title="下一首(Shift+N)"></button>
 
             <input type="range" class="player-range" id="play-progress" max="1000" min="0" step="1" value="0"
                 onmousedown="cancelTrack()" onmouseup="startTrack()" ontouchstart="cancelTrack()"
@@ -141,7 +145,8 @@
                         <div class="div-middle music-player-info-root">
                             <img id="music-lrc-info-pic" src="./static/img/default_cd.png" />
                             <div class="music-lrc-info-text-root">
-                                <span class="list-line-ele" id="music-lrc-info-text-name-root"><b id="music-lrc-info-text-name">这里是歌名</b></span>
+                                <span class="list-line-ele" id="music-lrc-info-text-name-root"><b
+                                        id="music-lrc-info-text-name">这里是歌名</b></span>
                                 <span class="list-line-ele" id="music-lrc-info-text-singer-root"><span
                                         class="small-gray-text width-80">相关人员：</span><b
                                         id="music-lrc-info-text-singer">这里是歌手</b></span>
@@ -207,10 +212,13 @@
                 </div>
                 <div id="win-musiclist" class="app-content-window-child">
                     <button onclick="hideWindow(this.parentNode);" class="button fa fa-close close-win-page"></button>
-                    <button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" id="btn-add-list-musiclist" onclick="wantPlayListAddToList()"></button>
-                    <button title="立即播放" class="button btn-add-list fa fa-play-circle" id="btn-play-list-musiclist" onclick="wantPlayListAddToList(true)"></button>
-                    <button title="添加收藏" class="button btn-add-list fa fa-star" id="btn-add-star-musiclist" onclick="wantAddLovesToList()"></button>
-                    
+                    <button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" id="btn-add-list-musiclist"
+                        onclick="wantPlayListAddToList()"></button>
+                    <button title="立即播放" class="button btn-add-list fa fa-play-circle" id="btn-play-list-musiclist"
+                        onclick="wantPlayListAddToList(true)"></button>
+                    <button title="添加收藏" class="button btn-add-list fa fa-star" id="btn-add-star-musiclist"
+                        onclick="wantAddLovesToList()"></button>
+
                     <button class="button fa fa-refresh reflush-page" onclick="refrush_detail_list();"></button>
                     <div class="page-head-musiclist">
                         <span id="list-album-name">专辑</span>
@@ -317,18 +325,9 @@
 
             <div id="win-setting" class="app-content-window">
                 <h1 class="fa fa-gears win-fronter">设置</h1>
-                <h2>音质设定（仅针对部分支持音源）</h2>
-                <button class="button" onclick="setMusicSourceQuality('2000kflac')">高品质 FLAC(不定)</button>
-                <button class="button" onclick="setMusicSourceQuality('320kmp3')">中品质 MP3(320k)</button>
-                <button class="button" onclick="setMusicSourceQuality('128kmp3')">流畅品质 MP3(128k)</button>
-                <h2>音量设置</h2>
-                <p>提示：此处的音量设置并非实时与进度条同步</p>
-                <input class="input setting-input" id="setting-volumeInput" /><span>%</span>
-                <button class="button-green" onclick="saveVolume()">保存</button>
-
-                <h2>歌词注音</h2>
-                <button class="button" onclick="enableKuromaji(1)">开启罗马音标注</button>
-                <button class="button" onclick="enableKuromaji(0)">关闭罗马音标注（推荐）</button>
+                <div class="hr"></div>
+                <div id="setting-frame-father"></div>
+                <div class="hr"></div>
                 <h2>播放页样式</h2>
                 <h3>背景</h3>
                 <span>支持CSS语法（Background）</span>
@@ -355,22 +354,20 @@
                 <div class="lrc-line-sel-show">
                     预览 Line Selected
                 </div>
-                <h2>播放列表</h2>
-                <p>当关闭页面时：</p>
-                <button class="button" onclick="enableListSave(1)">保存记录</button>
-                <button class="button" onclick="enableListSave(0)">不保存记录</button>
                 <div class="hr"></div>
-                <h2>节约模式</h2>
-                <p>启用选项后，将不显示专辑图片。</p>
-                <button class="button" onclick="enableNetworkSaving(1)">启用</button>
-                <button class="button" onclick="enableNetworkSaving(0)">禁用</button>
-                <div class="hr"></div>
+                <h2>高级选项</h2>
+                <h3>音量设置</h3>
+                <p>提示：此处的音量设置并非实时与进度条同步</p>
+                <input class="input setting-input" id="setting-volumeInput" /><span>%</span><br />
+                <div class="hr2"></div>
                 <h2>进度条显示更新频率</h2>
                 <input class="input setting-input" id="setting-rateInput" />
                 <button class="button-green" onclick="saveRate()">保存</button><br />
+                <button class="button-green" onclick="saveVolume()">保存</button>
 
+                <div class="hr2"></div>
                 <a class="url" target="_blank" href="./export.html">导入/导出列表</a><br />
-
+                <div class="hr"></div>
                 <h2>制作信息</h2>
                 <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
                 <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
@@ -383,6 +380,7 @@
   <div id="res">接收到的服务器端消息显示区域</div>
   <script src="/public/event.js"></script> -->
     <script src="./static/js/utils.js"></script>
+    <script src="./static/js/ui_settings.js"></script>
     <script src="./static/js/app_ui.js"></script>
     <script src="./static/js/app.js"></script>
     <script src="./static/js/api_treat.js"></script>

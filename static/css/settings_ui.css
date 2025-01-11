@@ -1,0 +1,147 @@
+.setting-father-des {
+    color: rgb(220, 220, 220);
+    font-size: 14px;
+    /* display: inline-block; */
+    display: inline-block;
+    word-wrap: break-word;
+}
+
+.setting-tr-title {
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    /* display: inline-block; */
+    font-weight: bold;
+    /* display: inline-block; */
+}
+
+.setting-tr-des {
+    color: rgb(220, 220, 220);
+    font-size: 14px;
+    display: inline-block;
+    word-wrap: break-word;
+    /* display: inline-block; */
+}
+
+.setting-father-table {
+    width: calc(100%);
+    max-width: 800px;
+    display: block;
+}
+
+#setting-frame-father {
+    width: calc(100%);
+    max-width: 800px;
+}
+
+.setting-father-table tbody {
+    width: calc(100%);
+    display: inline-block;
+}
+
+.setting-father-table tr {
+    width: calc(100%);
+    display: inline-block;
+    /* line-height: 40px; */
+}
+
+.setting-table-th-left {
+    text-align: left;
+    width: calc(100% - 208px);
+    min-width: 200px;
+    /* width:100%; */
+    display: inline-block;
+}
+
+.setting-table-th-right {
+    display: inline-block;
+    max-width: 200px;
+    width: 100%;
+}
+
+.setting-tr-option {
+    border: 1px solid rgb(113, 113, 113);
+    height: 32px;
+    display: inline-block;
+    width: auto;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding-left: 8px;
+    line-height: 32px;
+    padding-right: 8px;
+    text-align: left;
+    background-color: rgba(0,0,0,0);
+
+}
+.setting-tr-option:focus{
+    /* border: 1px solid rgb(113, 113, 113); */
+    border: 1px solid rgb(255, 255, 255)
+}
+.setting-tr-option:active{
+    border: 1px solid rgb(255, 255, 255);
+    background-color: rgb(81, 81, 81);
+}
+.setting-tr-option:hover{
+    border: 1px solid rgb(141, 141, 141);
+}
+select.setting-tr-option {
+    cursor: pointer;
+
+    width: 100%;
+    /* min-height: 40px; */
+    padding-left: 8px;
+    padding-right: 40px;
+    line-height: 32px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    /* padding-left: 24px; */
+    /* text-indent: 20px; */
+    /* padding-right: 24px; */
+    text-align: center;
+    color: var(--main-text-color);
+    background: url(../img/angles-down-dark.png) no-repeat scroll right center transparent;
+    background-size: 32px 32px;
+}
+
+select.setting-tr-option option {
+    background-color: var(--main-bg-color);
+}
+
+@media only screen and (max-width: 960px) {
+    .setting-table-th-left {
+        width: calc(100%);
+    }
+
+    .setting-table-th-right {
+        width: 100%;
+        margin-top: 8px;
+    }
+}
+
+
+input[type="checkbox"].setting-tr-option {
+    width: 32px;
+    height: 32px;
+    background-color: rgba(0,0,0,0);
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    /* border-radius: 2px; */
+    cursor: pointer;
+    outline: none;
+}
+input[type="checkbox"].setting-tr-option:active{
+    background-color: rgba(119, 119, 119, 0.5);
+
+}
+input[type="checkbox"].setting-tr-option:checked {
+    background: url("../img/tick.png") no-repeat center;
+    background-size: 18px 18px;
+    background-color: rgb(3, 134, 80);
+}
+input[type="checkbox"].setting-tr-option:checked:active {
+    background-color: rgb(9, 167, 101);
+}

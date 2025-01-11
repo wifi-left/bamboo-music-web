@@ -4,18 +4,35 @@ const BAMBOOMUSIC = {
     version: "v1.2",
     name: "Bamboo Music 竹子音乐"
 }
-// audio: 普通
-// playlist: 播放列表（比如专辑） 
-// video: 视频
-var isIphone = false;
-isIphone = function () {
-    //获取浏览器navigator对象的userAgent属性（浏览器用于HTTP请求的用户代理头的值）
-    var info = navigator.userAgent;
-    //通过正则表达式的test方法判断是否包含“Mobile”字符串
-    var isPhone = /mobile/i.test(info);
-    //如果包含“Mobile”（是手机设备）则返回true
-    return isPhone;
-}();
+
+const CUSTOM_SETTING = [];
+/*
+自定义设定项目。默认保存到LocalStorage。
+格式为：
+[
+    {
+        "name": "分类标题",
+        "children": [
+            {
+                "name": "一个项目",
+                // 必要
+                "type": "类型（checkbox、text、button、url、select)",
+                // 必要
+                "value": "内容",
+                // 必要
+                "onsave": 函数传址,
+                // 可选，在用户想要保存（如点击保存和按下选择框、按钮、链接时）
+                "des": "描述",
+                // 详细描述，HTML文本。
+                "save-item": "用于保存的条目名称",
+                "href":"链接地址"
+                // 仅在type为url时必要，链接地址。
+            }
+        ]
+    }
+]
+*/
+
 const DEFAULT_FALLBACK = { data: { total: 0, list: [] } };
 const localUrlRoot = "./apis/local/";
 const videoUrlRoot = "./apis/video/";

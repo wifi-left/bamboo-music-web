@@ -8,15 +8,7 @@ const totalTimeObj = document.getElementById("player-time-total");
 const videoPlayerObj = document.getElementById("mui-player");
 const pauseMusicBTNObj = document.getElementById("pane-pause-music");
 
-var isIphone = false;
-isIphone = function () {
-    //获取浏览器navigator对象的userAgent属性（浏览器用于HTTP请求的用户代理头的值）
-    var info = navigator.userAgent;
-    //通过正则表达式的test方法判断是否包含“Mobile”字符串
-    var isPhone = /mobile/i.test(info);
-    //如果包含“Mobile”（是手机设备）则返回true
-    return isPhone;
-}();
+
 
 // let muted = false;
 let volm = parseFloat(localSettings.getItem("mvolume"));
@@ -485,7 +477,7 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
         document.getElementById("music-lrc-info-text-name").innerText = title;
         let pic = info.pic;
 
-        if (pic == null || NetworkSavingMode) {
+        if (pic == null || SETTING_VAR.NetworkSavingMode) {
             document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd.png";
             pic = FALLBACK_BACKGROUND;
         } else {

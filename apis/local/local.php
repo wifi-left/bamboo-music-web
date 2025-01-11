@@ -287,13 +287,13 @@ switch ($type) {
                 $getLrc = false;
             }
         }
-        $res = getSongPath($value);
+        $res = getInfo($value);
         if ($res == false) {
             echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
             http_response_code(200);
             return;
         }
-        $filewithoutext = substr($res, 0, strrpos($res, "."));
+        $filewithoutext = substr($res['path'], 0, strrpos($res['path'], "."));
         $lrcres = $filewithoutext . '.lrc';
         $mvres = $filewithoutext . '.mp4';
         if ($getLrc) {
@@ -318,13 +318,13 @@ switch ($type) {
 
 
         $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null,"pic":null}');
-        if (is_file($mvres)) {
-            $line->hasMv = $value;
+        if ($res['extra'] > 0) {
+            $line->hasMv = $res['extra'];
         }
         $filebasename = basename($filewithoutext);
 
-        $filepath = dirname($res);
-        $musicid = getId($res);
+        $filepath = dirname($res['path']);
+        $musicid = getId($res['path']);
         $pathid = getId($filepath);
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
         if ($singer == "") {
@@ -337,13 +337,8 @@ switch ($type) {
             $songname = substr($filebasename, strpos($filebasename, " - ") + 3);
         else $songname = $filebasename;
         // echo strpos($res, " - ");
-        $cover = -1;
-        if (file_exists($filepath . "\\" . "cover.png")) {
-            $cover = getId($filepath . "\\" . "cover.png");
-        } else if (file_exists($filepath . "\\" . "cover.jpg")) {
-            $cover = getId($filepath . "\\" . "cover.jpg");
-        }
-
+        $cover = $res['cover'];
+        // if($line->)
         if ($cover != -1)
             $line->pic = dirname($url) . "/cover.php?id=" . $cover;
         if (!empty($songname)) {
