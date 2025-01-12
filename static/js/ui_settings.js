@@ -1,6 +1,27 @@
 const SETTING_VAR = {}
 const SETTING_ITEM = [
     {
+        "name": "测试",
+        "des": "测试用项目",
+        "children": [
+            {
+                "name":"测试按钮",
+                "des":"用于测试的没有作用的按钮",
+                "type":"button",
+                "value":"点我",
+                onsave:function(){
+                    alert(this.innerText)
+                }
+            },
+            {
+                "name":"编辑框测试",
+                "type":"text",
+                "value":"114514",
+                "save-item":"debug.test"
+            }
+        ]
+    },
+    {
         "name": "音源选项",
         "des": "针对部分音源的选项。",
         "children": [
@@ -50,7 +71,7 @@ const SETTING_ITEM = [
                 "type": "checkbox",
                 "value": "false",
                 "save-item": "kuroshiro",
-                "des": "开启后，可以查看日语歌词的罗马音注音。开启后，需要刷新页面生效。"
+                "des": "需要刷新页面生效。<br/>开启后，可以查看日语歌词的罗马音注音。<br/>注音模块: Kuroshiro"
             }
         ]
     }
@@ -80,7 +101,7 @@ function createSelectorObj(selections = [], select_value = null, onchange_event 
         op_obj.className = "setting-select-option";
         op_obj.value = value;
         op_obj.innerText = name;
-        if (is_default) op_obj.selected;
+        if (is_default) op_obj.selected = true;
         obj.appendChild(op_obj);
     }
     // console.log(select_value)
@@ -93,6 +114,11 @@ function refresh_setting_items() {
     let father_obj = document.getElementById("setting-frame-father");
     father_obj.innerHTML = "";
     for (let i = 0; i < SETTING_ITEM.length; i++) {
+        if (i > 0) {
+            let hr = document.createElement("div");
+            hr.className = "hr2";
+            father_obj.appendChild(hr);
+        }
         let t = SETTING_ITEM[i];
         let area_obj = document.createElement("div")
         area_obj.className = "setting-father-area";
@@ -113,7 +139,7 @@ function refresh_setting_items() {
         for (let j = 0; j < t['children'].length; j++) {
             let tt = t['children'][j];
             let line_obj = document.createElement("tr");
-
+            line_obj.className = "setting-tr"
             let tr1_obj = document.createElement("td");
             tr1_obj.className = "setting-table-th-left";
 
@@ -155,12 +181,15 @@ function refresh_setting_items() {
                     option_obj = createCheckboxObj(user_value, clickevent);
                     SETTING_VAR[save_item] = user_value;
                     tr2_obj.appendChild(option_obj);
+                    // tr2_obj.classList.add("checkbox");
+                    // tr1_obj.classList.add("checkbox");
+                    line_obj.classList.add("checkbox");
                     break;
                 case 'button':
                     option_obj = document.createElement("button");
-                    option_obj.className = "button-green setting-tr-save";
+                    option_obj.className = "button setting-tr-save";
                     option_obj.innerText = tt['value'];
-                    save_btn.onclick = tt['onsave'];
+                    option_obj.onclick = tt['onsave'];
                     tr2_obj.appendChild(option_obj);
                     break;
                 case 'url':
@@ -204,7 +233,7 @@ function refresh_setting_items() {
                         save_btn.onclick = tt['onsave'];
                     } else {
                         save_btn.onclick = function () {
-                            let target = this.value;
+                            let target = option_obj.value;
                             localSettings.setItem(save_item, target);
                             // console.log(save_item,target);
                             SETTING_VAR[save_item] = target;

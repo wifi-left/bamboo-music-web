@@ -24,13 +24,28 @@
 
 .setting-father-table {
     width: calc(100%);
-    max-width: 800px;
+    /* max-width: 800px; */
     display: block;
 }
 
 #setting-frame-father {
-    width: calc(100%);
-    max-width: 800px;
+    width: calc(100% - 8px);
+    max-width: 1200px;
+    text-align: left;
+}
+
+#setting-other {
+    width: calc(100% - 8px);
+    max-width: 1200px;
+    text-align: left;
+    display: inline-block;
+    padding-bottom: 32px;
+}
+
+#setting-frame-and-other-s-father {
+    width: 100%;
+    text-align: center;
+
 }
 
 .setting-father-table tbody {
@@ -46,19 +61,22 @@
 
 .setting-table-th-left {
     text-align: left;
-    width: calc(100% - 208px);
+    width: calc(100% - 272px);
+    
     min-width: 200px;
     /* width:100%; */
     display: inline-block;
 }
 
 .setting-table-th-right {
+    text-align: right;
     display: inline-block;
-    max-width: 200px;
-    width: 100%;
+    /* max-width: 400px; */
+    width: 260px;
 }
 
 .setting-tr-option {
+    
     border: 1px solid rgb(113, 113, 113);
     height: 32px;
     display: inline-block;
@@ -72,24 +90,29 @@
     line-height: 32px;
     padding-right: 8px;
     text-align: left;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
 
 }
-.setting-tr-option:focus{
+
+.setting-tr-option:focus {
     /* border: 1px solid rgb(113, 113, 113); */
     border: 1px solid rgb(255, 255, 255)
 }
-.setting-tr-option:active{
+
+.setting-tr-option:active {
     border: 1px solid rgb(255, 255, 255);
     background-color: rgb(81, 81, 81);
 }
-.setting-tr-option:hover{
+
+.setting-tr-option:hover {
     border: 1px solid rgb(141, 141, 141);
 }
+
 select.setting-tr-option {
     cursor: pointer;
 
     width: 100%;
+    max-width: 254px;
     /* min-height: 40px; */
     padding-left: 8px;
     padding-right: 40px;
@@ -109,8 +132,17 @@ select.setting-tr-option {
 select.setting-tr-option option {
     background-color: var(--main-bg-color);
 }
-
-@media only screen and (max-width: 960px) {
+.setting-tr-save{
+    width:64px;
+    text-align: center;
+}
+input.setting-tr-option{
+    width:194px;
+}
+input.setting-tr-option-full{
+    width:258px;
+}
+@media only screen and (max-width: 600px) {
     .setting-table-th-left {
         width: calc(100%);
     }
@@ -118,6 +150,30 @@ select.setting-tr-option option {
     .setting-table-th-right {
         width: 100%;
         margin-top: 8px;
+        text-align: left;
+    }
+    .setting-tr-option {
+        width: 100%;
+    }
+    input.setting-tr-option{
+        width: calc(100% - 64px);
+    }
+    input.setting-tr-option-full{
+        width: calc(100%);
+    }
+    .setting-tr.checkbox .setting-table-th-right{
+        width:36px;
+        text-align: right;
+    }
+    .setting-tr.checkbox .setting-table-th-left{
+        width: calc(100% - 44px);
+    }
+    select.setting-tr-option{
+        /* width: 100%; */
+        max-width: 100%;
+    }
+    .setting-tr .relative-top-32-element{
+        top:0;
     }
 }
 
@@ -125,7 +181,7 @@ select.setting-tr-option option {
 input[type="checkbox"].setting-tr-option {
     width: 32px;
     height: 32px;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
@@ -133,15 +189,18 @@ input[type="checkbox"].setting-tr-option {
     cursor: pointer;
     outline: none;
 }
-input[type="checkbox"].setting-tr-option:active{
+
+input[type="checkbox"].setting-tr-option:active {
     background-color: rgba(119, 119, 119, 0.5);
 
 }
+
 input[type="checkbox"].setting-tr-option:checked {
-    background: url("../img/tick.png") no-repeat center;
+    background: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB0PSIxNzM2NjU4NTY2Njc2IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjcgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9Ijg3ODIiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PHBhdGggZD0iTTI3Mi4xMTMyOCA2ODYuNTkyYzAgMCAzMjguMTI4LTQ0MS4yMTYgNTY1LjM3Ni01NjEuNzI4IDAgMCAxMzkuMTM2LTMxLjQ4OCAxNzQuNCAwIDAgMCA1MS43NzYgNTAuMDQ4LTM3LjA1NiA5MC44MTYgMCAwLTQwMC41MTIgMjM5LjE2OC01NTYuMjI0IDUzNS44MDggMCAwLTk0LjUyOCAxNzAuNDk2LTE2My4xMzYgMTYxLjI4LTY4LjYwOC05LjI4LTgxLjYtMTQuODQ4LTEyOC04NS4yNDgtNDYuMzM2LTcwLjUyOC05Ni4zODQtMjE2Ljk2LTEyMi4zMDQtMjQxLjAyNC0yNS45ODQtMjQuMTI4IDUwLjA0OC0xMTEuMjk2IDEzNy4yMTYtODcuMTY4QzIyOS40ODkyOCA1MjMuNDU2IDI3Mi4xMTMyOCA2ODYuNTkyIDI3Mi4xMTMyOCA2ODYuNTkyIiBmaWxsPSIjZmZmZmZmIiBwLWlkPSI4NzgzIj48L3BhdGg+PC9zdmc+) no-repeat center;
     background-size: 18px 18px;
     background-color: rgb(3, 134, 80);
 }
+
 input[type="checkbox"].setting-tr-option:checked:active {
     background-color: rgb(9, 167, 101);
 }

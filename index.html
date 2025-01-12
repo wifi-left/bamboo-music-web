@@ -326,52 +326,169 @@
             <div id="win-setting" class="app-content-window">
                 <h1 class="fa fa-gears win-fronter">设置</h1>
                 <div class="hr"></div>
-                <div id="setting-frame-father"></div>
-                <div class="hr"></div>
-                <h2>播放页样式</h2>
-                <h3>背景</h3>
-                <span>支持CSS语法（Background）</span>
-                <input class="input setting-input" id="setting-background-image" /><button class="button"
-                    onclick="saveBackgroundImage()">保存</button><br />
-                <span>预设：</span><button class="button" onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button
-                    class="button" onclick="saveBackgroundImageSample('')">无背景</button><br />
-                <h3>歌词</h3>
-                <span>普通歌词颜色：</span><input class="input setting-input" id='norlrccolor' type='text' /><input
-                    type="color" class="input"
-                    onchange="document.getElementById('norlrccolor').value = this.value;" /><br />
-                <span>普通歌词行高（间距）：</span><input class="input setting-input" id='norlineheight' type='text' /><br />
-                <span>普通歌词字体大小：</span><input class="input setting-input" id='norfontsize' type='text' /><br />
-                <span>选中歌词颜色：</span><input class="input setting-input" id='sellrccolor' type='text' /><input
-                    type="color" class="input"
-                    onchange="document.getElementById('sellrccolor').value = this.value;" /><br />
-                <span>选中歌词行高（间距）：</span><input class="input setting-input" id='sellineheight' type='text' /><br />
-                <span>选中歌词字体大小：</span><input class="input setting-input" id='selfontsize' type='text' /><br />
-                <button class="button-green" onclick="saveLrcConfig();">保存歌词设置</button>
+                <div id="setting-frame-and-other-s-father">
+                    <div id="setting-frame-father"></div><br />
+                    <div id="setting-other">
+                        <div class="hr2"></div>
+                        <div class="setting-father-area">
+                            <h2 class="setting-father-title">播放页样式</h2>
+                            <p class="setting-father-des">针对播放页面的设定</p>
+                            <table class="setting-father-table">
+                                <tbody class="setting-father-tbody">
+                                    <tr class="setting-tr">
+                                        <td class="setting-table-th-left">
+                                            <p class="setting-tr-title">背景</p><span class="setting-tr-des">支持CSS语法
+                                                (Background)。<br />也可以设定为 on 表示使用专辑封面，也可以以留空表明不使用背景（使用纯色）。</span>
+                                        </td>
+                                        <td class="setting-table-th-right relative-top-32-element">
+                                            <input class="input setting-tr-option"
+                                                id="setting-background-image" /><button
+                                                class="button-green setting-tr-save"
+                                                onclick="saveBackgroundImage()">保存</button>
+                                            <div class="small-gap"></div><span class="setting-tr-des">预设：</span><button
+                                                class="button"
+                                                onclick="saveBackgroundImageSample('on')">使用专辑封面</button><button
+                                                class="button"
+                                                onclick="saveBackgroundImageSample('')">无背景</button><br />
+                                        </td>
+                                    </tr>
+                                    <tr class="setting-tr">
+                                        <td>
+                                            <p class="setting-tr-title">歌词</p>
+                                            <table class="setting-father-table">
+                                                <tbody class="setting-father-tbody">
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">普通歌词颜色</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input class="input setting-tr-option" id='norlrccolor'
+                                                                type='text' /><input type="color"
+                                                                class="input setting-tr-save"
+                                                                onchange="document.getElementById('norlrccolor').value = this.value;" />
+                                                        </td>
+                                                    </tr>
 
-                <div class="lrc-line-show">
-                    预览 Line Normal Text
-                </div>
-                <div class="lrc-line-sel-show">
-                    预览 Line Selected
-                </div>
-                <div class="hr"></div>
-                <h2>高级选项</h2>
-                <h3>音量设置</h3>
-                <p>提示：此处的音量设置并非实时与进度条同步</p>
-                <input class="input setting-input" id="setting-volumeInput" /><span>%</span><br />
-                <div class="hr2"></div>
-                <h2>进度条显示更新频率</h2>
-                <input class="input setting-input" id="setting-rateInput" />
-                <button class="button-green" onclick="saveRate()">保存</button><br />
-                <button class="button-green" onclick="saveVolume()">保存</button>
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">普通歌词行高（间距）</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input
+                                                                class="input setting-tr-option setting-tr-option-full"
+                                                                id='norlineheight' type='text' />
+                                                        </td>
+                                                    </tr>
 
-                <div class="hr2"></div>
-                <a class="url" target="_blank" href="./export.html">导入/导出列表</a><br />
-                <div class="hr"></div>
-                <h2>制作信息</h2>
-                <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
-                <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
-                <span class="final-ele">仅提供技术支持</span>
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">普通歌词字体大小</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input
+                                                                class="input setting-tr-option setting-tr-option-full"
+                                                                id='norfontsize' type='text' />
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">选中歌词颜色</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input class="input setting-tr-option" id='sellrccolor'
+                                                                type='text' /><input type="color"
+                                                                class="input setting-tr-save"
+                                                                onchange="document.getElementById('sellrccolor').value = this.value;" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">选中歌词行高（间距）</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input
+                                                                class="input setting-tr-option setting-tr-option-full"
+                                                                id='sellineheight' type='text' />
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="setting-tr">
+                                                        <td class="setting-table-th-left"><span
+                                                                class="setting-tr-des">选中歌词字体大小</span>
+                                                        </td>
+                                                        <td class="setting-table-th-right">
+                                                            <input
+                                                                class="input setting-tr-option setting-tr-option-full"
+                                                                id='selfontsize' type='text' />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <br />
+                                            <button class="button-green" onclick="saveLrcConfig();">保存歌词设置</button>
+                                            <br />
+                                            <div class="lrc-line-show">
+                                                预览 Line Normal Text
+                                            </div>
+                                            <div class="lrc-line-sel-show">
+                                                预览 Line Selected
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="hr2"></div>
+                        <div class="setting-father-area">
+                            <h2 class="setting-father-title">高级选项</h2>
+                            <p class="setting-father-des">仅针对特定用户人群使用的选项，如果不了解请不要修改。</p>
+                            <table class="setting-father-table">
+                                <tbody class="setting-father-tbody">
+                                    <tr class="setting-tr">
+                                        <td class="setting-table-th-left">
+                                            <p class="setting-tr-title">音量设置</p><span
+                                                class="setting-tr-des">提示：此处的音量设置并非实时与进度条同步。单位：%</span>
+                                        </td>
+                                        <td class="setting-table-th-right">
+                                            <input class="input setting-tr-option" id="setting-volumeInput" /><button
+                                                class="button-green setting-tr-save" onclick="saveVolume()">保存</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="setting-tr">
+                                        <td class="setting-table-th-left">
+                                            <p class="setting-tr-title">进度条显示更新频率</p><span
+                                                class="setting-tr-des">单位：秒</span>
+                                        </td>
+                                        <td class="setting-table-th-right">
+                                            <input class="input setting-tr-option" id="setting-rateInput" /><button
+                                                class="button-green setting-tr-save" onclick="saveRate()">保存</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="setting-tr">
+                                        <td class="setting-table-th-left">
+                                            <p class="setting-tr-title">导出播放列表</p><span
+                                                class="setting-tr-des">获取播放列表数据。</span>
+                                        </td>
+                                        <td class="setting-table-th-right">
+                                            <a class="url setting-tr-option" target="_blank"
+                                                href="./export.html">导入/导出列表</a><br />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                        <div class="hr"></div>
+                        <h2>制作信息</h2>
+                        <b>前端作者：</b><span>Bamboo丶Gamom</span><br />
+                        <b>前端版本：</b><span class="version-show">加载版本号中...</span><br />
+                        <span class="final-ele">仅提供技术支持</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
