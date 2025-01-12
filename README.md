@@ -67,7 +67,7 @@ const search_types = [
 #### PHP环境
 本地环境使用 `PHP 8`，您也可以使用 `PHP 7` 或更高版本。
 
-建议您启用下列PHP扩展：
+您应当启用下列PHP扩展：
 ```ini
 extension=curl
 extension=fileinfo
@@ -236,4 +236,4 @@ lrc 请尽量使用 `GB2312` 或者是 `UTF-8`
     }
   }
   ```
-7. 如果要兼容 [MC Bamboo Music 插件（AllMusic Fork）](https://gitlab.com/wifi-left/mcbamboomusic)，还需要当访问参数`type=status`时，response code为200（内容任意）
+7. 如果要兼容 [MC Bamboo Music 插件（AllMusic Fork）](https://modrinth.com/plugin/allmusic-localapi)，还需要当访问参数`type=status`时，response code为200（内容任意）
