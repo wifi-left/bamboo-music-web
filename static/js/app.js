@@ -79,7 +79,7 @@ if (location.search.includes("hasreadme") == true) {
     hasReadme = "true";
 }
 var backgroundImage = localSettings.getItem("backgroundImage");
-if (backgroundImage == null) backgroundImage = "on";
+if (backgroundImage == null) backgroundImage = "";
 if (hasReadme != "true") {
     location = "./readme.html?return=" + encodeURIComponent(location.href);
 }
