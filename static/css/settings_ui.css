@@ -175,6 +175,10 @@ input.setting-tr-option-full{
     .setting-tr .relative-top-32-element{
         top:0;
     }
+    .url.setting-tr-option{
+        width:auto;
+        max-width: calc(100% - 28px);
+    }
 }
 
 

@@ -5,19 +5,19 @@ const SETTING_ITEM = [
         "des": "测试用项目",
         "children": [
             {
-                "name":"测试按钮",
-                "des":"用于测试的没有作用的按钮",
-                "type":"button",
-                "value":"点我",
-                onsave:function(){
+                "name": "测试按钮",
+                "des": "用于测试的没有作用的按钮",
+                "type": "button",
+                "value": "点我",
+                onsave: function () {
                     alert(this.innerText)
                 }
             },
             {
-                "name":"编辑框测试",
-                "type":"text",
-                "value":"114514",
-                "save-item":"debug.test"
+                "name": "编辑框测试",
+                "type": "text",
+                "value": "114514",
+                "save-item": "debug.test"
             }
         ]
     },
@@ -89,8 +89,9 @@ function createCheckboxObj(select_state = false, onclick_event = null) {
     // console.log(onclick_event)
     return option_obj;
 }
-function createSelectorObj(selections = [], select_value = null, onchange_event = null) {
+function createSelectorObj(selections = [], select_value = null, onchange_event = null, save_item = null) {
     let obj = document.createElement("select");
+    let default_value = "";
     for (let i = 0; i < selections.length; i++) {
         let t = selections[i];
         let name = t['name'];
@@ -101,13 +102,20 @@ function createSelectorObj(selections = [], select_value = null, onchange_event 
         op_obj.className = "setting-select-option";
         op_obj.value = value;
         op_obj.innerText = name;
-        if (is_default) op_obj.selected = true;
+        if (is_default) {
+            op_obj.selected = true;
+            default_value = value;
+        }
         obj.appendChild(op_obj);
     }
     // console.log(select_value)
     if (select_value != null)
         obj.value = select_value;
     obj.onchange = onchange_event;
+    if (select_value == null) select_value = default_value;
+    if (save_item != null) {
+        SETTING_VAR[save_item] = select_value;
+    }
     return obj;
 }
 function refresh_setting_items() {
@@ -177,6 +185,9 @@ function refresh_setting_items() {
                             console.log(save_item, target)
                         }
                     }
+                    if (user_value == null) {
+                        user_value = tt['value'];
+                    }
                     // console.log(user_value)
                     option_obj = createCheckboxObj(user_value, clickevent);
                     SETTING_VAR[save_item] = user_value;
@@ -194,7 +205,7 @@ function refresh_setting_items() {
                     break;
                 case 'url':
                     option_obj = document.createElement("url");
-                    option_obj.className = "button-green setting-tr-save";
+                    option_obj.className = "url setting-tr-option";
                     option_obj.innerText = tt['value'];
                     option_obj.href = tt['href'];
                     save_btn.onclick = tt['onsave'];
@@ -212,8 +223,10 @@ function refresh_setting_items() {
                             // console.log(save_item,target);
                         }
                     }
-                    option_obj = createSelectorObj(tt['value'], user_value, onchange_ev)
-                    SETTING_VAR[save_item] = user_value;
+                    if (user_value != null) {
+                        SETTING_VAR[save_item] = user_value;
+                    }
+                    option_obj = createSelectorObj(tt['value'], user_value, onchange_ev, save_item)
                     tr2_obj.appendChild(option_obj);
                     break;
                 default:
@@ -224,6 +237,8 @@ function refresh_setting_items() {
                     var user_value = localSettings.getItem(tt['save-item'], null);
                     if (user_value != null) {
                         option_obj.value = user_value;
+                    } else {
+                        user_value = tt['value'];
                     }
                     tr2_obj.appendChild(option_obj);
                     let save_btn = document.createElement("button");
