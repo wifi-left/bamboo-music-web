@@ -212,10 +212,10 @@ function getDirAlName($dir)
     }
     return ($dir);
 }
-function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
+function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true, $complete = false)
 {
     $enforceReal = false;
-    if($suggestMode) $enforceReal = true;
+    if ($suggestMode) $enforceReal = true;
     $GLOBALS['total'] = $limit * ($offset - 1);
     $count = 0;
     if ($suggestMode) $offset = 1;
@@ -233,28 +233,51 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true)
         // echo json_encode($info);
         // return;
         // echo $info['name'];
-        if ($value == "") $flag = true;
-        // echo $info['name'];
         $vv = array($value);
-        if (!$enforceReal) {
-            $vv = explode("|", $value, 4);
-        }
-        for ($j = 0; $j < count($vv); $j++) {
-            if (stripos($info['name'], $vv[$j]) !== false) $flag = true;
-            if (!$flag) if (($cid === $vv[$j])) $flag = true;
-            // echo getDirAlName(dirname($info['path']));
-            if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $vv[$j]) !== false) $flag = true;
-            if ($flag) {
-                $flagcount++;
-                $flag=false;
-                continue;
-            };
-        }
-        if ($flagcount >= count($vv)) {
-            $flag = true;
+        // echo $info['name'];
+        if ($complete) {
+            $singer = substr($info['name'], 0, strpos($info['name'], " - "));
+            $singer = str_replace("、", "&", $singer);
+            $value = str_replace("、", "&", $value);
+            $idx = stripos($singer, "&");
+            if ($singer == "") $singer = "匿名";
+            if ($singer == $value) {
+                $flag = true;
+            } else if ($idx != false) {
+
+                $singers = explode("&", $singer, 20);
+                for ($j = 0; $j < count($singers); $j++) {
+                    if ($singers[$j] == $value) {
+                        $flag = true;
+                        // print($singers[$j] . "|" . $value . "\r\n");
+                        // $flagcount++;
+                        break;
+                    }
+                }
+            }
         } else {
-            $flag = false;
+            if ($value == "") $flag = true;
+            if (!$enforceReal) {
+                $vv = explode("|", $value, 4);
+            }
+            for ($j = 0; $j < count($vv); $j++) {
+                if (stripos($info['name'], $vv[$j]) !== false) $flag = true;
+                if (!$flag) if (($cid === $vv[$j])) $flag = true;
+                // echo getDirAlName(dirname($info['path']));
+                if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $vv[$j]) !== false) $flag = true;
+                if ($flag) {
+                    $flagcount++;
+                    $flag = false;
+                    continue;
+                };
+            }
+            if ($flagcount >= count($vv)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
         }
+
         // echo $value;
         if ($flag) {
             // echo getDirAlName(dirname($info['path']));

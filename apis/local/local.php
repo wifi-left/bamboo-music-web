@@ -91,7 +91,7 @@ function fileListToData($searchValue, $show_match = false)
         $res = $valued->path;
         $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","pic":"","artistid":"","releaseDate":null}');
         $filewithoutext = substr($res, 0, strrpos($res, "."));
-        
+
         $filebasename = basename($filewithoutext);
         $filepath = dirname($res);
         $musicid = $valued->id;
@@ -102,8 +102,6 @@ function fileListToData($searchValue, $show_match = false)
         $cover = $valued->cover;
         $pathid = getId($filepath);
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
-
-
 
         if ($singer == "") $singer = "匿名";
 
@@ -143,10 +141,10 @@ function fileListToData($searchValue, $show_match = false)
     }
     return $result;
 }
-function searchSong($value)
+function searchSong($value, $complete = false)
 {
     //检测指正是否到达文件的未端
-    searchFileByName($value, $GLOBALS['limit'], $GLOBALS['offset'], false);
+    searchFileByName($value, $GLOBALS['limit'], $GLOBALS['offset'], false, $complete);
     $data = fileListToData($value, $GLOBALS['show_match']);
     $data->data->total = $GLOBALS['total'];
     return $data;
@@ -190,7 +188,7 @@ $redirect = false;
 switch ($type) {
     case 'status':
         $count = count($filelist);
-        echo '{"success":"ok","code":200,"status":"ok","total_songs":"'.$count.'"}';
+        echo '{"success":"ok","code":200,"status":"ok","total_songs":"' . $count . '"}';
         break;
     case 'random_url':
         header('Cache-Control:no-cache,must-revalidate');
@@ -236,7 +234,7 @@ switch ($type) {
                 $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","artistid":"","releaseDate":null}');
                 $filewithoutext = substr($res, 0, strrpos($res, "."));
                 $mvres = $filewithoutext . '.mp4';
-                
+
 
 
                 if ($ress['cover'] != -1)
@@ -518,7 +516,7 @@ switch ($type) {
         $valued = base64_decode(str_replace(" ", "+", $value));
         if ($valued != false) {
             $value = $valued;
-            $resu = searchSong($value);
+            $resu = searchSong($value, true);
             $resu->data->name = $value;
             $resu->data->total = $GLOBALS['total'];
             $html = json_encode($resu);

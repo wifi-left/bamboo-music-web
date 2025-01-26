@@ -182,7 +182,7 @@ function refresh_setting_items() {
                             let target = (this.checked ? true : false);
                             localSettings.setItem(save_item, target);
                             SETTING_VAR[save_item] = target;
-                            console.log(save_item, target)
+                            // console.log(save_item, target)
                         }
                     }
                     if (user_value == null) {
