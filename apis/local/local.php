@@ -104,6 +104,8 @@ function fileListToData($searchValue, $show_match = false)
         $singer = substr($filebasename, 0, strpos($filebasename, " - "));
 
         if ($singer == "") $singer = "匿名";
+        if (!empty($valued->trueextra))
+            $line->addition = $valued->trueextra;
 
         if ($show_match) {
             $singer = str_replace($searchValue, "<em>$searchValue</em>", $singer);
@@ -132,7 +134,7 @@ function fileListToData($searchValue, $show_match = false)
             $line->artistid = $prefix . base64_encode($singer);
         }
         if (!empty($pathid)) {
-            $line->album = getDirAlName($filepath);
+            $line->album = $valued->albumname;
             $line->albumid = $prefix . $pathid;
         }
         // $result->data->songinfo = $line;
@@ -266,6 +268,8 @@ switch ($type) {
                     $line->album = getDirAlName($filepath);
                     $line->albumid = $prefix . $pathid;
                 }
+                if (!empty($ress['trueextra']))
+                    $line->addition = $ress['trueextra'];
                 // $result->data->songinfo = $line;
                 $result->data->list[] = $line;
                 // echo json_encode($line);
@@ -353,7 +357,8 @@ switch ($type) {
             $line->album = getDirAlName($filepath);
             $line->albumid = $prefix . $pathid;
         }
-
+        if (!empty($res['trueextra']))
+            $line->addition = $res['trueextra'];
         $result->data->info = $line;
         if ($getLrc)
             $result->data->lrc = $lrc;
@@ -371,14 +376,25 @@ switch ($type) {
         $count = 0;
         foreach ($files as $value) {
             $val = $value->filename;
-            $singer = substr($val, 0, stripos($val, " - "));
-            $songname = substr($val, stripos($val, " - ") + 3);
+            $dx = stripos($val, " - ");
+            if ($dx != false) {
+                $singer = substr($val, 0, stripos($val, " - "));
+                $songname = substr($val, stripos($val, " - ") + 3);
+            } else {
+                $singer = "";
+                $songname = $val;
+            }
+
+            $addition = $value->trueextra;
+            $albumname = $value->albumname;
             if (stristr($singer, $keyword) != false) {
                 $suggests[] = $singer;
             } else if (stristr($songname, $keyword) != false) {
                 $suggests[] = $songname;
-            } else {
-                $suggests[] = $val;
+            } else if (stristr($addition, $keyword) != false) {
+                $suggests[] = $addition;
+            } else if (stristr($albumname, $keyword) != false) {
+                $suggests[] = $albumname;
             }
             // $suggests[] = $songname;
 
@@ -399,6 +415,8 @@ switch ($type) {
             http_response_code(200);
             return;
         }
+        // loadPathNames();
+
         // $page += 1;
         // $offset;
         searchForFolder(trim($path), $limit, $offset);
@@ -469,6 +487,8 @@ switch ($type) {
                 $line->album = getDirAlName($filepath);
                 $line->albumid = $prefix . $pathid;
             }
+            if (!empty($valued['trueextra']))
+                $line->addition = $valued['trueextra'];
             // $result->data->songinfo = $line;
             $result->data->list[] = $line;
             // echo json_encode($line);

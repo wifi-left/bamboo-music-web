@@ -1,4 +1,5 @@
 <?php
+$enableDetail = true;
 // include("./pinyinlib.php");
 
 
@@ -58,6 +59,90 @@ function saveCover($writer, $path)
     }
     return $GLOBALS['temp'][$path];
 }
+function searchAdditionHost()
+{
+    if (!$GLOBALS['enableDetail']) return;
+    $list = $GLOBALS['filelist'];
+    $id_list = $GLOBALS['all_id_lists'];
+    // echo json_encode($list);
+    // return;
+    $file = "../cache/list.txt.tmp.bamboomusic";
+    $openFile = fopen($file, "w");
+    for ($i = 0; $i < count($id_list); $i++) {
+        // echo '{"code":"201","msg":"处理中... ' . $i . '/' . count($id_list) . '"}\n';
+        $id = $id_list[$i];
+        $linea = $list[$id];
+        $ftype = $linea['type'];
+        $fname = $linea['name'];
+        $fpath = $linea['path'];
+        $fcover = $linea['cover'];
+        $fextra = $linea['extra'];
+        // $linea['type'] = $ftype;
+        // $linea['name'] = $fname;
+        // $linea['path'] = $fpath;
+        // $linea['cover'] = $fcover;
+        // $linea['extra'] = $fextra;
+        // $linea['trueextra'] = $ftrueextra;
+        // $line;
+        $filename = $fpath;
+        $pathwithoutext = remove_ext($filename);
+        $extra = "";
+
+        if ($ftype == 'f') {
+            if (file_exists($pathwithoutext . '.lrc')) {
+                $t = fopen($pathwithoutext . '.lrc', "r");
+                $timelen = strlen("[00:00.00]");
+                $line = fgets($t);
+                if (substr($line, 0, $timelen) == "[00:00.00]") {
+                    $extra = substr($line, $timelen);
+
+                    $line = fgets($t);
+                    if (substr($line, 0, $timelen) == "[00:00.00]") {
+                        $extra = substr($line, $timelen);
+                        $charset = mb_detect_encoding($extra, array('UTF-8', 'GBK', 'GB2312'));
+                        $charset = strtolower($charset);
+                        if ('cp936' == $charset) {
+                            $charset = 'GBK';
+                        }
+                        if ("utf-8" != $charset) {
+                            $extra = trim(iconv($charset, "UTF-8//IGNORE", $extra));
+                            if (substr($extra, 0, strlen("相关人员")) == "相关人员") {
+                                $extra = "";
+                            } else if (substr($extra, 0, strlen("作词")) == "作词") {
+                                $extra = "";
+                            } else if (substr($extra, 0, strlen("作曲")) == "作曲") {
+                                $extra = "";
+                            }
+                        }
+                    } else {
+                        $charset = mb_detect_encoding($extra, array('UTF-8', 'GBK', 'GB2312'));
+                        $charset = strtolower($charset);
+                        if ('cp936' == $charset) {
+                            $charset = 'GBK';
+                        }
+                        if ("utf-8" != $charset) {
+                            $extra = trim(iconv($charset, "UTF-8//IGNORE", $extra));
+                            if (substr($extra, 0, strlen("作词")) == "作词") {
+                                $extra = "";
+                            } else if (substr($extra, 0, strlen("作曲")) == "作曲") {
+                                $extra = "";
+                            }
+                        }
+                    }
+                }
+                fclose($t);
+            }
+            writeFileInfo($openFile, $id, $fpath, $fname, $fcover, $ftype, $fextra, $extra);
+        } else {
+            writeFileInfo($openFile, $id, $fpath, $fname, $fcover, $ftype, $fextra, "");
+        }
+    }
+    fclose($openFile);
+    if (file_exists("../cache/list.txt.tmp.bamboomusic")) {
+        if (file_exists("../cache/list.txt.bamboomusic")) unlink("../cache/list.txt.bamboomusic");
+        rename("../cache/list.txt.tmp.bamboomusic", "../cache/list.txt.bamboomusic");
+    }
+}
 function searchHost()
 {
     $reader = fopen("../cache/location.txt.bamboomusic", "r");
@@ -75,7 +160,7 @@ function searchHost()
     fclose($openFile);
     fclose($reader);
 }
-function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $extra = "")
+function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $hasmv = "", $extra = "")
 {
     /*
     >id
@@ -83,9 +168,11 @@ function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f'
     /名字
     ,封面
     .类型
+    ]hasmv
+    [extra
     <
     */
-    $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n]$extra\r\n<\r\n";
+    $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n]$hasmv\r\n[$extra\r\n<\r\n";
     fwrite($writer, $out);
 }
 function remove_ext($path)
@@ -112,6 +199,7 @@ function searchLocalFiles($path, $writer)
         $cover = saveCover($writer, $path . '\\cover.png');
     }
     saveFolder($writer, $path, $cover);
+
     foreach ($arr as $value) {
         //过滤掉当前目录和上级目录
         if ($value !== "." && $value !== "..") {
@@ -119,6 +207,7 @@ function searchLocalFiles($path, $writer)
             if (is_dir($path . '\\' . $value)) {
                 $tresult = searchLocalFiles($path . '\\' . $value, $writer); //继续遍历
             } else {
+                $extra = "";
                 $filename = $path . '\\' . $value;
                 $coverd = $cover;
 
@@ -151,7 +240,31 @@ function searchLocalFiles($path, $writer)
                 if (file_exists($pathwithoutext . '.mp4')) {
                     $hasMv = 1;
                 }
-                writeFileInfo($writer, $id, $filename, $name, $coverd, 'f', $hasMv);
+                // if($GLOBALS['enableDetail']) if (file_exists($pathwithoutext . '.lrc')) {
+                //     $t = fopen($pathwithoutext . '.lrc', "r");
+                //     $timelen = strlen("[00:00.00]");
+                //     $extra = "";
+                //     $line = fgets($t);
+                //     if (substr($line, 0, $timelen) == "[00:00.00]") {
+                //         $line = fgets($t);
+                //         if (substr($line, 0, $timelen) == "[00:00.00]") {
+                //             $extra = substr($line, $timelen);
+                //             $charset = mb_detect_encoding($extra, array('UTF-8', 'GBK', 'GB2312'));
+                //             $charset = strtolower($charset);
+                //             if ('cp936' == $charset) {
+                //                 $charset = 'GBK';
+                //             }
+                //             if ("utf-8" != $charset) {
+                //                 $extra = trim(iconv($charset, "UTF-8//IGNORE", $extra));
+                //                 if (substr($extra, 0, strlen("相关人员")) == "相关人员") {
+                //                     $extra = "";
+                //                 }
+                //             }
+                //         }
+                //     }
+                //     fclose($t);
+                // }
+                writeFileInfo($writer, $id, $filename, $name, $coverd, 'f', $hasMv, $extra);
             }
         }
     }

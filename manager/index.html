@@ -155,7 +155,7 @@
             margin-right: 4px;
             vertical-align: middle;
             display: inline-block;
-            line-height:48px;
+            line-height: 48px;
             text-align: center;
             max-width: 240px;
         }
@@ -213,7 +213,7 @@
             </div>
             <div id="D_LOADING" class="pane">
                 <h2>正在请求中...</h2>
-                <span>请等待服务器响应。</span>
+                <span id="loading-msg">请等待服务器响应。</span>
             </div>
         </div>
     </div>
@@ -224,6 +224,7 @@
     var namepaths = [];
     var paths = [];
     var pathnamess = {};
+    const loadingMsgObj = document.getElementById("loading-msg");
     function subNames() {
         var eles = document.getElementsByClassName("name-input");
         namepaths = [];
@@ -261,7 +262,7 @@
             backMain();
 
         }).catch(err => {
-            alert("出错！" + err.msg);
+            alert("出错！" + err.message);
             console.error(err);
             backMain();
         });
@@ -332,7 +333,7 @@
                 // D_checkPSW.style.display = "none";
                 // Ds_MAIN.style.display = "inline-block";
             }).catch(err => {
-                alert("出错！" + err.msg);
+                alert("出错！" + err.message);
                 console.error(err);
                 backMain();
             });
@@ -374,7 +375,7 @@
 
             backMain();
         }).catch(err => {
-            alert("出错！" + err.msg);
+            alert("出错！" + err.message);
             console.error(err);
             backMain();
         });;
@@ -388,6 +389,23 @@
         Ds_NAME.style.display = "inline-block";
         loadNamePaths();
     };
+    function flushCache_Addition() {
+        ShowLoadingUI("已刷新文件列表。<br/>正在刷新文件额外信息...")
+        $.fetch("../apis/local/localmanager.php?psw=" + encodeURIComponent(pswcache) + "&action=7", "json").then(data => {
+            // console.log(data);
+            if (data.msg == undefined) data.msg = "未知错误，请重试。";
+            HideLoadingUI();
+            alert(data.msg);
+            backMain();
+
+            // D_checkPSW.style.display = "none";
+            // Ds_MAIN.style.display = "inline-block";
+        }).catch(err => {
+            alert("出错！" + err.message);
+            console.error(err);
+            backMain();
+        });;
+    }
     function flushCache() {
         ShowLoadingUI()
         Ds_CACHE.style.display = "none";
@@ -399,16 +417,16 @@
 
             if (data.code != 200) {
                 alert(data.msg);
-
+                backMain();
+                return;
                 // return;
             }
-            backMain();
-
-            alert(data.msg);
+            flushCache_Addition();
+            // alert(data.msg);
             // D_checkPSW.style.display = "none";
             // Ds_MAIN.style.display = "inline-block";
         }).catch(err => {
-            alert("出错！" + err.msg);
+            alert("出错！" + err.message);
             console.error(err);
             backMain();
         });;
@@ -435,13 +453,14 @@
             D_checkPSW.style.display = "none";
             Ds_MAIN.style.display = "inline-block";
         }).catch(err => {
-            alert("出错！" + err.msg);
+            alert("出错！" + err.message);
             console.error(err);
             backMain();
         });;
     }
-    function ShowLoadingUI() {
+    function ShowLoadingUI(msg = "正在请求，请等待...") {
         document.getElementById("D_LOADING").style.display = "inline-block";
+        loadingMsgObj.innerHTML = msg;
         D_CHANGEPSW.style.display = "none";
         Ds_MAIN.style.display = "none";
         Ds_NAME.style.display = "none";

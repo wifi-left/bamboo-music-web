@@ -1,4 +1,6 @@
 <?php
+$manager_mode = true;
+ini_set('max_execution_time', 60);
 include("./listfiles.php");
 include("./filesaver.php");
 // reflushLocalCache();
@@ -53,7 +55,6 @@ if (!empty($_GET['value'])) {
     $value = $_GET['value'];
 }
 Header("content-type: text/json", true);
-
 switch ($action) {
     case -1:
         //啥也没有
@@ -61,6 +62,12 @@ switch ($action) {
         break;
     case 4: //刷新缓存
         searchHost();
+        echo '{"code":"200","msg":"操作成功。"}';
+        break;
+    case 7: //刷新缓存 / 额外信息
+        // include("./listfiles.php");
+
+        searchAdditionHost();
         echo '{"code":"200","msg":"操作成功。"}';
         break;
     case 5: //获取所有目录列表

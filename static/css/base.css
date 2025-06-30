@@ -1,3 +1,29 @@
+#init-loading-pane{
+    z-index: 10000;
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background-color: var(--main-bg-color);
+    text-align: center;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: 200ms;
+}
+.icon{
+    background-image: url(../img/favicon.png);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+}
+#loading-icon{
+    background-size: 120px 120px;
+    display: inline-block;
+    width:120px;
+    height:120px;
+}
+
 @keyframes rotation {
     0% {
         transform: rotate(0deg);

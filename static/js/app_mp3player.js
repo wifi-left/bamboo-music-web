@@ -458,9 +458,9 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
     document.getElementById("pane-music-info-name").innerText = title;
     document.getElementById("pane-music-info-singer").innerText = singer;
     if (url != "") show_msg(`正在播放：${singer} - ${title}`, 1000);
-    if(url == ""){
+    if (url == "") {
         change_web_title(BAMBOOMUSIC.name);
-    }else{
+    } else {
         change_web_title(`${title} - ${singer} - 正在播放 - ${BAMBOOMUSIC.name}`);
     }
 
@@ -479,8 +479,10 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
 
         if (pic == null || SETTING_VAR.NetworkSavingMode) {
             document.getElementById("music-lrc-info-pic").src = "./static/img/default_cd.png";
+            setMediaSession(title, singer, album, "./static/img/default_cd.png");
             pic = FALLBACK_BACKGROUND;
         } else {
+            setMediaSession(title, singer, album, pic);
             document.getElementById("music-lrc-info-pic").src = pic;
         }
         if (backgroundImage != null)
@@ -550,3 +552,22 @@ function change_music(title, singer, url = "", play = true, info = {}, openGUI =
     document.querySelector("#pane-last-music").removeAttribute("disabled");
 
 }
+
+function setMediaSession(title, artist, album, pic) {
+    if ('mediaSession' in navigator) {
+        // 设置元数据（标题、艺术家等）
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: title,
+            artist: artist,
+            album: album,
+            artwork: [{ src: pic, sizes: '300x300', type: 'image/jpg' }]
+        });
+
+    }
+}
+
+// 添加控制按钮事件
+navigator.mediaSession.setActionHandler('play', () => { pause_music();/* 播放逻辑 */ });
+navigator.mediaSession.setActionHandler('pause', () => { pause_music();/* 暂停逻辑 */ });
+navigator.mediaSession.setActionHandler('previoustrack', () => { play_last_music()/* 上一首 */ });
+navigator.mediaSession.setActionHandler('nexttrack', () => { play_next_music()/* 下一首 */ });

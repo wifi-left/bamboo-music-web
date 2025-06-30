@@ -6,6 +6,8 @@ class fileinfo
     public $id = 0;
     public $cover = -1;
     public $extra = "";
+    public $trueextra = "";
+    public $albumname = "";
 }
 class localfileinfo
 {
@@ -20,17 +22,13 @@ $count = 0;
 $total = 0;
 $totalcount = 0;
 
-function send_error($error)
-{
-    echo '{"code":500,"msg":"500 - ' . $error . '"}';
-    http_response_code(500);
-    exit(0);
-}
+include_once("./lib_simple.php");
 
 
 $id_finder = null;
 $filelist = [];
 $id_lists = [];
+$all_id_lists = [];
 
 if (!is_dir("../cache")) {
     mkdir("../cache");
@@ -50,8 +48,13 @@ function loadLists()
     $file = fopen("../cache/list.txt.bamboomusic", "r") or send_error("无法读取文件列表。");
     //检测指正是否到达文件的未端
     $flist = array();
+    $all_ids = array();
     $id_finder = [];
     $ids = [];
+    $save_all_ids = false;
+    if (!empty($GLOBALS['manager_mode'])) {
+        $save_all_ids = $GLOBALS['manager_mode'];
+    }
     while (!feof($file)) {
         /*
         文件结构：
@@ -76,6 +79,7 @@ function loadLists()
         $fcover = 0;
         $linea = [];
         $fextra = "";
+        $ftrueextra = "";
         while (!feof($file)) {
 
             $nline = fgets($file);
@@ -96,6 +100,9 @@ function loadLists()
             } else if ($ntype == '.') {
                 //类型
                 $ftype = $content;
+            } else if ($ntype == '[') {
+                //类型
+                $ftrueextra = $content;
             } else {
                 break;
             }
@@ -105,11 +112,17 @@ function loadLists()
         $linea['path'] = $fpath;
         $linea['cover'] = $fcover;
         $linea['extra'] = $fextra;
+        $linea['trueextra'] = $ftrueextra;
+        // $linea['id'] = $id;
         $flist[$id] = $linea;
         $id_finder[$fpath] = $id;
         if ($ftype == 'f')
             $ids[] = $id;
+        if ($save_all_ids)
+            $all_ids[] = $id;
     }
+    if ($save_all_ids)
+        $GLOBALS['all_id_lists'] = $all_ids;
     $GLOBALS['id_lists'] = $ids;
     $GLOBALS['filelist'] = $flist;
     $GLOBALS['id_finder'] = $id_finder;
@@ -122,6 +135,7 @@ function searchForFolder($folder, $limit, $offset)
     $count = 0;
     $id_lists = $GLOBALS['id_lists'];
     $res = [];
+    $albumname = getDirAlName($folder);
 
     for ($i = 0; $i < count($id_lists); $i++) {
         $cid = $id_lists[$i];
@@ -147,6 +161,9 @@ function searchForFolder($folder, $limit, $offset)
                 $finfo->id = $cid;
                 $finfo->cover = $flist[$cid]['cover'];
                 $finfo->extra = $flist[$cid]['extra'];
+                $finfo->trueextra = $flist[$cid]['trueextra'];
+                $finfo->albumname = $albumname;
+
                 $res[] = $finfo;
             }
         }
@@ -220,6 +237,7 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true,
     $count = 0;
     if ($suggestMode) $offset = 1;
     if ($offset <= 0) $offset = 1;
+
     for ($i = 0; $i < count($GLOBALS['id_lists']); $i++) {
         // echo $count;
         if ($count >= $limit) {
@@ -228,6 +246,8 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true,
         }
         $cid = $GLOBALS['id_lists'][$i];
         $info = $GLOBALS['filelist'][$cid];
+        $albumname = "";
+        $albumname = getDirAlName(dirname($info['path']));
         $flag = false;
         $flagcount = 0;
         // echo json_encode($info);
@@ -260,11 +280,17 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true,
             if (!$enforceReal) {
                 $vv = explode("|", $value, 4);
             }
+
             for ($j = 0; $j < count($vv); $j++) {
                 if (stripos($info['name'], $vv[$j]) !== false) $flag = true;
+                if (stripos($info['trueextra'], $vv[$j]) !== false) $flag = true;
                 if (!$flag) if (($cid === $vv[$j])) $flag = true;
                 // echo getDirAlName(dirname($info['path']));
-                if (!$flag) if (stripos(getDirAlName(dirname($info['path'])), $vv[$j]) !== false) $flag = true;
+
+                if (!$flag) {
+                    if (!$suggestMode)
+                        if ((stripos($albumname, $vv[$j])) !== false) $flag = true;
+                }
                 if ($flag) {
                     $flagcount++;
                     $flag = false;
@@ -294,10 +320,42 @@ function searchFileByName($value, $limit = 15, $offset = 1, $suggestMode = true,
             $finfo->id = $cid;
             $finfo->cover = $info['cover'];
             $finfo->extra = $info['extra'];
+            $finfo->trueextra = $info['trueextra'];
+            $finfo->albumname = $albumname;
             $GLOBALS['files'][] = $finfo;
             $count++;
             $GLOBALS['total']++;
             // echo " | " . $info['name'] . " " . $count;
+        }
+    }
+
+    if ($suggestMode) {
+        // 遍历专辑
+        $skipcount = 0;
+        $skipcount_2 = 0;
+        // echo "1";
+        loadPathNames();
+        // $total = 0;
+        if ($GLOBALS['pathnames'] != null) {
+            // echo 1;
+            foreach ($GLOBALS['pathnames'] as $vvalue) {
+                $skipcount++;
+                if ($skipcount < ($offset - 1) * $limit + 1) continue;
+                $ele = $vvalue;
+                $pps = $ele->path;
+
+                if ($ele->name == "") $ele->name = dirname($pps);
+                if (stristr($ele->name, $value) == false) continue;
+                $skipcount_2++;
+                if ($skipcount_2 < ($offset - 1) * $limit + 1) continue;
+                // $cover = 0;
+                $finfo = new fileinfo();
+                $svalue = $ele->name;
+                $finfo->filename = $svalue;
+                $GLOBALS['files'][] = $finfo;
+                $count++;
+                $GLOBALS['total']++;
+            }
         }
     }
     $GLOBALS['count'] = $count;

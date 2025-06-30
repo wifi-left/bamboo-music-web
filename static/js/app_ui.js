@@ -190,6 +190,11 @@ window.onload = function () {
         showPlayList(true)
     }
     hashDetect();
+    let initObj = document.getElementById("init-loading-pane");
+    // initObj.style.opacity = 0;
+    // setTimeout(function(){
+    initObj.remove();
+    // },200);
 
 }
 function hashDetect() {
