@@ -103,8 +103,30 @@ switch ($action) {
             echo '{"code":"402","msg":"缺少参数。"}';
             break;
         }
-        $mywritefile = fopen("../cache/names.json.bamboomusic", "w") or send_error("无法写入文件。");
-        fwrite($mywritefile, $value);
+        try {
+            $d = json_decode($value);
+        } catch (\Exception $e) {
+            echo '{"code":"500","msg":"Wrong JSON texts!"}';
+            break;
+        }
+        $res = "";
+        for ($i = 0; $i < count($d); $i++) {
+            $line = $d[$i];
+            if ($line) {
+                /*
+                文件结构：
+                >path
+                |名字
+                <
+                */
+                if (empty($line->path)) continue;
+                if (empty($line->name)) continue;
+                $lineres = ">" . $line->path . "\r\n|" . $line->name . "\r\n<";
+                $res .= ($res == "" ? "" : "\r\n") . $lineres;
+            }
+        }
+        $mywritefile = fopen("../cache/names.txt.bamboomusic", "w") or send_error("无法写入文件。");
+        fwrite($mywritefile, $res);
         fclose($mywritefile);
         echo '{"code":"200","msg":"操作成功。"}';
         break;

@@ -9,6 +9,11 @@ class fileinfo
     public $trueextra = "";
     public $albumname = "";
 }
+class pathinfo
+{
+    public $path = "";
+    public $name = "";
+}
 class localfileinfo
 {
     public $path = "";
@@ -195,7 +200,43 @@ function getSongPath($id)
 $pathnames = null;
 function loadPathNames()
 {
-    if (is_file("../cache/names.json.bamboomusic")) {
+    if (is_file("../cache/names.txt.bamboomusic")) {
+        $file = fopen("../cache/names.txt.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
+        $pathnames = json_decode("[]");
+        while (!feof($file)) {
+            /*
+                文件结构：
+
+                >path
+                |名字
+                <
+            */
+            $line = fgets($file);
+            $fpath = substr($line, 1, strlen($line) - 3);
+            if (substr($line, 0, 1) != '>') {
+                continue;
+            }
+            $fname = "";
+            while (!feof($file)) {
+
+                $nline = fgets($file);
+                $content = substr($nline, 1, strlen($nline) - 3);
+                $ntype = substr($nline, 0, 1);
+                if ($ntype == '|') {
+                    //名字
+                    $fname = $content;
+                } else {
+                    break;
+                }
+            }
+            $l = new pathinfo();
+            $l->path = $fpath;
+            $l->name = $fname;
+            $pathnames[] = $l;
+        }
+        fclose($file);
+        $GLOBALS['pathnames'] = $pathnames;
+    } else if (is_file("../cache/names.json.bamboomusic")) { // 兼容旧版本
         $myfile = fopen("../cache/names.json.bamboomusic", "r") or send_error("无法读取ID缓存列表。");
         $flength = filesize("../cache/names.json.bamboomusic");
         if ($flength > 0) {

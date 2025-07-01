@@ -395,6 +395,8 @@ switch ($type) {
                 $suggests[] = $addition;
             } else if (stristr($albumname, $keyword) != false) {
                 $suggests[] = $albumname;
+            } else if (stristr($val, $keyword) != false) {
+                $suggests[] = $val;
             }
             // $suggests[] = $songname;
 
