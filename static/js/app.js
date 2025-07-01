@@ -132,8 +132,8 @@ function checkLanguage(name) {
 }
 // 罗马音翻译
 function romajiTranslate(texts, resultFunc) {
-    KURO.convert(texts,
-        { to: "romaji", "mode": "spaced", "romajiSystem": "passport" }).then(data => {
+    KURO.convert(texts,//to: "romaji", "mode": "furigana", "romajiSystem": "passport"
+        { to: SETTING_VAR.kuroTo, "mode": SETTING_VAR.kuroMode, "romajiSystem": SETTING_VAR.kuroRomajiSystem }).then(data => {
             resultFunc(data);
             // console.log(this.ele.id);
         }).catch(e => {

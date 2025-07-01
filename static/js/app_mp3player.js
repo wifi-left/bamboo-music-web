@@ -333,10 +333,27 @@ function init_lrc_pane() {
         let romajiLRC = null;
         if (hasRomaji) {
             romajiLRC = oLRC.ms[i].tc;
-            let romajiele = document.createElement("span");
-            romajiele.classList.add("lrc-romaji");
-            romajiele.innerText = romajiLRC;
-            ele.appendChild(romajiele);
+            if (SETTING_VAR.kuroWebVersion == 'old') {
+                let romajiele = document.createElement("span");
+                romajiele.classList.add("lrc-romaji");
+                if (SETTING_VAR.kuroMode == 'furigana')
+                    romajiele.innerHTML = romajiLRC;
+                else
+                    romajiele.innerText = romajiLRC;
+                ele.appendChild(romajiele);
+            } else if (SETTING_VAR.kuroWebVersion == 'replace') {
+                if (SETTING_VAR.kuroMode == 'furigana')
+                    textele.innerHTML = romajiLRC;
+                else
+                    textele.innerText = romajiLRC;
+            } else {
+                textele.setAttribute("default", oLRC.ms[i].c);
+                textele.setAttribute("romajilrc", romajiLRC);
+                textele.setAttribute("hasromaji", "true");
+            }
+
+        } else {
+            // textele.setAttribute("hasromaji", "false");
         }
         if (oLRC.ms[i].c == "") textele.innerHTML = "&nbsp;";
         textele.setAttribute("time", oLRC.ms[i].t);
@@ -379,6 +396,9 @@ function hilightlrc(idx, push = false) {
     if (!push) for (var i = 0; i < ele.length; i++) {
         if (ele[i].id == 'lrc-' + idx) return;
         if (ele[i].id == 's-lrc-' + idx) return;
+        let textele = ele[i].querySelector(".lrc-text");
+        if (textele.getAttribute("hasromaji") == 'true')
+            textele.innerText = textele.getAttribute("default");
         ele[i].classList.remove("lrc-active");
     }
     var ch = LRC_root_obj.clientHeight;
@@ -387,7 +407,17 @@ function hilightlrc(idx, push = false) {
     // ScrolltoEx(document.getElementById("lrycishow"), (idx) / oLRC.ms.length * (schheight - bh / 2 + 80) - bh / 2 + 160);
 
     try {
-        document.getElementById("lrc-" + idx).classList.add("lrc-active");
+        let elee = document.getElementById("lrc-" + idx);
+        // console.log(elee.innerText,elee)
+        elee.classList.add("lrc-active");
+        let eleee = elee.querySelector(".lrc-text");
+        if (eleee.getAttribute("hasromaji") == 'true') {
+            if (SETTING_VAR.kuroMode == 'furigana')
+                eleee.innerHTML = eleee.getAttribute("romajilrc");
+            else
+                eleee.innerText = eleee.getAttribute("romajilrc");
+        }
+
     } catch (e) {
         // console.error(e);
     }

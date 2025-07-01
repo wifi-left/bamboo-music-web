@@ -1,26 +1,6 @@
 const SETTING_VAR = {}
 const SETTING_ITEM = [
-    {
-        "name": "测试",
-        "des": "测试用项目",
-        "children": [
-            {
-                "name": "测试按钮",
-                "des": "用于测试的没有作用的按钮",
-                "type": "button",
-                "value": "点我",
-                onsave: function () {
-                    alert(this.innerText)
-                }
-            },
-            {
-                "name": "编辑框测试",
-                "type": "text",
-                "value": "114514",
-                "save-item": "debug.test"
-            }
-        ]
-    },
+
     {
         "name": "音源选项",
         "des": "针对部分音源的选项。",
@@ -66,13 +46,113 @@ const SETTING_ITEM = [
                 "save-item": "NetworkSavingMode",
                 "des": "开启后，将不会加载专辑封面。"
 
-            }, {
-                "name": "歌词注音",
+            }
+        ]
+    },
+    {
+        "name": "日语歌词注音",
+        "des": "用于对日语歌词进行注音",
+        "children": [
+            {
+                "name": "启用注音",
                 "type": "checkbox",
                 "value": "false",
                 "save-item": "kuroshiro",
                 "des": "需要刷新页面生效。<br/>开启后，可以查看日语歌词的罗马音注音。<br/>注音模块: Kuroshiro"
+            },
+            {
+                "name": "处理模式",
+                // 必要
+                "type": "select",
+                // 必要
+                "value": [
+                    {
+                        name: "老版本注音模式",
+                        value: "old"
+                    }, {
+                        name: "替换歌词原文本",
+                        value: "replace"
+                    },
+                    {
+                        name: "现行样式",
+                        value: "nowline",
+                        default: true
+                    }
+                ],
+                "save-item": "kuroWebVersion",
+                "des": "老版本注音模式：在所有日语文本上方显示注音；替换歌词原文本：不显示原来歌词，全部显示注音后歌词；现行样式：仅显示当前歌词注音。"
+            },
+            {
+                "name": "注音音节文字",
+                // 必要
+                "type": "select",
+                // 必要
+                "value": [
+                    {
+                        name: "平假名",
+                        value: "hiragana"
+                    }, {
+                        name: "片假名",
+                        value: "katakana"
+                    },
+                    {
+                        name: "罗马字",
+                        value: "romaji",
+                        default: true
+                    }
+                ],
+                "save-item": "kuroTo",
+                "des": "注音音节文字。<br/>例如：日语文字：桜；平假名：さくら；片假名：サクラ；罗马字：sakura"
+            },
+            {
+                "name": "注音模式",
+                // 必要
+                "type": "select",
+                // 必要
+                "value": [
+                    {
+                        name: "标准模式",
+                        value: "normal"
+                    }, {
+                        name: "空格分组",
+                        value: "spaced"
+                    },
+                    {
+                        name: "送假名",
+                        value: "okurigana"
+                    },
+                    {
+                        name: "注音假名",
+                        value: "furigana",
+                        default: true
+                    }
+                ],
+                "save-item": "kuroMode",
+                "des": "注音模式。<br/><b>标准模式</b>：仅转换，会覆盖原本文本。<br/><b>空格分组</b>：使用空格分离，会覆盖原本文本。<br/><b>送假名</b>：使用括号标注。<br/><b>注音假名</b>：使用注音的方法在文本顶上显示。"
+            },
+            {
+                "name": "罗马字体系",
+                // 必要
+                "type": "select",
+                // 必要
+                "value": [
+                    {
+                        name: "日本式",
+                        value: "nippon"
+                    }, {
+                        name: "护照式",
+                        value: "passport",
+                        default: true
+                    },
+                    {
+                        name: "平文式",
+                        value: "hepburn"
+                    }
+                ],
+                "save-item": "kuroRomajiSystem",
+                "des": "罗马字体系"
             }
+
         ]
     }
 ].concat(CUSTOM_SETTING);
