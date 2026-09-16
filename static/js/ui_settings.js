@@ -40,6 +40,13 @@ const SETTING_ITEM = [
                 "des": "当关闭页面时，保存播放列表。"
             },
             {
+                "name": "新加的放末尾",
+                "type": "checkbox",
+                "value": "true",
+                "save-item": "newItemAtTail",
+                "des": "勾选＝新收藏、新加入播放列表的歌放在末尾（手动排序过的顺序不会被打乱）；取消＝放在最前面。"
+            },
+            {
                 "name": "节约模式",
                 "type": "checkbox",
                 "value": "false",
@@ -151,6 +158,15 @@ const SETTING_ITEM = [
                 ],
                 "save-item": "kuroRomajiSystem",
                 "des": "罗马字体系"
+            },
+            {
+                "name": "下载歌词时使用注音",
+                // 必要
+                "type": "checkbox",
+                // 必要
+                "value": "false",
+                "save-item": "kuroDownloadLrc",
+                "des": "下载歌词时使用注音"
             }
 
         ]
@@ -284,13 +300,11 @@ function refresh_setting_items() {
                     tr2_obj.appendChild(option_obj);
                     break;
                 case 'url':
-                    option_obj = document.createElement("url");
+                    option_obj = document.createElement("a");
                     option_obj.className = "url setting-tr-option";
                     option_obj.innerText = tt['value'];
                     option_obj.href = tt['href'];
-                    save_btn.onclick = tt['onsave'];
                     tr2_obj.appendChild(option_obj);
-                    // tr2_obj.appendChild(option_obj);
                     break;
                 case 'select':
                     var user_value = localSettings.getItem(tt['save-item'], null);

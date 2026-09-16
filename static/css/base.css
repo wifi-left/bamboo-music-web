@@ -1,10 +1,10 @@
-#init-loading-pane{
+#init-loading-pane {
     z-index: 10000;
     position: fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: var(--main-bg-color);
     text-align: center;
     -moz-user-select: none;
@@ -12,16 +12,18 @@
     user-select: none;
     transition: 200ms;
 }
-.icon{
+
+.icon {
     background-image: url(../img/favicon.png);
     background-position: 50% 50%;
     background-repeat: no-repeat;
 }
-#loading-icon{
+
+#loading-icon {
     background-size: 120px 120px;
     display: inline-block;
-    width:120px;
-    height:120px;
+    width: 120px;
+    height: 120px;
 }
 
 @keyframes rotation {
@@ -293,6 +295,222 @@
     padding: 0;
 }
 
+/* 手动排序模式开关（与"播放顺序"按钮区分开：一个改播放顺序，一个改列表顺序） */
+.playing-list-sort {
+    position: absolute;
+    z-index: 3;
+    right: 96px;
+    top: 20px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.playing-list-sort.sort-on {
+    color: #17ec94;
+}
+
+/* ---------- 收藏的手动排序与筛选 ---------- */
+.reflush-page.sort-on, .love-sort-btn.sort-on { color: #17ec94; }
+
+/* 收藏夹工具条：与「探索」里的批量条同一套样式（.batch-bar/.batch-actions/.batch-bar-sep）。
+   窗口的头部与列表都是绝对定位，所以这里也绝对定位在列表上方，并把列表整体下移；
+   只在收藏夹详情（#win-musiclist.star-bar-on）里显示。 */
+.batch-bar.star-batch-bar {
+    display: none;
+    position: absolute;
+    top: 88px;
+    left: 0;
+    right: 0;
+    height: 44px;
+    /* 让高度就是 44（含内边距），下面的列表按 44 下移才不会重叠 */
+    box-sizing: border-box;
+    z-index: 3;
+}
+
+#win-musiclist.star-bar-on .batch-bar.star-batch-bar {
+    display: flex;
+}
+
+#win-musiclist.star-bar-on .page-musiclist-list {
+    top: 132px;
+    height: calc(100% - 132px);
+}
+
+.star-filter-input {
+    flex: 0 0 auto;
+    width: 150px;
+    height: 32px;
+    font-size: 13px;
+    margin: 0 0 0 4px;
+}
+
+@media only screen and (max-width: 948px) {
+    .batch-bar.star-batch-bar {
+        top: 96px;
+    }
+    #win-musiclist.star-bar-on .page-musiclist-list {
+        top: 140px;
+        height: calc(100% - 140px);
+    }
+}
+
+#list-album-name {
+    display: inline-block;
+    /* 给右侧的工具留出空间：长标题用省略号截断 */
+    max-width: calc(100% - 320px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.star-filter-input {
+    width: 150px;
+    height: 30px;
+    font-size: 13px;
+    margin: 0;
+}
+
+.star-tools-row .button {
+    height: 30px;
+    min-width: 30px;
+    line-height: 30px;
+    padding: 0 8px;
+    font-size: 13px;
+}
+
+/* 个人中心的收藏工具行（导出/导入/清理） */
+.love-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 0 0;
+    padding: 0 8px;
+}
+
+/* 收藏详情的批量操作：与搜索列表同款（复选框其实早就在每行里渲染了，只是没有对应样式） */
+#playlist-item-head .batch-select {
+    display: none;
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    /* 必须抬到封面上层：勾选框是行里的第一个子元素，封面在后面绘制，没有 z-index 会被盖住 */
+    z-index: 2;
+    /* 尺寸/外观要跟搜索列表那套一致：只写定位不写宽高的话，appearance:none 下它就是 0×0（看不见也点不到） */
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+    accent-color: #0dd26f;
+}
+
+#playlist-item-head.batch-mode li {
+    position: relative;
+    padding: 8px 0 8px 26px;
+}
+
+#playlist-item-head.batch-mode .batch-select {
+    display: inline-block;
+}
+
+#playlist-item-head.batch-mode li.selected {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+
+/* 收藏夹列表（个人中心）的排序开关 */
+.love-sort-btn {
+    height: 32px;
+    width: 32px;
+    line-height: 32px;
+    padding: 0;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* 拖动手柄：默认不显示，只在排序模式出现。touch-action 只加在手柄上，
+   这样列表本身照旧可以用手指滚动（手机上关键的一点）。 */
+#playlist-item-head .drag-handle,
+#lover-displayer .drag-handle {
+    display: none;
+}
+
+#playlist-item-head.sort-armed li,
+#lover-displayer.sort-armed li {
+    position: relative;
+}
+
+#playlist-item-head.sort-armed .drag-handle,
+#lover-displayer.sort-armed .drag-handle {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    color: #9a9a9a;
+    cursor: grab;
+    z-index: 2;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#playlist-item-head.sort-armed li { padding-left: 24px; }
+#lover-displayer.sort-armed li { padding-left: 32px; }
+
+#playlist-item-head li.sort-dragging,
+#lover-displayer li.sort-dragging {
+    z-index: 5;
+    background-color: rgba(4, 161, 88, 0.35);
+    opacity: 0.92;
+}
+
+/* 排序模式：每行左侧出现拖动手柄，右侧换成上下移按钮 */
+#playing-list-head .drag-handle {
+    display: none;
+}
+
+#playing-list-head.sort-armed .drag-handle {
+    display: inline-block;
+    width: 28px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    cursor: grab;
+    color: #9a9a9a;
+    /* 只有手柄吃掉触摸手势（否则手机上一按就被列表滚动抢走），列表本身照旧可滚 */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#playing-list-head.sort-armed .playing-list-text-root {
+    width: calc(100% - 93px);
+}
+
+#playing-list-head li.sort-dragging {
+    position: relative;
+    z-index: 5;
+    background-color: rgba(4, 161, 88, 0.726);
+    opacity: 0.92;
+}
+
+#playing-list-head li.sort-dragging .playing-list-text-root {
+    cursor: grabbing;
+}
+
 #playing-list-head .action-bar {
     /* position: absolute; */
     margin: 0;
@@ -361,10 +579,34 @@
     display: inline-block;
 }
 
-.playing-list-text-root:hover {
-    background-color: rgba(0, 99, 53, 0.726);
-    cursor: pointer;
-    /* transition: ; */
+/* 悬停高亮包在 @media (hover: hover) 里：触屏设备没有"悬停"，
+   不包的话点完一行会一直留着那层半透明背景，看起来像选中了。
+   桌面端像素完全一致。 */
+@media (hover: hover) {
+    .playing-list-text-root:hover {
+        background-color: rgba(0, 99, 53, 0.726);
+        cursor: pointer;
+        transition: background-color 120ms ease;
+    }
+
+    #list-item-head li:hover,
+    #playlist-item-head li:hover {
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+}
+
+#list-item-head li,
+#playlist-item-head li {
+    transition: background-color 120ms ease;
+    /* 把布局与重绘限制在行内：悬停/换图不会牵动整个列表 */
+    contain: layout paint;
+}
+
+/* 滚动列表容器：失效范围限制在自己内部（这三个是滚动容器，contain: paint 与 overflow 语义一致） */
+#list-item-head,
+#playlist-item-head,
+#playing-list-head {
+    contain: layout paint;
 }
 
 
@@ -374,10 +616,6 @@
     -webkit-user-select: text;
 }
 
-.width-72 {
-    display: inline-block;
-    width: 72px;
-}
 
 .width-40 {
     display: inline-block;
@@ -622,50 +860,9 @@ body {
     margin-right: 16px;
 }
 
-.top-title {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    color: var(--main-text-color);
-    line-height: 60px;
-    height: 60px;
-    width: calc(100% - 68px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 18px;
-    font-weight: bold;
-    display: inline-block;
-    text-indent: 68px;
-    background-image: url("../img/favicon.png");
-    background-size: 60px 60px;
-    background-repeat: no-repeat;
-}
 
-.btn-show-menu-bar {
-    outline: none;
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    right: 10px;
-    transition: 200ms;
-    top: 10px;
-    display: inline-block;
-    font-size: 18px;
-    background-color: rgba(0, 0, 0, 0);
-    border: none;
-    padding: 0 0 0 0;
-    text-align: center;
-    color: var(--main-text-color);
-}
 
-.btn-show-menu-bar:hover {
-    background-color: rgb(53, 53, 53);
-}
 
-.btn-show-menu-bar:active {
-    background-color: rgb(40, 40, 40);
-}
 
 .left-btn-bottom {
     position: absolute;
@@ -733,10 +930,12 @@ body {
     margin-top: 16px;
     margin-bottom: 16px;
 }
-#setting-frame-father{
+
+#setting-frame-father {
     display: inline-block;
 }
-.hr2{
+
+.hr2 {
     display: block;
     width: calc(100% - 8px);
     height: 1px;
@@ -762,9 +961,96 @@ body {
 }
 
 .list-box {
-    height: 100%;
+    height: calc(100% - 44px);
     overflow: auto;
     width: 100%;
+}
+
+/* 搜索批量操作工具栏 */
+.batch-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgb(53, 53, 53);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.batch-bar .button {
+    height: 32px;
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.batch-bar .button .fa {
+    margin-right: 6px;
+}
+
+.batch-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.batch-bar-sep {
+    width: 1px;
+    height: 20px;
+    background: rgb(70, 70, 70);
+    margin: 0 4px;
+    flex: 0 0 auto;
+}
+
+/* 批量勾选框 */
+#list-item-head .batch-select {
+    display: none;
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+    accent-color: #0dd26f;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 4px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#list-item-head.batch-mode li {
+    position: relative;
+    padding: 8px 0 8px 26px;
+}
+
+#list-item-head.batch-mode .batch-select {
+    display: inline-block;
+}
+
+#list-item-head.batch-mode li:hover {
+    background-color: rgba(23, 236, 148, 0.06);
+}
+
+/* 触摸设备上不保留这套悬停态（同上） */
+@media not all and (hover: hover) {
+    #list-item-head.batch-mode li:hover {
+        background-color: transparent;
+    }
+}
+
+#list-item-head.batch-mode li.selected {
+    background-color: rgba(23, 236, 148, 0.10);
 }
 
 #page-info-name {
@@ -848,30 +1134,8 @@ body {
     border-left: 2px solid #08cf72;
 }
 
-#video-player-suggest-loading-pane {
-    height: 30px;
-    /* line-height: 30px; */
-    width: 100%;
-    top: 60px;
-    left: 0;
-    position: absolute;
-    display: inline-block;
-    text-align: center;
-}
 
-#video-player-suggest-loading-pane .loader {
-    width: 16px;
-    height: 16px;
-}
 
-#video-player-suggest-loading-pane .loading-pane-middle {
-    /* width:100%; */
-    display: inline-block;
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: none;
-}
 
 #video-player-suggest-list li:hover {
     background-color: #525252;
@@ -899,6 +1163,7 @@ body {
     color: #eeeeee;
     font-weight: bold;
     cursor: pointer;
+    vertical-align: middle;
 }
 
 .album-name {
@@ -906,16 +1171,20 @@ body {
     color: #eeeeee;
     cursor: pointer;
     font-weight: bold;
+    vertical-align: middle;
 }
 
 .addition-msg {
     font-size: 14px;
     color: var(--main-text-color);
+    vertical-align: middle;
+    white-space: normal;
 }
 
 .warning-msg {
     font-size: 14px;
     color: rgb(252, 88, 88);
+    vertical-align: middle;
 }
 
 .text-not-found-error {
@@ -932,6 +1201,7 @@ body {
 .small-gray-text {
     font-size: 14px;
     color: #cecece;
+    vertical-align: middle;
 }
 
 #list-album-name {
@@ -1016,9 +1286,8 @@ body {
 }
 
 #playlist-item-head li {
-    margin-top: 8px;
-    padding-bottom: 8px;
-    /* border-bottom: 1px solid rgb(136, 136, 136); */
+    padding: 8px 0;
+    /* 用 padding 撑开行距，保证 hover 背景铺满整行 */
 }
 
 #playlist-item-head .list-left-img {
@@ -1060,9 +1329,8 @@ body {
 }
 
 #list-item-head li {
-    margin-top: 8px;
-    padding-bottom: 8px;
-    /* border-bottom: 1px solid rgb(136, 136, 136); */
+    padding: 8px 0;
+    /* 用 padding 撑开行距，保证 hover 背景铺满整行 */
 }
 
 .pretty-hr {
@@ -1335,8 +1603,10 @@ body {
     line-height: 28px;
     font-size: 16px;
     border: 1px solid #686868;
+    border-radius: 8px;
     background-color: #333;
-    padding: 8px 8px 8px 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    padding: 8px 16px;
     display: none;
 }
 

@@ -1,10 +1,13 @@
 <?php
+/*
+ * 管理端接口。所有操作都要带 psw（前端传 btoa(密码) 再 URL 编码）：
+ *   -1 校验密码  1 读别名表  2 写别名表（POST body）  3 改密码  4 重扫磁盘重建索引  5 列出全部目录  7 重建额外信息
+ * 注意 action=4 和 7 是重活（全盘扫描），HTTP 侧限时 60 秒。
+ */
 $manager_mode = true;
 ini_set('max_execution_time', 60);
-include("./listfiles.php");
-include("./filesaver.php");
-// reflushLocalCache();
-// echo '{"code":200,"msg":"文件列表刷新成功！"}';
+require_once __DIR__ . '/listfiles.php';
+require_once __DIR__ . '/filesaver.php';
 $action = 0;
 if (empty($_GET['action'])) {
     http_response_code(403);
@@ -19,9 +22,10 @@ if (empty($_GET['psw'])) {
     exit(0);
 }
 $config = null;
-if (is_file("../cache/config.json.bamboomusic")) {
-    $myfiles = fopen("../cache/config.json.bamboomusic", "r") or send_error("无法写入配置文件。");
-    $flengths = filesize("../cache/config.json.bamboomusic");
+$configFile = cache_path('config.json');
+if (is_file($configFile)) {
+    $myfiles = fopen($configFile, "r") or send_error("无法写入配置文件。");
+    $flengths = filesize($configFile);
     if ($flengths > 0) {
         $contentFs = fread($myfiles, $flengths);
     } else {
@@ -109,6 +113,15 @@ switch ($action) {
             echo '{"code":"500","msg":"Wrong JSON texts!"}';
             break;
         }
+        if (!is_array($d)) {
+            echo '{"code":"500","msg":"Wrong JSON texts!"}';
+            break;
+        }
+        if (count($d) == 0) {
+            // 一个输入框都没有就提交（目录列表为空等异常情况下会发生）会把整张别名表清空
+            echo '{"code":"402","msg":"提交的别名列表为空，已忽略。"}';
+            break;
+        }
         $res = "";
         for ($i = 0; $i < count($d); $i++) {
             $line = $d[$i];
@@ -121,11 +134,15 @@ switch ($action) {
                 */
                 if (empty($line->path)) continue;
                 if (empty($line->name)) continue;
-                $lineres = ">" . $line->path . "\r\n|" . $line->name . "\r\n<";
+                // 规范化路径，避免把双反斜杠写进别名表后匹配不上目录
+                $apath = normalize_dir_path($line->path);
+                if ($apath == "") continue;
+                $lineres = ">" . $apath . "\r\n|" . $line->name . "\r\n<";
                 $res .= ($res == "" ? "" : "\r\n") . $lineres;
             }
         }
-        $mywritefile = fopen("../cache/names.txt.bamboomusic", "w") or send_error("无法写入文件。");
+        backupNamesFile();
+        $mywritefile = fopen(cache_path('names.txt'), "w") or send_error("无法写入文件。");
         fwrite($mywritefile, $res);
         fclose($mywritefile);
         echo '{"code":"200","msg":"操作成功。"}';
@@ -151,10 +168,24 @@ switch ($action) {
     default:
         echo '{"code":"401","msg":"未知操作。"}';
 }
+// 覆盖别名表前先留一份带时间戳的副本（只保留最近 5 份），
+// 这样即使某次提交写坏了，也能从上一份副本还原。
+function backupNamesFile()
+{
+    $src = cache_path('names.txt');
+    if (!is_file($src)) return;
+    @copy($src, BAMBOO_CACHE_DIR . DIRECTORY_SEPARATOR . "names.txt.bak." . date("Ymd-His") . BAMBOO_FILES_SUFFIX);
+    $olds = glob(BAMBOO_CACHE_DIR . DIRECTORY_SEPARATOR . "names.txt.bak.*" . BAMBOO_FILES_SUFFIX);
+    if ($olds === false || count($olds) <= 5) return;
+    sort($olds);
+    for ($i = 0; $i < count($olds) - 5; $i++) {
+        @unlink($olds[$i]);
+    }
+}
 function saveCFG()
 {
-    $mywritefile = fopen("../cache/config.json.bamboomusic", "w") or send_error("无法写入缓存列表。");
-    $mywritefile2 = fopen("../cache/salt.bamboomusic", "w") or send_error("无法写入缓存列表。");
+    $mywritefile = fopen(cache_path('config.json'), "w") or send_error("无法写入缓存列表。");
+    $mywritefile2 = fopen(cache_path('salt'), "w") or send_error("无法写入缓存列表。");
     fwrite($mywritefile, json_encode($GLOBALS['config']));
     fwrite($mywritefile2, '<?php $salt=' . json_encode($GLOBALS['config']->salt) . ';?>');
 

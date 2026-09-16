@@ -1,6 +1,11 @@
 <?php
-include("./listfiles.php");
-include("../cache/salt.bamboomusic");
+/*
+ * 音频/视频流的实际发送端。local.php 的 type=url / type=mv 会签发这里的 URL：
+ *   t = base64(crypt("<br>_<id>_<日期>_<随机数>", salt))
+ * 校验通过后按 Range 请求切片发送（播放器拖动进度就靠这个）。token 用日期绑定，跨天失效。
+ */
+require_once __DIR__ . '/listfiles.php';
+include(cache_path('salt'));
 if (empty($_GET['id'])) {
     http_response_code(403);
     return;
@@ -26,10 +31,6 @@ if (empty($_GET['br'])) {
 $ran = $_GET['r'];
 $value = $_GET['id'];
 $br = $_GET['br'];
-$ios = false;
-if (!empty($_GET['ios'])) {
-    $ios = $_GET['ios'] == 'true';
-}
 $time = crypt($br . "_" . $value . '_' . $_GET['d'] . $ran, $salt);
 $requesttime = strtotime($_GET['d']);
 $realtime = strtotime(date('Y-m-d'));
@@ -109,15 +110,9 @@ $time = date('r', filemtime($location));
 header("Last-Modified: $time");
 
 //$begin++;  如果不读取第一个字节
-include("downloadlib.php");
+require_once __DIR__ . '/downloadlib.php';
 header("Accept-Encoding: identity");
-if (stripos($_SERVER['HTTP_USER_AGENT'], "iPhone") != false) $ios = true;
-// user-agent
 header('Accept-Ranges: bytes');
 
 $obj = new FileDownload();
-// if ($ios) {
-//     $obj->download($location, '', false, $mimeType, false);
-// } else {
 $obj->download($location, '', true, $mimeType, false);
-// }

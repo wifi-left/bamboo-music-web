@@ -1,13 +1,15 @@
 <?php
-include("./listfiles.php");
-
+/*
+ * 按 id 输出封面图片。带 304 / Expires 缓存头（注意 downloadlib 里的 Cache-Control 会覆盖这里
+ * 的 max-age，实际生效的是 1000 秒，这是现状，改前端行为前别动）。
+ */
+require_once __DIR__ . '/listfiles.php';
 
 if (empty($_GET['id'])) {
     http_response_code(403);
     return;
 }
 
-$type = "img";
 $value = $_GET['id'];
 $res = getSongPath($value);
 if ($res == false) {
@@ -16,16 +18,14 @@ if ($res == false) {
     $mimeType = "image/png";
     header('Content-Type: ' . $mimeType);
 
-    echo file_get_contents("../../static/img/unknown.png");
+    echo file_get_contents(dirname(__DIR__, 2) . "/static/img/unknown.png");
     return;
 }
 // echo $res;
 
 
-// 文件名
-$filename = $res;
-$location = $res;
 // 文件路径
+$location = $res;
 
 if (!is_file($location)) {
     echo '{"code":404,"msg":"404 - 图片消失了！"}';
@@ -58,10 +58,8 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 $mimeType = "image/" . $extension;
 //; charset=gb2312
 // $size = filesize($location);
-$time = date('r', filemtime($location));
 
-include("downloadlib.php");
+require_once __DIR__ . '/downloadlib.php';
 
-// header("Last-Modified: $time");
 $obj = new FileDownload();
 $obj->download($location, '', true, $mimeType, true);

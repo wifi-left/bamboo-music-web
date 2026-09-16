@@ -1,5 +1,3 @@
-// const musicPlayerObj = document.getElementById("music-player-audio");
-// var mplayerobj = document.getElementById("musicurl");
 const volumeobj = document.getElementById("volume-set");
 const playerobj = document.getElementById("play-progress");
 const currentTimeObj = document.getElementById("player-time-current");
@@ -8,9 +6,6 @@ const totalTimeObj = document.getElementById("player-time-total");
 const videoPlayerObj = document.getElementById("mui-player");
 const pauseMusicBTNObj = document.getElementById("pane-pause-music");
 
-
-
-// let muted = false;
 let volm = parseFloat(localSettings.getItem("mvolume"));
 let vol = parseFloat(localSettings.getItem("avolume"));
 if (isNaN(vol)) vol = 1;
@@ -18,7 +13,6 @@ if (isNaN(volm)) volm = 1;
 musicPlayerObj.volume = vol;
 videoPlayerObj.volume = volm;
 volumeobj.value = vol * 100;
-// console.log(vol);
 changePos(volumeobj);
 document.getElementById("setting-volumeInput").value = volumeobj.value;
 
@@ -54,10 +48,7 @@ function play_last_music(openGUI = false, isauto = false) {
         }
         return;
     }
-    let target_idx = playing_idx;
-
-    target_idx = playing_idx - 1;
-
+    let target_idx = playing_idx - 1;
     if (target_idx < 0) {
         target_idx = playing_list.length - 1;
     }
@@ -76,8 +67,7 @@ function play_next_music(openGUI = false, isauto = false) {
         musicPlayerObj.currentTime = 0;
         musicPlayerObj.play();
         document.querySelector("#pane-next-music").removeAttribute("disabled");
-        document.querySelector("#pane-next-music").removeAttribute("disabled", true);
-        document.querySelector("#pane-last-music").removeAttribute("disabled", true);
+        document.querySelector("#pane-last-music").removeAttribute("disabled");
         return;
     }
     if (playing_list.length <= 0) {
@@ -201,51 +191,42 @@ function updateWebProgress(width) {
     }
 }
 musicPlayerObj.ontimeupdate = function () {
-    //TODO: LRC
-    // console.log(114)
     updateTime();
     if (mplayer.trackEvents) {
         let value = parseFloat(this.currentTime / this.duration * 1000);
         if (!isNaN(value)) {
             let width = parseFloat(this.currentTime / this.duration * 100);
             updateWebProgress(width);
-            // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
             playerobj.value = value;
-            // playerobj.style.backgroundSize = width + " 100%";
             changePos(playerobj);
-            // currentTimeObj.innerText = secondToTime_int(this.currentTime);
         }
     } else {
         if (!isNaN(this.currentTime)) {
             let width = parseFloat(this.currentTime / this.duration * 100);
             updateWebProgress(width);
-
-            // document.getElementById("player-progress-displayer").style.backgroundSize = width + " 100%";
-            // playerobj.style.backgroundSize = width + " 100%";
-            // document.getElementById("player-progress-displayer").width = width;
-
         }
     }
     choose_lrc(musicPlayerObj.currentTime);
 }
 musicPlayerObj.oncanplay = function () {
     updateTime();
+    let duration = musicPlayerObj.duration;
+    if (!isNaN(duration) && !(duration == Infinity)) {
+        totalTimeObj.innerText = secondToTime_int(duration);
+    }
 }
 musicPlayerObj.onpause = function () {
     changePauseBtnStatus(true);
 }
 musicPlayerObj.onplay = function () {
     changePauseBtnStatus(false);
-
 }
 musicPlayerObj.onerror = function (e) {
     changePauseBtnStatus(true);
     console.warn(e);
 }
 musicPlayerObj.onended = function () {
-    // changePauseBtnStatus(true);
     play_next_music(false, true);
-    // console.warn(e);
 }
 
 function changePauseBtnStatus(paused) {
@@ -257,12 +238,6 @@ function changePauseBtnStatus(paused) {
         pauseMusicBTNObj.classList.remove("fa-play");
     }
 }
-musicPlayerObj.oncanplay = function () {
-    let duration = musicPlayerObj.duration;
-    if (!isNaN(duration) && !(duration == Infinity)) {
-        totalTimeObj.innerText = secondToTime_int(duration);
-    }
-}
 musicPlayerObj.ondurationchange = function () {
     let duration = musicPlayerObj.duration;
     if (!isNaN(duration) && !(duration == Infinity)) {
@@ -270,11 +245,12 @@ musicPlayerObj.ondurationchange = function () {
     }
 }
 
+var lastTimeTextSec = -1;
 function updateTime() {
-    // let duration = musicPlayerObj.duration;
-    // if (!isNaN(duration)) {
-    //     totalTimeObj.innerText = secondToTime_int(duration);
-    // }
+    // 时钟只显示到整秒，没必要每刻（每秒 4 次）都重写文本节点
+    let sec = Math.floor(musicPlayerObj.currentTime);
+    if (sec === lastTimeTextSec) return;
+    lastTimeTextSec = sec;
     currentTimeObj.innerText = secondToTime_int(musicPlayerObj.currentTime);
 }
 
@@ -282,24 +258,18 @@ function changePos(ele) {
     let Nvalue = parseInt(ele.value);
     let Nmax = parseInt(ele.max);
     let width = parseFloat(Nvalue / Nmax * 100) + "%";
-    // document.documentElement.style.setProperty(`--playing-progress`, width);
-
     ele.style.backgroundSize = width + " 100%";
 }
 
 playerobj.onchange = function () {
-    // changePos(this);
-
     let time = parseInt(playerobj.value) / 1000 * musicPlayerObj.duration;
     if (!isNaN(time))
         musicPlayerObj.currentTime = time;
-    // mplayer.changeTime();
 };
 volumeobj.onchange = function () {
     changePos(this);
     let volumes = parseInt(volumeobj.value) / 100;
     musicPlayerObj.volume = volumes;
-    // mui-player
     localSettings.setItem("avolume", volumes);
 };
 
@@ -321,166 +291,252 @@ function change_playing_music_time(time) {
         console.error(e);
     }
 }
+/* ---------------- 歌词渲染 ----------------
+   原来：当前行靠扫 DOM（getElementsByClassName("lrc-active")）找、行高每次 getComputedStyle 重读、
+   滚动动画没有生命周期、高亮行用 transition:all 动画 font-size/line-height 导致切行时整列表重排十几帧，
+   JS 再去读 offsetTop/offsetHeight 与它互抢（所以才有 shrinkComp 那个补偿 hack）。
+   现在：当前行与几何尺寸都记在状态里，切行只动两个元素、不读布局、只过渡颜色。 */
+var lrcState = { idx: -1, buildToken: 0, activeH: 0 };
+var lrcGeom = { lineH: 28, selLineH: 40, norFont: 16, selFont: 24, clientH: 0, padTop: 0, ready: false };
+var lrcScrollRAF = 0;
+
+/** 行高/容器尺寸/内边距只在构建、resize、设置变更时读一次——读它们会强制同步排版。 */
+function lrcGeometry(force) {
+    if (lrcGeom.ready && force !== true) return lrcGeom;
+    let root = document.getElementById("lrc-show-root");
+    if (root == null) return lrcGeom;
+    try {
+        let cs = getComputedStyle(root);
+        let nor = parseFloat(cs.getPropertyValue("--norlineheight"));
+        let sel = parseFloat(cs.getPropertyValue("--sellineheight"));
+        let pad = parseFloat(cs.getPropertyValue("padding-top"));
+        let norf = parseFloat(cs.getPropertyValue("--norfontsize"));
+        let self = parseFloat(cs.getPropertyValue("--selfontsize"));
+        if (nor > 0) lrcGeom.lineH = nor;
+        if (sel > 0) lrcGeom.selLineH = sel;
+        if (pad >= 0) lrcGeom.padTop = pad;
+        if (norf > 0) lrcGeom.norFont = norf;
+        if (self > 0) lrcGeom.selFont = self;
+    } catch (e) { }
+    lrcGeom.clientH = root.clientHeight;
+    lrcGeom.ready = true;
+    return lrcGeom;
+}
+/** 设置改动或窗口尺寸变化后必须让缓存失效。 */
+function lrcInvalidateGeometry() {
+    lrcGeom.ready = false;
+}
+
+function lrcCancelScroll() {
+    if (lrcScrollRAF != 0) {
+        cancelAnimationFrame(lrcScrollRAF);
+        lrcScrollRAF = 0;
+    }
+}
+
+/** 点击跳转用事件委托：原来每行一个 onclick，重建时产生 N 个闭包。 */
+function lrcBindRootOnce() {
+    let root = document.getElementById("lrc-show-root");
+    if (root == null || root.getAttribute("data-lrc-bound") == "1") return;
+    root.setAttribute("data-lrc-bound", "1");
+    root.addEventListener("click", function (e) {
+        let t = (e.target && e.target.closest) ? e.target.closest(".lrc-text") : null;
+        if (t == null) return;
+        let time = t.getAttribute("time");
+        if (time != null) change_playing_music_time(time);
+    });
+}
+
+/** 按当前设置把某一行的内容刷成最新数据（初始构建与罗马字补丁共用同一套逻辑，
+ *  三种显示模式 old / replace / nowline 的行为与原来一致）。 */
+function applyLrcLineDisplay(li, i) {
+    let line = oLRC.ms[i];
+    if (line == null || li == null) return;
+    let text = li.querySelector(".lrc-text");
+    if (text == null) return;
+    // 'old' 模式会在行里额外放一个 romaji 元素：先去掉上一次的
+    let old = li.querySelector(".lrc-romaji");
+    if (old != null && old.parentNode != null) old.parentNode.removeChild(old);
+    text.innerText = line.c;
+    if (line.tkuro && line.tc != null) {
+        if (SETTING_VAR.kuroWebVersion == 'old') {
+            let romajiele = document.createElement("span");
+            romajiele.classList.add("lrc-romaji");
+            if (SETTING_VAR.kuroMode == 'furigana')
+                romajiele.innerHTML = line.tc;
+            else
+                romajiele.innerText = line.tc;
+            li.appendChild(romajiele);
+        } else if (SETTING_VAR.kuroWebVersion == 'replace') {
+            if (SETTING_VAR.kuroMode == 'furigana')
+                text.innerHTML = line.tc;
+            else
+                text.innerText = line.tc;
+        } else {
+            text.setAttribute("default", line.c);
+            text.setAttribute("romajilrc", line.tc);
+            text.setAttribute("hasromaji", "true");
+        }
+    } else {
+        text.removeAttribute("hasromaji");
+        text.removeAttribute("default");
+        text.removeAttribute("romajilrc");
+    }
+    if (line.c == "") text.innerHTML = "&nbsp;";
+    text.setAttribute("time", line.t);
+}
+
 function init_lrc_pane() {
     let rrot = document.getElementById("lrc-show-root");
+    if (rrot == null) return;
+    // 重建前必须停掉上一首歌的滚动动画，否则它会拿着旧目标继续写 scrollTop
+    lrcCancelScroll();
+    lrcState.buildToken++;
+    lrcState.idx = -1;
+    lrcState.activeH = 0;
     rrot.innerHTML = "";
+    let frag = document.createDocumentFragment();
     for (var i = 0; i < oLRC.ms.length; i++) {
         let ele = document.createElement("li");
         let textele = document.createElement("span");
         textele.classList.add("lrc-text");
-        textele.innerText = oLRC.ms[i].c;
-        let hasRomaji = oLRC.ms[i].tkuro;
-        let romajiLRC = null;
-        if (hasRomaji) {
-            romajiLRC = oLRC.ms[i].tc;
-            if (SETTING_VAR.kuroWebVersion == 'old') {
-                let romajiele = document.createElement("span");
-                romajiele.classList.add("lrc-romaji");
-                if (SETTING_VAR.kuroMode == 'furigana')
-                    romajiele.innerHTML = romajiLRC;
-                else
-                    romajiele.innerText = romajiLRC;
-                ele.appendChild(romajiele);
-            } else if (SETTING_VAR.kuroWebVersion == 'replace') {
-                if (SETTING_VAR.kuroMode == 'furigana')
-                    textele.innerHTML = romajiLRC;
-                else
-                    textele.innerText = romajiLRC;
-            } else {
-                textele.setAttribute("default", oLRC.ms[i].c);
-                textele.setAttribute("romajilrc", romajiLRC);
-                textele.setAttribute("hasromaji", "true");
-            }
-
-        } else {
-            // textele.setAttribute("hasromaji", "false");
-        }
-        if (oLRC.ms[i].c == "") textele.innerHTML = "&nbsp;";
-        textele.setAttribute("time", oLRC.ms[i].t);
-        textele.onclick = function () {
-            change_playing_music_time(this.getAttribute("time"));
-        }
         ele.classList.add("lrc");
         ele.appendChild(textele);
         ele.id = "lrc-" + i;
-        rrot.appendChild(ele);
+        applyLrcLineDisplay(ele, i);
+        frag.appendChild(ele);
     }
+    rrot.appendChild(frag); // 一次插入，不再逐行 append 到已在文档中的节点
+    lrcBindRootOnce();
+    lrcGeometry(true);
+}
+/** 行时间：优先用解析时算好的数值，兼容没有 tn 的旧数据。 */
+function lrcTimeAt(i) {
+    let m = oLRC.ms[i];
+    if (m == null) return 0;
+    if (typeof m.tn == "number") return m.tn;
+    return parseFloat(m.t);
 }
 function choose_lrc(time, push = false) {
     try {
         var times = time + oLRC.offset;
-        // logdata(time)
     } catch (e) {
         return;
     }
-    var i = 0;
-    if (oLRC.ms.length == 0) return;
+    let n = oLRC.ms.length;
+    if (n == 0) return;
     try {
-        var tmp = parseFloat(oLRC.ms[0].t);
-        while (i < oLRC.ms.length && tmp <= times) {
-            i++;
-            if (i < oLRC.ms.length) tmp = parseFloat(oLRC.ms[i].t);
-        }
-        // logdata(i);
-        i -= 1;
-        if (i == -1) i = 0;
-
+        // 正常播放时时间单调递增，从上次的行号向后推进即可；
+        // 只有时间倒退（拖动进度条、上一首）才需要从 0 重扫。
+        let i = lrcState.idx;
+        if (i < 0 || i > n - 1) i = 0;
+        if (i > 0 && lrcTimeAt(i) > times) i = 0;
+        while (i + 1 < n && lrcTimeAt(i + 1) <= times) i++;
+        if (lrcTimeAt(0) > times) i = 0;
         hilightlrc(i, push);
     } catch (e) {
-        // logdata(e);
         console.error(e);
     }
 }
+/**
+ * 高亮行允许换行，所以它的高度不再等于行高：这里量出「最终字号下的高度」并钉死在盒子上。
+ * 好处是字号放大的那 200ms 里盒高不变，后面的歌词不会一帧一帧地重排（每次换行只量这一次）。
+ * 量完后把字号按普通字号起跳、再放开，让过渡照常从 16px 放大到 24px。
+ */
+function lrcPinActiveHeight(ele) {
+    if (ele == null) return 0;
+    let g = lrcGeometry();
+    let prevTransition = ele.style.transition;
+    // 1) 关掉过渡 → 字号立刻是最终值 → 量到的是"最终字号下的换行高度"
+    ele.style.transition = "none";
+    ele.style.height = "auto";
+    let h = Math.round(ele.getBoundingClientRect().height);
+    // 2) 把高度钉死（动画期间盒高不变），然后在"无过渡"状态下把字号退回普通字号
+    ele.style.height = h > 0 ? (h + "px") : "";
+    ele.style.fontSize = g.norFont + "px";
+    if (ele.offsetHeight < 0) { /* 读一次，强制应用上面这个普通字号 */ }
+    // 3) 恢复过渡，再放开内联字号：过渡就会从普通字号平滑放大到高亮字号
+    ele.style.transition = prevTransition;
+    ele.style.fontSize = "";
+    return h > 0 ? h : g.selLineH;
+}
+
 function hilightlrc(idx, push = false) {
-    var ele = document.getElementsByClassName("lrc-active");
-    if (!push) for (var i = 0; i < ele.length; i++) {
-        if (ele[i].id == 'lrc-' + idx) return;
-        if (ele[i].id == 's-lrc-' + idx) return;
-        let textele = ele[i].querySelector(".lrc-text");
-        if (textele.getAttribute("hasromaji") == 'true')
-            textele.innerText = textele.getAttribute("default");
-        ele[i].classList.remove("lrc-active");
-    }
-    var ch = LRC_root_obj.clientHeight;
-    // 显示到： bh/2;
-    var schheight = document.getElementById("lrc-show-root").scrollHeight;
-    // ScrolltoEx(document.getElementById("lrycishow"), (idx) / oLRC.ms.length * (schheight - bh / 2 + 80) - bh / 2 + 160);
-
-    try {
-        let elee = document.getElementById("lrc-" + idx);
-        // console.log(elee.innerText,elee)
-        elee.classList.add("lrc-active");
-        let eleee = elee.querySelector(".lrc-text");
-        if (eleee.getAttribute("hasromaji") == 'true') {
-            if (SETTING_VAR.kuroMode == 'furigana')
-                eleee.innerHTML = eleee.getAttribute("romajilrc");
-            else
-                eleee.innerText = eleee.getAttribute("romajilrc");
+    let n = oLRC.ms.length;
+    if (n == 0) return;
+    if (idx < 0) idx = 0;
+    if (idx > n - 1) idx = n - 1;
+    // 同一行且不是强制刷新：原来每刻都要扫一遍 DOM 才判断得出来
+    if (lrcState.idx === idx && !push) return;
+    let ele = document.getElementById("lrc-" + idx);
+    if (ele == null) return;
+    // 只摘掉记录里的那一行。原来遍历 getElementsByClassName 的实时集合、边删边遍历会漏删；
+    // 而 push 路径根本不删旧类，于是可能两行同时高亮。
+    if (lrcState.idx !== idx) {
+        let prev = document.getElementById("lrc-" + lrcState.idx);
+        if (prev != null) {
+            prev.classList.remove("lrc-active");
+            prev.style.height = "";     // 让上一行回到普通行高
+            prev.style.fontSize = "";
+            let ptext = prev.querySelector(".lrc-text");
+            if (ptext != null && ptext.getAttribute("hasromaji") == "true")
+                ptext.innerText = ptext.getAttribute("default");
         }
-
-    } catch (e) {
-        // console.error(e);
     }
-    ScrolltoEx(document.getElementById("lrc-show-root"), (lrc_normal_line_height) * idx + lrc_normal_line_height / 2);
+    if (!ele.classList.contains("lrc-active")) ele.classList.add("lrc-active");
+    let text = ele.querySelector(".lrc-text");
+    if (text != null && text.getAttribute("hasromaji") == "true") {
+        if (SETTING_VAR.kuroMode == 'furigana')
+            text.innerHTML = text.getAttribute("romajilrc");
+        else
+            text.innerText = text.getAttribute("romajilrc");
+    }
+    lrcState.idx = idx;
+    lrcState.activeH = lrcPinActiveHeight(ele);
+    let g = lrcGeometry();
+    // 居中位置直接算出来（高亮行的高度是刚量到的 activeH，可能因为换行比普通行高）：
+    // 「容器上内边距 + 前面所有普通行 + 高亮行的一半 - 容器高度的一半」
+    lrcScrollTo(g.padTop + idx * g.lineH + lrcState.activeH / 2 - g.clientH / 2);
 }
-
-var timer = 0;
-function ScrolltoEx(ele, y) {
-    if (isIphone) {
-        ele.scroll({
-            top: y,
-            behavior: "smooth"
-        });
-    } else {
-        ScrolltoEx_JS(ele, y);
-    }
-
-}
-function ScrolltoEx_JS(ele, x) {
-    if (ele.scrollHeight == undefined) {
-        ele.scrollTop = x;
-        return;
-    }
-    try {
-        if (timer != 0) {
-            try {
-                clearInterval(timer);
-                timer = 0;
-            } catch (e) {
-                // logdata(e);
-                logdata(e);
-            }
+/** 平滑滚动到指定位置。保留 scrollTop 方案：手动滚动/惯性滚动不能被破坏。 */
+function lrcScrollTo(target) {
+    let root = document.getElementById("lrc-show-root");
+    if (root == null) return;
+    lrcCancelScroll();
+    let g = lrcGeometry();
+    let n = oLRC.ms.length;
+    // 可滚动量用算的（内容高 + 上下内边距 - 容器高）；高亮行可能因为换行比普通行高
+    let activeH = lrcState.activeH > 0 ? lrcState.activeH : g.selLineH;
+    let maxScroll = 2 * g.padTop + (n - 1) * g.lineH + activeH - g.clientH;
+    if (!(maxScroll > 0)) maxScroll = 0;
+    target = Math.round(target);
+    if (target < 0) target = 0;
+    if (target > maxScroll) target = maxScroll;
+    let start = root.scrollTop;
+    let distance = target - start;
+    if (distance == 0) return;
+    let token = lrcState.buildToken;
+    let duration = Math.min(600, Math.max(250, Math.abs(distance) * 0.4));
+    let startTime = null;
+    function step(now) {
+        // 换歌/重建过就作废这次动画，避免旧目标写到新内容上
+        if (token !== lrcState.buildToken) {
+            lrcScrollRAF = 0;
+            return;
         }
-        var mb = Math.round(x);
-        if (mb < 0) mb = 0;
-        if (mb > ele.scrollHeight) mb.ele.scrollHeight;
-        var g = Math.round(Math.abs(x - ele.scrollTop) / 30);
-        // logdata(g);
-        if (g <= 0) g = 1;
-        var tl = 0;
-        timer = setInterval(function () {
-            //让滚动条到顶部的距离自动缩减到0;
-            // ele.scrollTop = document.body.scrollTop = Math.floor(Ontop - 200);//兼容性设置;
-            //设置定时器
-            // logdata(ele.scrollTop,mb)
-            tl++;
-            if (tl >= 50) {
-                ele.scrollTop = mb;
-                clearInterval(timer);
-                timer = 0;
-            } else if (Math.abs(ele.scrollTop - mb) <= g / 2) {
-                ele.scrollTop = mb;
-                clearInterval(timer);
-                timer = 0;
-            } else {
-                // if (g < 16 && tt%2==0) g++,tt=1;
-                // else tt++;
-                if (ele.scrollTop > mb) ele.scrollTop = ele.scrollTop - g; else ele.scrollTop = ele.scrollTop + g;
-            }
-        }, 10);
-    } catch (e) {
-        ele.scrollTop = x;
+        if (startTime == null) startTime = now;
+        // easeOutCubic：先快后慢
+        var t = Math.min(1, (now - startTime) / duration);
+        var eased = 1 - Math.pow(1 - t, 3);
+        root.scrollTop = start + distance * eased;
+        if (t < 1) {
+            lrcScrollRAF = requestAnimationFrame(step);
+        } else {
+            root.scrollTop = target;
+            lrcScrollRAF = 0;
+        }
     }
+    lrcScrollRAF = requestAnimationFrame(step);
 }
 function change_music(title, singer, url = "", play = true, info = {}, openGUI = false) {
     document.getElementById("page-info-name").innerText = title;

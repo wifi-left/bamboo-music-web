@@ -1,23 +1,18 @@
 <?php
-$enableDetail = true;
-// include("./pinyinlib.php");
-
-
 /*
-文件结构：
+ * 索引的写入端：扫描磁盘、生成 id、写记录，以及管理端的两个重建流程。
+ *
+ * id 用 md5(路径) 加一个冲突计数后缀，所以同一路径每次重建都得到同一个 id（前端收藏、播放列表
+ * 都存了 id）。这里的 $GLOBALS['temp'] / $GLOBALS['ids'] 是一次重建过程中的登记表：
+ * temp 是「路径 -> id」的记忆，ids 是「已用过的 id」集合，两者都必须跨函数共享。
+ */
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/search_match.php';
 
->id
-|文件地址
-/名字
-]拼音
-,封面
-.类型
-<
+$enableDetail = true;
 
-*/
 $temp = [];
 $ids = [];
-$idx = 0;
 function generateId($path)
 {
     $wantId = md5($path);
@@ -27,49 +22,54 @@ function generateId($path)
     }
     return $wantId . $i;
 }
+
+/**
+ * 取路径对应的 id。$created 返回 true 表示这次是新登记的（调用方据此决定要不要写记录）。
+ * 原来 getId2/saveFolder/saveCover 各自抄了一遍这段登记逻辑。
+ */
+function id_for_path($path, &$created)
+{
+    if (!empty($GLOBALS['temp'][$path])) {
+        $created = false;
+        return $GLOBALS['temp'][$path];
+    }
+    $id = generateId($path);
+    $GLOBALS['temp'][$path] = $id;
+    $GLOBALS['ids'][$id] = true;
+    $created = true;
+    return $id;
+}
 function getId2($path)
 {
-    if (empty($GLOBALS['temp'][$path])) {
-        // new id
-        $id = generateId($path);
-        $GLOBALS['temp'][$path] = ($id);
-        $GLOBALS['ids'][$id] = true;
-    }
-    return $GLOBALS['temp'][$path];
+    $created = false;
+    return id_for_path($path, $created);
 }
 function saveFolder($writer, $path, $cover = -1)
 {
-    if (empty($GLOBALS['temp'][$path])) {
-        // new id
-        $id = generateId($path);
-        $GLOBALS['temp'][$path] = ($id);
-        $GLOBALS['ids'][$id] = true;
-        writeFileInfo($writer, ($id), $path, "", $cover, "l");
+    $created = false;
+    $id = id_for_path($path, $created);
+    if ($created) {
+        writeFileInfo($writer, $id, $path, "", $cover, "l");
     }
-    return $GLOBALS['temp'][$path];
+    return $id;
 }
 function saveCover($writer, $path)
 {
-    if (empty($GLOBALS['temp'][$path])) {
-        // new id
-        $id = generateId($path);
-        $GLOBALS['temp'][$path] = ($id);
-        $GLOBALS['ids'][$id] = true;
-        writeFileInfo($writer, ($id), $path, "", -1, "i");
+    $created = false;
+    $id = id_for_path($path, $created);
+    if ($created) {
+        writeFileInfo($writer, $id, $path, "", -1, "i");
     }
-    return $GLOBALS['temp'][$path];
+    return $id;
 }
 function searchAdditionHost()
 {
     if (!$GLOBALS['enableDetail']) return;
     $list = $GLOBALS['filelist'];
     $id_list = $GLOBALS['all_id_lists'];
-    // echo json_encode($list);
-    // return;
-    $file = "../cache/list.txt.tmp.bamboomusic";
+    $file = cache_path('list.txt.tmp');
     $openFile = fopen($file, "w");
     for ($i = 0; $i < count($id_list); $i++) {
-        // echo '{"code":"201","msg":"处理中... ' . $i . '/' . count($id_list) . '"}\n';
         $id = $id_list[$i];
         $linea = $list[$id];
         $ftype = $linea['type'];
@@ -77,60 +77,83 @@ function searchAdditionHost()
         $fpath = $linea['path'];
         $fcover = $linea['cover'];
         $fextra = $linea['extra'];
-        // $linea['type'] = $ftype;
-        // $linea['name'] = $fname;
-        // $linea['path'] = $fpath;
-        // $linea['cover'] = $fcover;
-        // $linea['extra'] = $fextra;
-        // $linea['trueextra'] = $ftrueextra;
-        // $line;
         $filename = $fpath;
         $pathwithoutext = remove_ext($filename);
         $extra = "";
 
         if ($ftype == 'f') {
-            if (file_exists($pathwithoutext . '.lrc')) {
-                $t = fopen($pathwithoutext . '.lrc', "r");
-                $timelen = strlen("[00:00.00]");
-                $line = fgets($t);
-                if (substr($line, 0, $timelen) == "[00:00.00]") {
-                    $extra = substr($line, $timelen);
+            $lrcPath = $pathwithoutext . '.lrc';
+            if (file_exists($lrcPath)) {
+                $t = fopen($lrcPath, "r");
+                $timeLen = strlen("[00:00.00]");
+                $linesUtf8 = []; // 存储已转为 UTF-8 的连续 [00:00.00] 行内容
 
-                    $line = fgets($t);
-                    if (substr($line, 0, $timelen) == "[00:00.00]") {
-                        $extra = substr($line, $timelen);
-                        $charset = mb_detect_encoding($extra, array('UTF-8', 'GBK', 'GB2312'));
-                        $charset = strtolower($charset);
-                        if ('cp936' == $charset) {
-                            $charset = 'GBK';
-                        }
-                        if ("utf-8" != $charset) {
-                            $extra = trim(iconv($charset, "UTF-8//IGNORE", $extra));
-                            if (substr($extra, 0, strlen("相关人员")) == "相关人员") {
-                                $extra = "";
-                            } else if (substr($extra, 0, strlen("作词")) == "作词") {
-                                $extra = "";
-                            } else if (substr($extra, 0, strlen("作曲")) == "作曲") {
-                                $extra = "";
+                // 只读取开头的连续 [00:00.00] 行，遇到第一个非该格式的行就停止
+                while (($line = fgets($t)) !== false) {
+                    $line = rtrim($line, "\n\r\t\v\0");
+                    if (substr($line, 0, $timeLen) == "[00:00.00]") {
+                        $content = trim(substr($line, $timeLen));
+                        if ($content !== '') {
+                            // 立即转换为 UTF-8 并存储
+                            $charset = mb_detect_encoding($content, array('UTF-8', 'GBK', 'GB2312'));
+                            $charset = strtolower($charset);
+                            if ($charset == 'cp936') $charset = 'GBK';
+                            if ($charset != 'utf-8') {
+                                $content = trim(iconv($charset, "UTF-8//IGNORE", $content));
                             }
+                            $linesUtf8[] = $content;
                         }
                     } else {
-                        $charset = mb_detect_encoding($extra, array('UTF-8', 'GBK', 'GB2312'));
-                        $charset = strtolower($charset);
-                        if ('cp936' == $charset) {
-                            $charset = 'GBK';
-                        }
-                        if ("utf-8" != $charset) {
-                            $extra = trim(iconv($charset, "UTF-8//IGNORE", $extra));
-                            if (substr($extra, 0, strlen("作词")) == "作词") {
-                                $extra = "";
-                            } else if (substr($extra, 0, strlen("作曲")) == "作曲") {
-                                $extra = "";
-                            }
-                        }
+                        // 遇到第一个非 [00:00.00] 的行，立即停止读取
+                        break;
                     }
                 }
                 fclose($t);
+
+                // 处理 $extra（完全保持原有逻辑，但使用已转换的 UTF-8 行）
+                if (!empty($linesUtf8)) {
+                    // 先取第一行
+                    $extra_t = $linesUtf8[0];
+                    // 如果存在第二行，则覆盖
+                    if (isset($linesUtf8[1])) {
+                        $extra_t = $linesUtf8[1];
+                    }
+
+                    // 原有过滤：相关人员 / 作词 / 作曲 清空 extra_t（此时已是 UTF-8）
+                    if (substr($extra_t, 0, strlen("相关人员")) == "相关人员") {
+                        $extra_t = "";
+                    } else if (substr($extra_t, 0, strlen("作词")) == "作词") {
+                        $extra_t = "";
+                    } else if (substr($extra_t, 0, strlen("作曲")) == "作曲") {
+                        $extra_t = "";
+                    }
+                    if ($extra_t != "") {
+                        $extra = $extra_t;
+                    }
+
+                    // 查找专辑信息：从 extra 结束的下一行开始
+                    // 如果使用了第二行（索引1），则从索引2开始；否则从索引1开始
+                    $startIndex = isset($linesUtf8[1]) ? 2 : 1;
+                    $album = '';
+                    for ($j = $startIndex; $j < count($linesUtf8); $j++) {
+                        $lineContent = $linesUtf8[$j]; // 已经是 UTF-8
+                        // 匹配中英文冒号
+                        if (preg_match('/^专辑[：:]\s*(.*)/u', $lineContent, $matches)) {
+                            $album = trim($matches[1]);
+                            // 无需再次转换，因为 $album 已经是 UTF-8
+                            break;
+                        }
+                    }
+
+                    // 追加专辑信息（用换行分隔）
+                    if (!empty($album) && $album != "") {
+                        if (!empty($extra) && $extra != "") {
+                            $extra = "原专辑：" . $album . " | " . $extra;
+                        } else {
+                            $extra = "原专辑：" .  $album;
+                        }
+                    }
+                }
             }
             writeFileInfo($openFile, $id, $fpath, $fname, $fcover, $ftype, $fextra, $extra);
         } else {
@@ -138,42 +161,44 @@ function searchAdditionHost()
         }
     }
     fclose($openFile);
-    if (file_exists("../cache/list.txt.tmp.bamboomusic")) {
-        if (file_exists("../cache/list.txt.bamboomusic")) unlink("../cache/list.txt.bamboomusic");
-        rename("../cache/list.txt.tmp.bamboomusic", "../cache/list.txt.bamboomusic");
+    $tmp = cache_path('list.txt.tmp');
+    if (file_exists($tmp)) {
+        $live = cache_path('list.txt');
+        if (file_exists($live)) unlink($live);
+        rename($tmp, $live);
+        // 索引指纹变了，快缓存与搜索键都必然失效；显式删一次，避免别的 worker 还拿着旧数据
+        index_invalidate_fast_cache();
+        search_keys_invalidate();
     }
 }
+/**
+ * 全量重建：按 location.txt 里的根目录重新扫描磁盘。
+ * 写临时文件再原子替换——原来是一上来就把线上索引 fopen(...,"w") 截断，扫描过程中一旦超时或
+ * 出错（管理端限时 60 秒），前端就一直读到残缺索引。
+ */
 function searchHost()
 {
-    $reader = fopen("../cache/location.txt.bamboomusic", "r");
-    $file = "../cache/list.txt.bamboomusic";
-    //打开文件
-    $openFile = fopen($file, "w");
-    //测试写入并换行
+    $reader = fopen(cache_path('location.txt'), "r");
+    $tmpFile = cache_path('list.txt.tmp');
+    $openFile = fopen($tmpFile, "w");
     while (!feof($reader)) {
         $path = fgets($reader);
-        // echo "<h1>$path</h1>";
         searchLocalFiles(trim($path), $openFile);
     }
-    // saveId();
-
     fclose($openFile);
     fclose($reader);
+    if (file_exists($tmpFile)) {
+        $live = cache_path('list.txt');
+        if (file_exists($live)) unlink($live);
+        rename($tmpFile, $live);
+        index_invalidate_fast_cache();
+        search_keys_invalidate();
+    }
 }
 function writeFileInfo($writer, $id, $path, $name = "", $cover = -1, $type = 'f', $hasmv = "", $extra = "")
 {
-    /*
-    >id
-    |文件地址
-    /名字
-    ,封面
-    .类型
-    ]hasmv
-    [extra
-    <
-    */
-    $out = ">$id\r\n|$path\r\n/$name\r\n,$cover\r\n.$type\r\n]$hasmv\r\n[$extra\r\n<\r\n";
-    fwrite($writer, $out);
+    // 格式在 bootstrap.php 的 index_encode_record() 里定义，读端用同一张标签表
+    fwrite($writer, index_encode_record($id, $path, $name, $cover, $type, $hasmv, $extra));
 }
 function remove_ext($path)
 {

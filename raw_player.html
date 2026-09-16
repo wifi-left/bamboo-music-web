@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>外置音乐播放器（iframe）</title>
+    <link href="./static/css/font-awesome.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #121212;
+            --panel: #1e1e1e;
+            --accent: rgb(23, 236, 148);
+            --muted: #9a9a9a;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Segoe UI, Roboto, "Helvetica Neue", Arial;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--bg), #0f0f0f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            color: #fff
+        }
+
+        .player {
+            width: 360px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .top {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(90deg, rgba(199, 43, 43, 0.08), transparent);
+            align-items: center;
+        }
+
+        .cover {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            flex: 0 0 80px;
+            background: linear-gradient(135deg, #222, #111);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block
+        }
+
+        .meta {
+            flex: 1;
+            min-width: 0
+        }
+
+        .title {
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .artist {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 8px
+        }
+
+        .btn {
+            background: transparent;
+            border: 0;
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 120ms ease, transform 120ms ease;
+        }
+
+        .btn:hover {
+            background: rgb(12, 125, 78)
+        }
+
+        .btn:active {
+            background: rgb(9, 89, 56);
+            transform: scale(0.96)
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px
+        }
+
+        .btn[aria-pressed="true"] {
+            color: var(--accent);
+            background: rgba(23, 236, 148, 0.12)
+        }
+
+        .big {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(180deg, var(--accent), rgb(18, 180, 112));
+            box-shadow: 0 4px 12px rgb(5, 89, 54);
+            border-radius: 8px;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+        }
+
+        .big:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 6px 16px rgb(5, 89, 54);
+        }
+
+        .progress {
+            padding: 12px 14px 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .timebar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .bar {
+            flex: 1;
+            height: 6px;
+            background: var(--glass);
+            border-radius: 6px;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .bar .filled {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff6b6b);
+            border-radius: 6px;
+            width: 0%;
+        }
+
+        .bar::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -6px;
+            bottom: -6px;
+        }
+
+        .bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: transparent
+        }
+
+        .small-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        input[type="range"] {
+            appearance: none;
+            background: transparent;
+            width: 96px;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 3px;
+            background: #333;
+            border-radius: 3px
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-top: -4.5px
+        }
+
+        .mini {
+            width: 260px
+        }
+
+        /* responsive for iframe small sizes */
+        @media (max-width:360px) {
+            .player {
+                width: 96%
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="player" id="player">
+        <div class="top">
+            <div class="cover" id="cover">
+                <!-- placeholder art -->
+                <img id="coverImg" src="" alt="封面">
+            </div>
+            <div class="meta">
+                <div class="title" id="title">未选择曲目</div>
+                <div class="artist" id="artist">作者 - 专辑</div>
+            </div>
+            <div class="controls">
+                <button class="btn big" id="play" title="播放/暂停" aria-label="播放/暂停">
+                    <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M8 5v14l11-7-11-7z" fill="#fff" />
+                    </svg>
+                </button>
+                <button class="btn" id="next" title="下一首" aria-label="下一首">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 8v8l6-4-6-4zM12 8v8l6-4-6-4z" fill="#fff" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="timebar">
+                <span id="currentTime">0:00</span>
+                <div class="bar" id="progressBar" role="slider" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                    <div class="filled" id="progressFilled"></div>
+                </div>
+                <span id="duration">0:00</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;gap:8px;align-items:center">
+                    <button class="btn" id="loop" title="循环" aria-pressed="false">循环</button>
+                    <button class="btn" id="shuffle" title="随机" aria-pressed="false">随机</button>
+                    <button class="btn" id="open_bm_music" title="打开Bamboo Music获取完整功能"
+                        aria-pressed="false">完整功能</button>
+                </div>
+                <div class="small-controls">
+                    <span style="width:16px;height:16px;" class="fa fa-volume-up"></span>
+                    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio"></audio>
+
+    <script>
+        /*
+            使用说明（简短）:
+            - 将音源列表放入 playlist 数组（每项为 {src,title,artist,cover}）
+            - 可通过 iframe query 参数 ?src=URL 来传入单曲（优先）
+        */
+        var playlist = [];
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('play');
+        const playIcon = document.getElementById('playIcon');
+        const nextBtn = document.getElementById('next');
+        const titleEl = document.getElementById('title');
+        const artistEl = document.getElementById('artist');
+        const coverImg = document.getElementById('coverImg');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const progressBar = document.getElementById('progressBar');
+        const progressFilled = document.getElementById('progressFilled');
+        const loopBtn = document.getElementById('loop');
+        const shuffleBtn = document.getElementById('shuffle');
+        const volumeRange = document.getElementById('volume');
+
+        // 支持通过 iframe ?src=URL&title=... 注入单曲
+        const params = new URLSearchParams(location.search);
+        var nowId = null;
+        if (params.get('id')) {
+            nowId = params.get('id');
+        }
+
+        let index = 0;
+        let isPlaying = false;
+        let isLoop = false;
+        let isShuffle = false;
+        document.getElementById("open_bm_music").onclick = function () {
+            let p = location.href;
+            window.open(p.substring(0, p.lastIndexOf("/")) + "/index.html");
+        }
+        function loadTrack(i) {
+            const t = playlist[i];
+            if (!t) return;
+            audio.src = t.src;
+            titleEl.textContent = t.title || '未知';
+            artistEl.textContent = t.artist || '';
+            coverImg.src = t.cover || '';
+            audio.load();
+            updateProgress(0, 0);
+            document.getElementById("open_bm_music").onclick = function () {
+                let p = location.href;
+                window.open(p.substring(0, p.lastIndexOf("/")) + "/index.html#musicid=" + t.id);
+            }
+        }
+        function play() {
+            audio.play().then(() => { isPlaying = true; updatePlayUI(); }).catch(() => { });
+        }
+        function pause() { audio.pause(); isPlaying = false; updatePlayUI(); }
+        function togglePlay() { isPlaying ? pause() : play(); }
+        function updatePlayUI() {
+            if (isPlaying) {
+                // pause icon
+                playIcon.innerHTML = '<path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z" fill="#fff"/>';
+            } else {
+                playIcon.innerHTML = '<path d="M8 5v14l11-7-11-7z" fill="#fff"/>';
+            }
+        }
+        function formatTime(s) {
+            if (!isFinite(s)) return '0:00';
+            s = Math.floor(s);
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return m + ':' + (sec < 10 ? ('0' + sec) : sec);
+        }
+        function updateProgress(current, total) {
+            currentTimeEl.textContent = formatTime(current);
+            durationEl.textContent = formatTime(total);
+            const pct = total ? (current / total * 100) : 0;
+            progressFilled.style.width = pct + '%';
+        }
+        audio.addEventListener('loadedmetadata', () => {
+            updateProgress(0, audio.duration || 0);
+        });
+        audio.addEventListener('timeupdate', () => {
+            updateProgress(audio.currentTime, audio.duration);
+        });
+        audio.addEventListener('ended', () => {
+            if (isLoop) { audio.currentTime = 0; play(); return; }
+            if (isShuffle) { nextRandom(); return; }
+            nextTrack();
+        });
+
+        playBtn.addEventListener('click', togglePlay);
+
+        nextBtn.addEventListener('click', nextTrack);
+
+        function nextTrack() {
+            index = (index + 1) % playlist.length;
+            loadTrack(index); play();
+        }
+        function nextRandom() {
+            if (playlist.length <= 1) { audio.currentTime = 0; play(); return; }
+            let next = index;
+            while (next === index) next = Math.floor(Math.random() * playlist.length);
+            index = next; loadTrack(index); play();
+        }
+
+        // progress seek
+        function seekFromEvent(e) {
+            const rect = progressBar.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const pct = Math.max(0, Math.min(1, x / rect.width));
+            audio.currentTime = pct * (audio.duration || 0);
+        }
+        progressBar.addEventListener('click', seekFromEvent);
+        progressBar.addEventListener('touchstart', (e) => { seekFromEvent(e); });
+
+        // keyboard support for accessibility
+        progressBar.addEventListener('keydown', (e) => {
+            if (!audio.duration) return;
+            if (e.key === 'ArrowLeft') { audio.currentTime = Math.max(0, audio.currentTime - 5); }
+            if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); }
+        });
+
+        // loop & shuffle
+        loopBtn.addEventListener('click', () => {
+            isLoop = !isLoop;
+            loopBtn.setAttribute('aria-pressed', String(isLoop));
+            loopBtn.style.opacity = isLoop ? '1' : '0.7';
+        });
+        shuffleBtn.addEventListener('click', () => {
+            isShuffle = !isShuffle;
+            shuffleBtn.setAttribute('aria-pressed', String(isShuffle));
+            shuffleBtn.style.opacity = isShuffle ? '1' : '0.7';
+        });
+
+        // volume
+        volumeRange.addEventListener('input', () => { audio.volume = parseFloat(volumeRange.value); });
+        audio.volume = parseFloat(volumeRange.value);
+
+        // load first
+        if (playlist.length) loadTrack(index);
+
+        // expose minimal API for parent iframe (postMessage)
+        window.addEventListener('message', (ev) => {
+            const data = ev.data || {};
+            if (data === 'play') togglePlay();
+            if (data === 'next') nextTrack();
+            if (data === 'prev') { index = (index - 1 + playlist.length) % playlist.length; loadTrack(index); play(); }
+            if (data && data.type === 'load' && data.track) {
+                playlist = [data.track]; index = 0; loadTrack(0);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,19 +1,29 @@
 <?php
-include("./listfiles.php");
-include("./libs.php");
-if (!file_exists("../cache/salt.bamboomusic")) {
-    $mywritefile2 = fopen("../cache/salt.bamboomusic", "w") or send_error("无法写入缓存列表。");
+/*
+ * 本地音源的对外接口。$type 决定返回什么，全部走 GET。
+ *
+ * 响应格式是前端契约的一部分，改动前先读 README 的接口章节。几个看着像 bug 但**故意如此**的点：
+ *   - 逻辑上的 404 也返回 HTTP 200：前端 $.fetch 遇到非 2xx 会重试 3 次、每次间隔 2 秒。
+ *   - $total 故意比真实数量多报，前端用它判断「没有更多了」。
+ *   - hasMv 只在 extra == 1 时出现，视频推荐面板靠它过滤。
+ *   - pic 用 dirname($url) 拼绝对地址，跟随请求的 Host 头（支持子目录部署）。
+ *   - $value 会被 rawurldecode 第二次解码。
+ */
+require_once __DIR__ . '/listfiles.php';
+$saltFile = cache_path('salt');
+if (!file_exists($saltFile)) {
+    $mywritefile2 = fopen($saltFile, "w") or send_error("无法写入缓存列表。");
     fwrite($mywritefile2, '<?php $salt="bamboomusic";?>');
     fclose($mywritefile2);
 }
-include("../cache/salt.bamboomusic");
+include($saltFile);
 
-Header("content-type: application/json", true);
 function loadPath2Url()
 {
-    if (is_file("../cache/location2url.json.bamboomusic")) {
-        $myfile = fopen("../cache/location2url.json.bamboomusic", "r") or send_error("无法读取文件列表。");
-        $flength = filesize("../cache/location2url.json.bamboomusic");
+    $file = cache_path('location2url.json');
+    if (is_file($file)) {
+        $myfile = fopen($file, "r") or send_error("无法读取文件列表。");
+        $flength = filesize($file);
         if ($flength > 0) {
             $contentF = fread($myfile, $flength);
         } else {
@@ -27,6 +37,8 @@ function loadPath2Url()
 }
 
 if (empty($_GET['type'])) {
+    Header("content-type: application/json", true);
+
     echo '{"success":"fail","code":404,"message":"缺少请求参数。","code":1}';
     return;
 }
@@ -35,14 +47,11 @@ if (empty($_GET['value'])) {
 } else {
     $value = $_GET['value'];
 }
+// echo $value;
 $type = $_GET['type'];
 $show_match = false;
 if (!empty($_GET['show_match'])) {
     $show_match = $_GET['show_match'] == 'true';
-}
-$ios = false;
-if (!empty($_GET['ios'])) {
-    $ios = $_GET['ios'] == 'true';
 }
 $offset = 0;
 $limit = 30;
@@ -64,8 +73,8 @@ if (!empty($_GET['br'])) {
     else if ($br == '2000kflac') $br = "flac";
 }
 // $url = str_replace("\~", "%7E", $url);
-$headers = "";
-$value = urldecode($value);
+
+$value = rawurldecode($value);
 if ($type != 'alarm') {
     if ($offset < 1) $offset = 1;
     if ($limit < 1) $offset = 10;
@@ -74,22 +83,25 @@ if ($type != 'alarm') {
     if ($limit < 1) $offset = 10;
 }
 
-$page = (int)$offset - 1;
-$offsets = ((int)$offset - 1) * ((int)$limit);
 $html = "";
 $result = json_decode('{}');
-
 if (substr($value, 0, 6) == 'MUSIC_') {
     $value = substr($value, 6);
 }
 function fileListToData($searchValue, $show_match = false)
 {
+    static $lineTemplate = null;
+    if ($lineTemplate === null) {
+        // 每行原来是 json_decode 一次这个骨架再逐字段赋值；decode 一次、clone 出来即可，
+        // 属性顺序不变，所以 JSON 输出字节不变。
+        $lineTemplate = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","pic":"","artistid":"","releaseDate":null}');
+    }
     $result = json_decode('{"data":{"total":30,"list":[]}}');
     $prefix = $GLOBALS['prefix'];
     foreach ($GLOBALS['files'] as $valued) {
         // $line->data[] = $value->filename;
         $res = $valued->path;
-        $line = json_decode('{"id":0,"addition":"","artist":"","name":"","album":"","albumid":"","pic":"","artistid":"","releaseDate":null}');
+        $line = clone $lineTemplate;
         $filewithoutext = substr($res, 0, strrpos($res, "."));
 
         $filebasename = basename($filewithoutext);
@@ -168,6 +180,8 @@ function getLocalMusicUrl($value, $redirect = false, $br = "mp3")
 {
     $res = getSongPath($value);
     if ($res == false) {
+        Header("content-type: application/json", true);
+
         echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
         http_response_code(404);
         return;
@@ -190,17 +204,22 @@ $redirect = false;
 switch ($type) {
     case 'status':
         $count = count($filelist);
+        Header("content-type: application/json", true);
+
         echo '{"success":"ok","code":200,"status":"ok","total_songs":"' . $count . '"}';
+
         break;
     case 'random_url':
         header('Cache-Control:no-cache,must-revalidate');
         header('Pragma:no-cache');
         header("Expires:0");
         header('Access-Control-Allow-Origin: *');
+
         $redirect = true;
     case 'random':
         // echo $seed;
         // return;
+        Header("content-type: application/json", true);
 
         $result = json_decode('{"seed":"","data":{"total":30,"list":[]}}');
         $result->seed = $seed;
@@ -275,13 +294,14 @@ switch ($type) {
                 // echo json_encode($line);
             }
         }
-        // saveId();
         // $result->data-
         $result->data->total = ($offset) * $count + 1;
 
         $html = json_encode($result);
         break;
     case 'info':
+        Header("content-type: application/json", true);
+
         $result = json_decode('{"data":{"info":{}}}');
         $getLrc = true;
         if (!empty($_GET['lrc'])) {
@@ -365,12 +385,15 @@ switch ($type) {
         $html = json_encode($result);
         break;
     case 'suggestKey':
+        Header("content-type: application/json", true);
+
         $line = json_decode('{"code":200,"data":[]}');
         $keyword = $value;
         //检测指正是否到达文件的未端
         $limit = 12;
         $page = 0;
         searchFileByName($keyword, $limit, 1);
+        $terms = search_tokenize($keyword);
 
         $suggests = array();
         $count = 0;
@@ -387,15 +410,18 @@ switch ($type) {
 
             $addition = $value->trueextra;
             $albumname = $value->albumname;
-            if (stristr($singer, $keyword) != false) {
+            // 用和搜索一致的规则（分词 AND、顺序无关、归一化 + 容错）判断这段文本是否命中关键词，
+            // 否则搜索已经找到的命中会在这里被原始子串过滤掉：打错字时提示词是空的，
+            // 「东方 17」这种词序与歌名相反的多词查询也是空的。空字段不参与（建议项不能是空字符串）。
+            if ($singer !== "" && search_terms_hit($singer, $terms)) {
                 $suggests[] = $singer;
-            } else if (stristr($songname, $keyword) != false) {
+            } else if (search_terms_hit($songname, $terms)) {
                 $suggests[] = $songname;
-            } else if (stristr($addition, $keyword) != false) {
+            } else if ($addition !== "" && search_terms_hit($addition, $terms)) {
                 $suggests[] = $addition;
-            } else if (stristr($albumname, $keyword) != false) {
+            } else if ($albumname !== "" && search_terms_hit($albumname, $terms)) {
                 $suggests[] = $albumname;
-            } else if (stristr($val, $keyword) != false) {
+            } else if (search_terms_hit($val, $terms)) {
                 $suggests[] = $val;
             }
             // $suggests[] = $songname;
@@ -407,10 +433,11 @@ switch ($type) {
             if ($count > 10) break;
             $line->data[] = $value;
         }
-        // saveId();
         echo json_encode($line);
         break;
     case 'album':
+        Header("content-type: application/json", true);
+
         $path = getSongPath($value);
         if ($path == false) {
             echo '{"code":404,"msg":"404 - 此专辑不存在"}';
@@ -425,7 +452,6 @@ switch ($type) {
         $albumname = getDirAlName($path);
         // echo json_encode($files);
 
-        // saveId();
         // $result->data->lrclist = $lrc;
         $resu = fileListToData($value, $show_match);
         $resu->total = $total;
@@ -436,9 +462,9 @@ switch ($type) {
         // http_response_code(200);
         break;
     case 'playlist':
+        Header("content-type: application/json", true);
+
         $result = json_decode('{"data":{"total":0,"list":[]}}');
-        $file = fopen("../cache/location.txt.bamboomusic", "r");
-        $keyword = "";
         //检测指正是否到达文件的未端
         $path = getSongPath($value);
         if ($path == false) {
@@ -447,9 +473,9 @@ switch ($type) {
             return;
         }
 
-        scanAllFile(trim($path), $keyword);
-        fclose($file);
-        // echo json_encode($files);
+        // 按目录 id 列出该目录（含子目录）下的歌曲。这里原来调用的 scanAllFile() 只存在于
+        // apis/video，在 apis/local 里从来没有过定义，所以这个接口一直是 500。
+        searchForFolder(trim($path), $limit, $offset);
         foreach ($files as $valued) {
             // $line->data[] = $value->filename;
             $res = $valued->path;
@@ -461,7 +487,8 @@ switch ($type) {
             $filepath = dirname($res);
             $cover = $valued->cover;
             if ($cover != -1) {
-                $line->pic = dirname($url) . "/local/cover.php?id=" . $cover;
+                // 原来是 dirname($url) . "/local/cover.php"，多一层 local，指向不存在的路径
+                $line->pic = dirname($url) . "/cover.php?id=" . $cover;
             }
             $musicid = $valued->id;
             $mvres = $filepath . '\\' . $filewithoutext . '.mp4';
@@ -489,19 +516,21 @@ switch ($type) {
                 $line->album = getDirAlName($filepath);
                 $line->albumid = $prefix . $pathid;
             }
-            if (!empty($valued['trueextra']))
-                $line->addition = $valued['trueextra'];
+            // $valued 是 fileinfo 对象，不能当数组取值（PHP 8 会直接抛错），原来写成 $valued['trueextra']
+            if (!empty($valued->trueextra))
+                $line->addition = $valued->trueextra;
             // $result->data->songinfo = $line;
             $result->data->list[] = $line;
             // echo json_encode($line);
         }
-        // saveId();
         // $result->data->lrclist = $lrc;
         $result->data->total = $total;
         $html = json_encode($result);
         // http_response_code(200);
         break;
     case 'mv':
+        Header("content-type: application/json", true);
+
         $res = getSongPath($value);
         if ($res == false) {
             echo '{"code":404,"msg":"404 - 此歌曲不存在"}';
@@ -524,15 +553,20 @@ switch ($type) {
         $html = getLocalMusicUrl($value, false, "mp4");
         break;
     case 'url':
+        Header("content-type: text/plain", true);
 
         $html = getLocalMusicUrl($value, false, $br);
         // echo $html;
         break;
     case 'listen':
+        Header("content-type: application/json", true);
+
         Header("Location: ../../index.html?musicid=$value", true, 302);
         return;
         break;
     case 'singer':
+        Header("content-type: application/json", true);
+
         $resu = json_decode('{"data":{"list":[],"total":0}}');
         //不break，进入search
         $valued = base64_decode(str_replace(" ", "+", $value));
@@ -546,17 +580,19 @@ switch ($type) {
             $html = json_encode($resu);
         }
 
-        // saveId();
 
         break;
     case 'search':
+        Header("content-type: application/json", true);
+
         $result = searchSong($value);
         $html = json_encode($result);
-        // saveId();
 
         break;
     case 'folder':
-        $file = fopen("../cache/location.txt.bamboomusic", "r");
+        Header("content-type: application/json", true);
+
+        $file = fopen(cache_path('location.txt'), "r");
         $result = json_decode('{"data":{"list":[]}}');
         while (!feof($file)) {
             $path = trim(fgets($file));
@@ -569,16 +605,15 @@ switch ($type) {
             $line->uname = "Local";
             $line->userName = "Local";
             $result->data->list[] = $line;
-            // scanAllFile(trim($path), $keyword);
         }
-        // saveId();
 
         $html = json_encode($result);
         fclose($file);
-        // saveId();
         break;
     case 'searchAlarm':
     case 'searchAlbum':
+        Header("content-type: application/json", true);
+
         $resu = json_decode('{"data":{"list":[],"total":0,"pic":null}}');
         loadPathNames();
         $list = array();
@@ -627,10 +662,11 @@ switch ($type) {
         echo json_encode($resu);
         break;
     default:
+        Header("content-type: application/json", true);
+
         echo '{"success":"fail","code":404,"message":"未知的参数"}';
         http_response_code(200);
         return;
 }
-// saveId();
 
 echo $html;

@@ -132,6 +132,8 @@ function changeWindow(winname, closeold = true, _element) {
         }
     }
     if (winname == 'account') {
+        // 只有在不可见期间收藏变动过才重建（见 saveUserLoves）
+        loveUIDirty = false;
         ReloadLoveListUI();
     }
     $(winele).fadeIn(100);
@@ -180,6 +182,19 @@ function getQueryString(name, url = window.location.search) {
     var r = url.substring(1).match(reg);
     if (r != null) return decodeURI(r[2]); return null;
 }
+// 首屏遮罩：DOMContentLoaded 就撤掉。
+// 原来放在 window.onload 里，而 onload 要等所有脚本、样式和图片都加载完 —— 列表里的封面图
+// 会让首屏白屏时间被图片拖长。这里只负责"界面可以看了"，数据仍由各自的请求异步填充。
+function hideInitLoadingPane() {
+    let initObj = document.getElementById("init-loading-pane");
+    if (initObj != null) initObj.remove();
+}
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hideInitLoadingPane);
+} else {
+    hideInitLoadingPane();
+}
+
 // 页面加载完后...
 window.onload = function () {
     changeWindow(default_page);
@@ -190,11 +205,7 @@ window.onload = function () {
         showPlayList(true)
     }
     hashDetect();
-    let initObj = document.getElementById("init-loading-pane");
-    // initObj.style.opacity = 0;
-    // setTimeout(function(){
-    initObj.remove();
-    // },200);
+    hideInitLoadingPane();
 
 }
 function hashDetect() {
@@ -243,8 +254,13 @@ refrushButtonObj.onclick = function () {
 function refrush_detail_list() {
     api_list_alarm(l_playlistid, l_type, true, 1);
 }
+// 搜索提示词：输入防抖（原来每敲一个字符就发一次请求，后端搜索只要十几毫秒，
+// 浪费的是"每字符一次网络往返 + 一次渲染"）
+var suggestKeyDebounced = debounceByKey(function (key) {
+    api_suggestKey(key);
+}, 140);
 searchBoxObj.oninput = (function () {
-    api_suggestKey(this.value);
+    suggestKeyDebounced("main", this.value);
 });
 
 function displayNowSelSuggest() {
@@ -263,20 +279,21 @@ function displayNowSelSuggest() {
     }
 }
 searchBoxObj.onkeydown = (ev => {
-    // console.log(ev.keyCode);
     switch (ev.keyCode) {
+        // 上键：选择上一个建议词
         case 38:
             if (nowsel >= 0) nowsel--;
             displayNowSelSuggest();
             break;
+        // 下键：选择下一个建议词
         case 40:
             if (nowsel < 9) nowsel++;
             displayNowSelSuggest();
             break;
+        // 回车：确认选择
         case 13:
             if (nowsel >= 0) {
                 let ele = document.querySelector(".li-sel");
-                // searchBoxObj.value = ele.innerText;
                 if (ele.onclick != undefined)
                     ele.onclick();
                 else {
@@ -289,13 +306,14 @@ searchBoxObj.onkeydown = (ev => {
                 searchButtonObj.onclick();
             }
             break;
+        // Esc：隐藏建议框
         case 27:
             suggestKeyRootObj.style.display = "none";
             break;
-        case 9:  //如果是其它键，换上相应在ascii 码即可。
+        // Tab：用建议词补全输入框
+        case 9:
             if (nowsel >= 0) {
                 let ele = document.querySelector(".li-sel");
-                // searchBoxObj.value = ele.innerText;
                 if (ele.onclick != undefined)
                     searchBoxObj.value = ele.innerText;
                 else {
@@ -306,8 +324,6 @@ searchBoxObj.onkeydown = (ev => {
             }
 
     }
-    // console.log(ev.keyCode)
-    //38 up 40 down 13 enter 27 esc
 })
 
 searchBoxObj.onfocus = (function () {
@@ -327,7 +343,10 @@ for (var i = 0; i < pageContents1.length; i++) {
         suggestKeyRootObj.style.display = "none";
     });
 }
+// 滚动加载：加 passive（不调用 preventDefault 的滚动监听没必要让浏览器等 JS），
+// 并且在手动排序进行中不触发加载（追加的 DOM 会打乱拖动）。
 document.getElementById("playlist-item-head").addEventListener('scroll', function () {
+    if (reorderInProgress) return;
     if (!l_cooldown)
         if (l_page * PAGESIZE < l_total) {
             if (this.scrollTop > this.scrollHeight - this.clientHeight * 1.5) {
@@ -335,108 +354,75 @@ document.getElementById("playlist-item-head").addEventListener('scroll', functio
                 // console.log(1)
             }
         };
-});
+}, { passive: true });
 listRootObj.addEventListener('scroll', function () {
+    if (reorderInProgress) return;
     if (s_page * PAGESIZE < s_total) {
         if (this.scrollTop > this.scrollHeight - this.clientHeight * 1.5) {
             api_search(s_searchkey, s_type, s_page + 1, false);
         }
     };
-});
+}, { passive: true });
+// 视频推荐滚动加载
 var moreVideoSuggestFuc = function () {
-    if (!v_cooldown) {
-        if (v_page * PAGESIZE < s_total) {
-            if (this.scrollTop > this.scrollHeight - this.clientHeight * 1.5) {
-                // (s_searchkey, s_type, s_page + 1, false);
-                try {
-                    v_cooldown = true;
-                    v_page = v_page + 1;
-                    let url = get_api_suggest_url(v_vid, v_playlistid, "video", v_page);
-                    if (url == undefined) {
-                        document.getElementById("video-player-suggest-list").innerHTML = `<span class="small-gray-text">无推荐内容</span>`;
-                        return;
-                    }
-                    var loading_todeal = document.createElement("div");
-                    loading_todeal.classList.add("loading_todeal");
-                    loading_todeal.innerHTML = `<div class="loader" style="width:12px;height:12px;"></div><b class="unable-sel" style="margin-left:16px;font-size:16px;">正在缓冲中...</b>`
-                    document.getElementById("video-player-suggest-list").appendChild(loading_todeal);
-                    $.fetch(url, "json").then(data => {
-                        deal_data_suggest_video(data, false);
-                        v_cooldown = false;
-                    }).catch(e => {
-                        console.error(e);
-                        document.getElementById("video-player-suggest-list").innerHTML = `<li class="small-gray-text">出现错误：${e.message}</li>`;
-                        v_cooldown = false;
-                        return;
-                    });
-                } catch (e) {
-                    console.error(e);
-                    document.getElementById("video-player-suggest-list").innerHTML = `<li class="small-gray-text">出现错误：${e.message}</li>`;
-                    v_cooldown = false;
-                    return;
-                }
-            }
-        };
+    if (!v_cooldown && v_page * PAGESIZE < v_total) {
+        if (this.scrollTop > this.scrollHeight - this.clientHeight * 1.5) {
+            loadMoreSuggestVideos();
+        }
     }
 }
-document.getElementById("video-player-suggest-list").addEventListener('scroll', moreVideoSuggestFuc);
-document.getElementById("win-video-player").addEventListener('scroll', moreVideoSuggestFuc);
+document.getElementById("video-player-suggest-list").addEventListener('scroll', moreVideoSuggestFuc, { passive: true });
+document.getElementById("win-video-player").addEventListener('scroll', moreVideoSuggestFuc, { passive: true });
+
+// 读取点击元素所在歌曲行存储的信息
+function readLineInfo(ele, isRootNode = false) {
+    if (isRootNode) {
+        if (ele.classList.contains("playing")) return null; // 已是当前播放行
+        return getLineData(ele);
+    }
+    return getLineData(ele.parentNode.parentNode.parentNode);
+}
+// 从 <li> 元素提取歌曲信息
+function getLineData(infoele) {
+    if (infoele == undefined) return null;
+    let picele = infoele.querySelector(".list-left-img");
+    let pic = undefined;
+    if (picele != undefined) pic = picele.src;
+    return {
+        ele: infoele,
+        songid: infoele.getAttribute("songid"),
+        songname: infoele.getAttribute("songname"),
+        singer: infoele.getAttribute("singer"),
+        singerid: infoele.getAttribute("singerid"),
+        album: infoele.getAttribute("album"),
+        albumid: infoele.getAttribute("albumid"),
+        pic
+    };
+}
 
 function btn_seeSinger(ele) {
-    let infoele = ele.parentNode.parentNode.parentNode;
-    // let songid = infoele.getAttribute("songid");
-    // let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    list_singer_gui(singer, singerid, true);
+    let info = readLineInfo(ele);
+    list_singer_gui(info.singer, info.singerid, true);
 }
 function btn_seeAlbum(ele) {
-    let infoele = ele.parentNode.parentNode.parentNode;
-    // let songid = infoele.getAttribute("songid");
-    // let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let album = infoele.getAttribute("album");
-    let albumid = infoele.getAttribute("albumid");
-    list_alarm_gui(singer, singerid, album, albumid, true);
+    let info = readLineInfo(ele);
+    list_alarm_gui(info.singer, info.singerid, info.album, info.albumid, true);
 }
 
 function btn_watchVideo(ele, isRootNode = false, reloadSuggest = true) {
-    let infoele = undefined;
-    if (isRootNode) {
-        if (ele.classList.contains("playing")) {
-            return;
-            // 已经播放
-        }
-        infoele = ele;
-    }
-    else infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-
-    let hasmv = infoele.getAttribute("hasmv");
-    let songid = hasmv
+    let info = readLineInfo(ele, isRootNode);
+    if (info == null) return;
+    let hasmv = info.ele.getAttribute("hasmv");
+    // 若有 MV ID，优先播放 MV
+    let songid = hasmv;
     if (!(hasmv != false && hasmv != "false" && hasmv != null && hasmv != "null" && hasmv != "" && hasmv != 1 && hasmv != true && hasmv != "true")) {
-        songid = infoele.getAttribute("songid");
+        songid = info.songid;
     }
-    let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let albumid = infoele.getAttribute("albumid");
-
-    // console.log(songname)
-    watchVideo(songid, songname, singer, singerid, albumid, reloadSuggest);
+    watchVideo(songid, info.songname, info.singer, info.singerid, info.albumid, reloadSuggest);
 }
 function btn_shareURL(ele) {
-    infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
-    let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let album = infoele.getAttribute("album");
-    let albumid = infoele.getAttribute("albumid");
-    shareEventHandler(songid, songname, singer, album)
-
+    let info = readLineInfo(ele);
+    shareEventHandler(info.songid, info.songname, info.singer, info.album)
 }
 function shareEventHandler(songid, songname, singer, album) {
     let brE = document.createElement("br");
@@ -493,52 +479,15 @@ function closeDialog() {
     document.getElementById("dialog-root").style.display = "none";
 }
 function btn_playMusic(ele, openGUI = false, isRootNode = false) {
-    let infoele = undefined;
-    if (isRootNode) {
-        if (ele.classList.contains("playing")) {
-            return;
-            // 已经播放
-        }
-        infoele = ele;
-    }
-    else infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
-    let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let album = infoele.getAttribute("album");
-    let albumid = infoele.getAttribute("albumid");
-    let picele = infoele.querySelector(".list-left-img");
-    let pic = undefined;
-    if (picele != undefined) pic = picele.src;
-    addToList({ name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic }, -1, true, openGUI);
-    // console.log(songname)
-    // play_music_id(songid, openGUI);
+    let info = readLineInfo(ele, isRootNode);
+    if (info == null) return;
+    addToList({ name: info.songname, singer: info.singer, singerid: info.singerid, album: info.album, albumid: info.albumid, id: info.songid, pic: info.pic }, -1, true, openGUI);
 }
 function btn_addtoList(ele, openGUI = false, isRootNode = false) {
-    let infoele = undefined;
-    if (isRootNode) {
-        if (ele.classList.contains("playing")) {
-            return;
-            // 已经播放
-        }
-        infoele = ele;
-    }
-    else infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
-    let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let album = infoele.getAttribute("album");
-    let albumid = infoele.getAttribute("albumid");
-    let picele = infoele.querySelector(".list-left-img");
-    let pic = undefined;
-    if (picele != undefined) pic = picele.src;
-    addToList({ name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic }, -1);
-    show_msg("已添加【" + songname + "】到播放列表", 1000);
-    // console.log(songname)
+    let info = readLineInfo(ele, isRootNode);
+    if (info == null) return;
+    addToList({ name: info.songname, singer: info.singer, singerid: info.singerid, album: info.album, albumid: info.albumid, id: info.songid, pic: info.pic }, -1);
+    show_msg("已添加【" + info.songname + "】到播放列表", 1000);
 }
 var PlayListPaneState = false;
 function showPlayList(show_or_hide) {
@@ -612,12 +561,23 @@ function showHideMusicPlayerPane(show_or_hide, exit_fullscreen = false, fromCont
 }
 //small-music-control
 
-window.onresize = windowsOnResize;
+// resize 用一帧一次合并：原来拖动窗口时每个事件都要读两次 clientHeight（强制同步排版）、
+// 写两次 :root 变量（整文档样式失效）并重排一次歌词，60Hz 地重复。
+var resizeRAF = 0;
+window.onresize = function () {
+    if (resizeRAF != 0) return;
+    resizeRAF = requestAnimationFrame(function () {
+        resizeRAF = 0;
+        windowsOnResize();
+    });
+};
 function windowsOnResize() {
     let h = LRC_root_obj.clientHeight;
     let w = LRC_root_obj.clientWidth;
     document.documentElement.style.setProperty(`--lrc-client-height`, h + 'px');
     document.documentElement.style.setProperty(`--lrc-client-width`, w + 'px');
+    // 容器尺寸变了，歌词的居中/滚动上限要用新值重算
+    if (typeof lrcInvalidateGeometry == "function") lrcInvalidateGeometry();
     if (choose_lrc)
         choose_lrc(musicPlayerObj.currentTime, true);
 }
@@ -628,6 +588,8 @@ function set_globle_css_var() {
     document.documentElement.style.setProperty(`--sellineheight`, lrc_selected_line_height + "px");
     document.documentElement.style.setProperty(`--norfontsize`, lrc_normal_font_size + "px");
     document.documentElement.style.setProperty(`--selfontsize`, lrc_selected_font_size + "px");
+    // 行高/字号改了，歌词的几何缓存要作废
+    if (typeof lrcInvalidateGeometry == "function") lrcInvalidateGeometry();
     // document.documentElement.style.setProperty(`--lrc-client-width`, w + 'px');
     // --norlrccolor: rgb(209, 209, 209);
     // --sellrccolor: rgb(23, 236, 148);
@@ -764,16 +726,26 @@ function saveBackgroundImageSample(value) {
 function GetFullscreen() {
     document.querySelector("#win-playing").requestFullscreen();
 }
-function Sdwoijnjudhewhgfryhgrh32r3726tyr46723tyf3w42e7t(i, idx, root) {
+// 渲染"个人中心"里的一个收藏夹行
+function renderLoveListItem(folderId, idx, root) {
+    if (userLoves[folderId] == undefined) userLoves[folderId] = { lists: [] };
 
     let linef = document.createElement("li");
     linef.id = "star-list-" + idx;
+    // 只有用户自建的收藏夹可参与排序：默认/稍后再听固定在最前面
+    let sortable = (folderId != "default" && folderId != "later");
+    if (sortable) linef.setAttribute("data-sortable", "1");
+    if (loveSortMode && sortable) {
+        let handle = document.createElement("span");
+        handle.className = "drag-handle fa fa-bars";
+        handle.setAttribute("title", "拖动排序");
+        linef.appendChild(handle);
+    }
     let line = document.createElement("div");
     line.classList.add("star-list-text-root");
     line.setAttribute("idx", idx);
-    line.setAttribute("pid", i);
+    line.setAttribute("pid", folderId);
 
-    if (userLoves[i] == undefined) userLoves[i] = { lists: [] };
     let indexname = document.createElement("span");
     indexname.innerText = (idx + 1);
     indexname.classList.add("l-idx")
@@ -782,38 +754,495 @@ function Sdwoijnjudhewhgfryhgrh32r3726tyr46723tyf3w42e7t(i, idx, root) {
         show_star_detail(this, true);
     }
     songname.classList.add("songname");
-    if (i == 'default') songname.innerText = "默认收藏夹";
-    else if (i == 'later') songname.innerText = "稍后再听";
+    if (folderId == 'default') songname.innerText = "默认收藏夹";
+    else if (folderId == 'later') songname.innerText = "稍后再听";
     else
-        songname.innerText = i;
-    songname.innerText += " (" + userLoves[i].lists.length + ")";
+        songname.innerText = folderId;
+    songname.innerText += " (" + userLoves[folderId].lists.length + ")";
     line.appendChild(indexname);
     line.appendChild(songname);
     let actionbar = document.createElement("div");
     actionbar.classList.add("action-bar");
-    actionbar.setAttribute("pid", i);
-    let actioncode = ``;
-    actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="addStarListToPlaying(this,true);">`;
-    actioncode += `<button title="添加到列表" class="button btn-play fa fa-plus-circle btn-add-list" onclick="addStarListToPlaying(this,false);">`;
-    actioncode += `<button title="详情" class="button btn-info fa fa-info-circle" onclick="show_star_detail(this);">`;
-    actioncode += `<button title="删除" class="button fa fa-remove" onclick="removeStarList(this);"></button>`;
-    actionbar.innerHTML = actioncode;
+    actionbar.setAttribute("pid", folderId);
+    actionbar.innerHTML = `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="addStarListToPlaying(this,true);">`
+        + `<button title="添加到列表" class="button btn-play fa fa-plus-circle btn-add-list" onclick="addStarListToPlaying(this,false);">`
+        + `<button title="详情" class="button btn-info fa fa-info-circle" onclick="show_star_detail(this);">`
+        + `<button title="删除" class="button fa fa-remove" onclick="removeStarList(this);"></button>`;
     linef.appendChild(line);
     linef.appendChild(actionbar);
     root.appendChild(linef);
-    idx++;
 }
 function ReloadLoveListUI() {
     let root = document.getElementById("lover-displayer");
     root.innerHTML = "";
+    if (loveSortMode) root.classList.add("sort-armed"); else root.classList.remove("sort-armed");
     let idx = 2;
-    //
-    Sdwoijnjudhewhgfryhgrh32r3726tyr46723tyf3w42e7t("default", 0, root);
-    Sdwoijnjudhewhgfryhgrh32r3726tyr46723tyf3w42e7t("later", 1, root);
-    //
+    renderLoveListItem("default", 0, root);
+    renderLoveListItem("later", 1, root);
+    let userFolders = 0;
     for (var i in userLoves) {
         if (i == 'default' || i == 'later') continue;
-        Sdwoijnjudhewhgfryhgrh32r3726tyr46723tyf3w42e7t(i, idx++, root);
+        renderLoveListItem(i, idx++, root);
+        userFolders++;
+    }
+    if (userFolders === 0) {
+        let hint = document.createElement("div");
+        hint.className = "list-item unable-sel";
+        hint.innerText = "还没有自建收藏夹。在列表或播放页点星标就能添加收藏。";
+        root.appendChild(hint);
+    }
+    let sub = document.getElementById("love-subtitle");
+    if (sub != null) sub.innerText = "收藏列表（共 " + loveTotalCount() + " 首）";
+}
+
+/* ---------- 收藏夹（个人中心里的列表）手动排序 ---------- */
+var loveSortMode = false;
+var loveSortable = null;
+
+function getLoveSortable() {
+    if (loveSortable == null) {
+        loveSortable = createSortList({
+            container: document.getElementById("lover-displayer"),
+            // 只把带 data-sortable 的行当可拖项，所以拖不到"默认/稍后再听"前面去
+            itemSelector: "li[data-sortable]",
+            handleClass: "drag-handle",
+            scroller: document.getElementById("win-account"),
+            onCommit: function (from, to) { moveLoveFolderByIndex(from, to); }
+        });
+    }
+    return loveSortable;
+}
+function toggleLoveSort(force) {
+    let next = (force === undefined) ? !loveSortMode : !!force;
+    if (next === loveSortMode) return;
+    loveSortMode = next;
+    let btn = document.getElementById("btn-love-sort");
+    if (btn != null) btn.classList.toggle("sort-on", next);
+    if (next) getLoveSortable().arm(); else getLoveSortable().disarm();
+    ReloadLoveListUI();
+    show_msg(next ? "排序模式：拖动手柄调整收藏夹顺序" : "已退出排序模式", 1800);
+}
+/** 收藏夹的显示顺序就是 userLoves 里字符串键的插入顺序（default/later 固定在最前）。 */
+function moveLoveFolderByIndex(from, to) {
+    let root = document.getElementById("lover-displayer");
+    let rows = Array.prototype.slice.call(root.querySelectorAll(":scope > li[data-sortable]"));
+    let pidAt = function (i) {
+        let row = rows[i];
+        if (row == null) return null;
+        let el = row.querySelector("[pid]");
+        return el == null ? null : el.getAttribute("pid");
+    };
+    let fromPid = pidAt(from), toPid = pidAt(to);
+    if (fromPid == null || toPid == null || fromPid === toPid) return;
+    let keys = Object.keys(userLoves).filter(function (k) { return k !== "default" && k !== "later"; });
+    let f = keys.indexOf(fromPid), t = keys.indexOf(toPid);
+    if (f < 0 || t < 0 || f === t) return;
+    keys.splice(t, 0, keys.splice(f, 1)[0]);
+    let rebuilt = { default: userLoves["default"], later: userLoves["later"] };
+    for (let i = 0; i < keys.length; i++) rebuilt[keys[i]] = userLoves[keys[i]];
+    userLoves = rebuilt;
+    ReloadLoveListUI();
+    saveUserLoves();
+    show_msg("收藏夹顺序已保存", 1200);
+}
+
+/* ---------- 收藏详情（某个收藏夹里的歌曲）手动排序 ---------- */
+var starSortMode = false;
+var starSortable = null;
+var starFilterText = "";
+
+function getStarSortable() {
+    if (starSortable == null) {
+        starSortable = createSortList({
+            container: document.getElementById("playlist-item-head"),
+            itemSelector: "li",
+            handleClass: "drag-handle",
+            // 行高不固定、还夹着 .pretty-hr 分隔符：只移动被拖的那一行更清楚
+            shiftOthers: false,
+            onCommit: function (from, to) { moveStarItem(from, to); }
+        });
+    }
+    return starSortable;
+}
+function attachStarHandles() {
+    let rows = document.getElementById("playlist-item-head").querySelectorAll(":scope > li");
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].querySelector(".drag-handle") == null) {
+            let h = document.createElement("span");
+            h.className = "drag-handle fa fa-bars";
+            h.setAttribute("title", "拖动排序");
+            rows[i].insertBefore(h, rows[i].firstChild);
+        }
+    }
+}
+function removeStarHandles() {
+    let hs = document.getElementById("playlist-item-head").querySelectorAll(".drag-handle");
+    for (let i = 0; i < hs.length; i++) hs[i].parentNode.removeChild(hs[i]);
+}
+/** 每页追加都会留一个"没有更多了"提示，只保留最后一个。 */
+function trimStarEndHints() {
+    let root = document.getElementById("playlist-item-head");
+    let hints = root.querySelectorAll(".list-no-more");
+    for (let i = 0; i < hints.length - 1; i++) hints[i].parentNode.removeChild(hints[i]);
+}
+/** 排序前必须把没加载的页补齐：否则只能在已渲染的 20 首里排。 */
+function ensureStarRowsLoaded() {
+    if (l_type !== "star") return;
+    let folder = userLoves[l_playlistid];
+    if (folder == undefined || !Array.isArray(folder.lists)) return;
+    let totalPages = Math.max(1, Math.ceil(folder.lists.length / PAGESIZE));
+    if (l_page >= totalPages) return;
+    for (let p = l_page + 1; p <= totalPages; p++) {
+        treat_star_detail(l_playlistid, "star", false, p);
+    }
+    l_page = totalPages;
+    trimStarEndHints();
+}
+function toggleStarSort(force) {
+    let next = (force === undefined) ? !starSortMode : !!force;
+    if (next === starSortMode) return;
+    if (next && l_type !== "star") {
+        show_msg("排序模式只在收藏夹里可用", 1500);
+        return;
+    }
+    starSortMode = next;
+    let btn = document.getElementById("btn-star-sort");
+    if (btn != null) btn.classList.toggle("sort-on", next);
+    let root = document.getElementById("playlist-item-head");
+    let filterInput = document.getElementById("star-filter-input");
+    if (next) {
+        // 筛选会把行藏起来（隐藏的行没有矩形，落点会算错），所以排序期间关闭筛选并清空
+        starFilterText = "";
+        if (filterInput != null) { filterInput.value = ""; filterInput.disabled = true; }
+        applyStarFilter("");
+        ensureStarRowsLoaded();
+        attachStarHandles();
+        root.classList.add("sort-armed");
+        getStarSortable().arm();
+        let n = root.querySelectorAll(":scope > li").length;
+        show_msg("排序模式：拖动手柄调整顺序（共 " + n + " 首）", 2200);
+    } else {
+        getStarSortable().disarm();
+        root.classList.remove("sort-armed");
+        removeStarHandles();
+        if (filterInput != null) filterInput.disabled = false;
+        show_msg("已退出排序模式", 1500);
+    }
+}
+function moveStarItem(from, to) {
+    if (from === to) return;
+    let folder = userLoves[l_playlistid];
+    if (folder == undefined || !Array.isArray(folder.lists)) return;
+    if (from < 0 || to < 0 || from >= folder.lists.length || to >= folder.lists.length) return;
+    folder.lists.splice(to, 0, folder.lists.splice(from, 1)[0]);
+    folder.lastUpdatedTime = formatDateTime(new Date());
+    // 行内按钮把下标写死在 onclick 里，落定后必须重渲染（并保持已加载的页数）
+    starRerenderAll();
+    saveUserLoves();
+}
+/* ---------- 收藏：批量操作 / 收藏夹管理 / 导入导出 / 失效清理 ---------- */
+
+// 这两个是"虚拟收藏夹"，不能重命名也不能删（原来删掉默认收藏夹会连歌一起消失且毫无痕迹）
+var LOVE_FIXED_FOLDERS = ["default", "later"];
+var starBatchMode = false;
+
+function loveTotalCount() {
+    let n = 0;
+    for (let k in userLoves) {
+        if (userLoves[k] != null && Array.isArray(userLoves[k].lists)) n += userLoves[k].lists.length;
+    }
+    return n;
+}
+/** 重渲染收藏详情并保持已加载的页数（treat_star_detail 自己不清空容器，这里手动清）。 */
+function starRerenderAll() {
+    let pages = Math.max(1, l_page);
+    l_page = 1;
+    document.getElementById("playlist-item-head").innerHTML = "";
+    treat_star_detail(l_playlistid, "star", true, 1);
+    for (let p = 2; p <= pages; p++) treat_star_detail(l_playlistid, "star", false, p);
+    l_page = pages;
+    trimStarEndHints();
+    let root = document.getElementById("playlist-item-head");
+    if (starSortMode) {
+        root.classList.add("sort-armed");
+        attachStarHandles();
+    }
+    if (starBatchMode) root.classList.add("batch-mode");
+}
+/** 收藏夹专属工具（排序/重命名按钮、筛选与批量工具行）只在该收藏夹详情里显示。 */
+function setStarToolsVisible(visible) {
+    let win = document.getElementById("win-musiclist");
+    if (win != null) win.classList.toggle("star-bar-on", !!visible);
+    if (!visible) {
+        // 切到专辑/搜索列表时把这两种模式一并关掉，避免勾选状态残留
+        if (starBatchMode) toggleStarBatchMode(false);
+        if (starSortMode) toggleStarSort(false);
+        applyStarFilter("");
+        let input = document.getElementById("star-filter-input");
+        if (input != null) input.value = "";
+    }
+}
+function toggleStarBatchMode(force) {
+    let next = (force === undefined) ? !starBatchMode : !!force;
+    if (next === starBatchMode) return;
+    if (next && l_type !== "star") {
+        show_msg("批量操作只在收藏夹里可用", 1500);
+        return;
+    }
+    if (next && starSortMode) toggleStarSort(false);   // 两种模式互斥
+    starBatchMode = next;
+    let bar = document.getElementById("star-batch-bar");
+    let root = document.getElementById("playlist-item-head");
+    if (bar != null) bar.classList.toggle("batch-mode", next);
+    root.classList.toggle("batch-mode", next);
+    // 与「探索」里的批量条一致：进入后收起开关、展开动作条；退出用动作条里的「完成」
+    let toggle = document.getElementById("btn-star-batch-toggle");
+    if (toggle != null) toggle.style.display = next ? "none" : "inline-block";
+    let actions = document.getElementById("star-batch-actions");
+    if (actions != null) actions.style.display = next ? "flex" : "none";
+    if (!next) setStarSelection([]);
+    show_msg(next ? "批量操作：勾选歌曲后选择动作（点「完成」退出）" : "已退出批量操作", 1600);
+}
+// 批量模式下点击条目空白区域 = 点击选择框（与「探索」列表里的行为一致）
+document.getElementById("playlist-item-head").addEventListener("click", function (e) {
+    if (!starBatchMode) return;
+    let li = e.target.closest("li");
+    if (li == null) return;
+    // 交互元素（按钮/链接/勾选框/歌曲名等）保持原有行为
+    if (e.target.closest("button, a, .batch-select, .song-name")) return;
+    let box = li.querySelector(".batch-select");
+    if (box == null) return;
+    box.checked = !box.checked;
+    li.classList.toggle("selected", box.checked);
+});
+function starRowIds(onlySelected) {
+    let rows = document.getElementById("playlist-item-head").querySelectorAll(":scope > li");
+    let out = [];
+    for (let i = 0; i < rows.length; i++) {
+        let box = rows[i].querySelector(".batch-select");
+        if (box == null) continue;
+        if (onlySelected && !box.checked) continue;
+        let id = rows[i].getAttribute("songid");
+        if (id != null && id !== "") out.push(id);
+    }
+    return out;
+}
+function setStarSelection(ids) {
+    let set = new Set(ids);
+    let rows = document.getElementById("playlist-item-head").querySelectorAll(":scope > li");
+    for (let i = 0; i < rows.length; i++) {
+        let box = rows[i].querySelector(".batch-select");
+        if (box == null) continue;
+        box.checked = set.has(String(rows[i].getAttribute("songid")));
+        rows[i].classList.toggle("selected", box.checked);
+    }
+}
+/** 全选／全不选（与「探索」里的 selectAllResults 同款）。
+ *  会先把没加载的页补齐，这样"全选"才是真的全部，而不是只选当前这一页。 */
+function starSelectAll(select) {
+    ensureStarRowsLoaded();
+    let rows = document.getElementById("playlist-item-head").querySelectorAll(":scope > li");
+    let n = 0;
+    for (let i = 0; i < rows.length; i++) {
+        let box = rows[i].querySelector(".batch-select");
+        if (box == null) continue;
+        box.checked = !!select;
+        rows[i].classList.toggle("selected", !!select);
+        n++;
+    }
+    show_msg(select ? ("已选中全部 " + n + " 首") : "已取消全选", 1400);
+}
+function starBatchDelete() {
+    let ids = starRowIds(true);
+    if (ids.length === 0) { show_msg("请先勾选歌曲", 1400); return; }
+    if (!confirm("确认从收藏夹移除选中的 " + ids.length + " 首吗？")) return;
+    let set = new Set(ids);
+    let folder = userLoves[l_playlistid];
+    folder.lists = folder.lists.filter(function (x) { return !set.has(String(x.id)); });
+    folder.lastUpdatedTime = formatDateTime(new Date());
+    starRerenderAll();
+    saveUserLoves();
+    show_msg("已移除 " + ids.length + " 首", 1600);
+}
+function starBatchMoveTo() {
+    let ids = starRowIds(true);
+    if (ids.length === 0) { show_msg("请先勾选歌曲", 1400); return; }
+    let names = Object.keys(userLoves).filter(function (k) { return k !== l_playlistid; });
+    if (names.length === 0) { show_msg("没有其它收藏夹可移动", 1500); return; }
+    let target = prompt("移动到哪个收藏夹？（输入名称）\n现有：" + names.join("、"), names[0]);
+    if (target == null || String(target).trim() === "") return;
+    target = String(target).trim();
+    if (target === l_playlistid) { show_msg("已经在当前收藏夹里", 1500); return; }
+    if (userLoves[target] == undefined || !Array.isArray(userLoves[target].lists)) { show_msg("没有这个收藏夹：" + target, 1800); return; }
+    let set = new Set(ids);
+    let folder = userLoves[l_playlistid];
+    let moving = folder.lists.filter(function (x) { return set.has(String(x.id)); });
+    folder.lists = folder.lists.filter(function (x) { return !set.has(String(x.id)); });
+    userLoves[target].lists = userLoves[target].lists.concat(moving);
+    userLoves[target].lastUpdatedTime = formatDateTime(new Date());
+    folder.lastUpdatedTime = formatDateTime(new Date());
+    starRerenderAll();
+    saveUserLoves();
+    show_msg("已移动 " + moving.length + " 首到「" + target + "」", 1800);
+}
+function starBatchAddToPlaying() {
+    let ids = starRowIds(true);
+    if (ids.length === 0) { show_msg("请先勾选歌曲", 1400); return; }
+    let set = new Set(ids);
+    let adding = userLoves[l_playlistid].lists.filter(function (x) { return set.has(String(x.id)); });
+    playing_list = playing_list.concat(adding);
+    reloadPlayingList(false, true, false);
+    saveUserLoves();
+    show_msg("已加入播放列表：" + adding.length + " 首", 1600);
+}
+function loveRenameFolderById(pid) {
+    if (pid == null) { show_msg("请先打开一个收藏夹", 1500); return; }
+    if (LOVE_FIXED_FOLDERS.indexOf(pid) >= 0) { show_msg("默认收藏夹与稍后再听不能重命名", 1800); return; }
+    if (userLoves[pid] == undefined) return;
+    let name = prompt("新的收藏夹名称：", pid);
+    if (name == null) return;
+    name = String(name).trim();
+    if (name === "") { show_msg("名称不能为空", 1500); return; }
+    if (name === pid) return;
+    if (userLoves[name] != undefined || LOVE_FIXED_FOLDERS.indexOf(name) >= 0) { show_msg("已存在同名收藏夹", 1700); return; }
+    // 收藏夹名称就是存储键：换键时按原顺序重建，避免顺序被打乱
+    let rebuilt = {};
+    let keys = Object.keys(userLoves);
+    for (let i = 0; i < keys.length; i++) rebuilt[keys[i] === pid ? name : keys[i]] = userLoves[keys[i]];
+    userLoves = rebuilt;
+    if (l_type === "star" && l_playlistid === pid) show_star_detail_id(name);
+    ReloadLoveListUI();
+    saveUserLoves();
+    show_msg("已重命名为「" + name + "」", 1800);
+}
+function loveExportFile() {
+    try {
+        let text = JSON.stringify({ version: 2, exportedAt: formatDateTime(new Date()), loves: userLoves }, null, 2);
+        let blob = new Blob([text], { type: "application/json" });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "bamboo-loves-" + formatDateTime(new Date()).replace(/[^0-9]/g, "") + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+        show_msg("已导出 " + loveTotalCount() + " 首收藏", 2200);
+    } catch (e) {
+        console.error(e);
+        show_msg("导出失败：" + e, 2600);
+    }
+}
+function loveImportFile(input) {
+    let file = (input && input.files) ? input.files[0] : null;
+    if (file == null) return;
+    let reader = new FileReader();
+    reader.onload = function () {
+        input.value = "";   // 允许再次选择同一个文件
+        let data = null;
+        try { data = JSON.parse(String(reader.result)); } catch (e) { data = null; }
+        if (data == null) { show_msg("文件不是合法的 JSON", 2500); return; }
+        let incoming = (data.loves != null) ? data.loves : data;   // 兼容直接导出的 userLoves
+        let clean = normalizeUserLoves(incoming);
+        let count = 0;
+        for (let k in clean) count += clean[k].lists.length;
+        if (count === 0) { show_msg("文件里没有收藏数据", 2200); return; }
+        let merge = confirm("文件里有 " + count + " 首收藏。\n点“确定”＝合并进现有收藏（同 id 不重复）\n点“取消”＝用文件内容替换全部收藏");
+        if (merge) {
+            for (let folder in clean) {
+                if (userLoves[folder] == undefined) userLoves[folder] = { lists: [], lastUpdatedTime: "Unknown" };
+                if (!Array.isArray(userLoves[folder].lists)) userLoves[folder].lists = [];
+                let have = new Set(userLoves[folder].lists.map(function (x) { return String(x.id); }));
+                let list = clean[folder].lists;
+                for (let i = 0; i < list.length; i++) {
+                    if (have.has(String(list[i].id))) continue;
+                    userLoves[folder].lists.push(list[i]);
+                }
+                userLoves[folder].lastUpdatedTime = formatDateTime(new Date());
+            }
+        } else {
+            userLoves = clean;
+        }
+        ReloadLoveListUI();
+        saveUserLoves();
+        show_msg("导入完成，现有 " + loveTotalCount() + " 首", 2500);
+    };
+    reader.readAsText(file);
+}
+/** 清理失效条目：逐首问一次本地接口，返回 404 的就是已经搜不到的。 */
+function loveCleanStale() {
+    let ids = [];
+    let seen = new Set();
+    for (let k in userLoves) {
+        let lists = Array.isArray(userLoves[k].lists) ? userLoves[k].lists : [];
+        for (let i = 0; i < lists.length; i++) {
+            let id = String(lists[i].id);
+            if (seen.has(id)) continue;
+            seen.add(id);
+            ids.push(id);
+        }
+    }
+    if (ids.length === 0) { show_msg("收藏是空的", 1500); return; }
+    if (!confirm("将逐首检查 " + ids.length + " 首是否还能找到（会请求本地接口）。开始？")) return;
+    show_msg("正在检查 0 / " + ids.length + " …", 2000);
+    let stale = new Set();
+    let done = 0, idx = 0, running = 0;
+    let concurrency = 8;
+    let finish = function () {
+        if (stale.size === 0) { show_msg("没有发现失效条目", 2200); return; }
+        if (!confirm("发现 " + stale.size + " 首已经搜不到了，要移除它们吗？")) { show_msg("已取消", 1200); return; }
+        for (let k in userLoves) {
+            userLoves[k].lists = (userLoves[k].lists || []).filter(function (x) { return !stale.has(String(x.id)); });
+        }
+        ReloadLoveListUI();
+        saveUserLoves();
+        show_msg("已移除 " + stale.size + " 首失效条目", 2500);
+    };
+    let pump = function () {
+        while (running < concurrency && idx < ids.length) {
+            let id = ids[idx++];
+            running++;
+            $.fetch(localUrlRoot + "local.php?type=info&value=" + encodeURIComponent(id), "json")
+                .then(function (j) {
+                    if (j == null || j.code == 404 || j.data == null || j.data.info == null) stale.add(id);
+                })
+                .catch(function () { })
+                .then(function () {
+                    running--;
+                    done++;
+                    if (done % 10 === 0 || done === ids.length) show_msg("正在检查 " + done + " / " + ids.length + " …", 1200);
+                    if (done >= ids.length) finish();
+                    else pump();
+                });
+        }
+    };
+    pump();
+}
+
+function applyStarFilter(text) {
+    starFilterText = (text == null) ? "" : String(text);
+    let root = document.getElementById("playlist-item-head");
+    if (root == null) return;
+    let kw = starFilterText.trim().toLowerCase();
+    let rows = root.querySelectorAll(":scope > li");
+    let shown = 0;
+    for (let i = 0; i < rows.length; i++) {
+        let li = rows[i];
+        let hay = ((li.getAttribute("songname") || "") + " " + (li.getAttribute("singer") || "") + " " + (li.getAttribute("album") || "")).toLowerCase();
+        let ok = (kw === "" || hay.indexOf(kw) >= 0);
+        li.style.display = ok ? "" : "none";
+        if (ok) shown++;
+    }
+    let hint = document.getElementById("star-filter-empty");
+    if (kw !== "" && shown === 0 && rows.length > 0) {
+        if (hint == null) {
+            hint = document.createElement("div");
+            hint.id = "star-filter-empty";
+            hint.className = "list-no-more unable-sel";
+            hint.innerText = "没有匹配的歌曲。";
+            root.appendChild(hint);
+        }
+    } else if (hint != null && hint.parentNode != null) {
+        hint.parentNode.removeChild(hint);
     }
 }
 function changeOrder(ele) {
@@ -834,60 +1263,30 @@ function btn_addStar_now() {
     openAddStarDialog(oLRC.info, 'music');
 }
 function btn_removeStar(ele, type, isRootNode = false) {
-    let infoele = undefined;
-    if (isRootNode) {
-        if (ele.classList.contains("playing")) {
-            return;
-            // 已经播放
-        }
-        infoele = ele;
-    }
-    else infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
-    let songname = infoele.getAttribute("songname");
-    let starId = infoele.getAttribute("starid");
+    let info = readLineInfo(ele, isRootNode);
+    if (info == null) return;
+    let starId = info.ele.getAttribute("starid");
     if (userLoves[starId] == undefined) return;
     let flag = false;
     for (let i in userLoves[starId].lists) {
-        if (userLoves[starId].lists[i].id == songid) {
+        if (userLoves[starId].lists[i].id == info.songid) {
             userLoves[starId].lists.splice(i, 1);
             flag = true;
             break;
         }
     }
     if (flag) {
-        show_msg("成功将“" + songname + "”从收藏夹“" + starId + "”删除", 1000);
-        ele.parentNode.parentNode.parentNode.remove();
+        show_msg("成功将“" + info.songname + "”从收藏夹“" + starId + "”删除", 1000);
+        info.ele.remove();
         saveUserLoves();
     } else {
-        show_msg("无法删除“" + songname + "”。无法从收藏夹“" + starId + "”找到此歌曲。", 1000);
+        show_msg("无法删除“" + info.songname + "”。无法从收藏夹“" + starId + "”找到此歌曲。", 1000);
     }
-
-    // ele.remove();
 }
 function btn_addStar(ele, type = 'music', isRootNode = false) {
-    let infoele = undefined;
-    if (isRootNode) {
-        if (ele.classList.contains("playing")) {
-            return;
-            // 已经播放
-        }
-        infoele = ele;
-    }
-    else infoele = ele.parentNode.parentNode.parentNode;
-    // console.log(infoele)
-    let songid = infoele.getAttribute("songid");
-    let songname = infoele.getAttribute("songname");
-    let singer = infoele.getAttribute("singer");
-    let singerid = infoele.getAttribute("singerid");
-    let album = infoele.getAttribute("album");
-    let albumid = infoele.getAttribute("albumid");
-    let picele = infoele.querySelector(".list-left-img");
-    let pic = undefined;
-    if (picele != undefined) pic = picele.src;
-    let info = { name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic };
-    openAddStarDialog(info, type);
+    let info = readLineInfo(ele, isRootNode);
+    if (info == null) return;
+    openAddStarDialog({ name: info.songname, singer: info.singer, singerid: info.singerid, album: info.album, albumid: info.albumid, id: info.songid, pic: info.pic }, type);
 }
 function openAddStarDialog(info, type = 'music') {
     starInfoTemp = {};
@@ -929,10 +1328,14 @@ function wantAddUserLovers() {
     let options = rt.selectedOptions;
     for (let i = 0; i < options.length; i++) {
         addToUserLove(starInfoTemp, options[i].value, true)
+        if (options[i].value == l_playlistid && l_type == 'star') {
+            refrush_detail_list();
+        }
     }
     saveUserLoves();
     closeDialog();
     show_msg("添加收藏成功", 1000);
+
 }
 
 function addPlaylisttoLoves() {
@@ -945,6 +1348,12 @@ function addPlaylisttoLoves() {
 
 function removeStarList(ele) {
     let id = ele.parentNode.getAttribute("pid");
+    // 默认收藏夹/稍后再听是虚拟收藏夹：删掉它们等于把里面的歌一起丢掉（而且渲染时会当成空夹重建），
+    // 所以直接不允许删除。
+    if (id === "default" || id === "later") {
+        show_msg("默认收藏夹与稍后再听不能删除", 1800);
+        return;
+    }
     if (id != "" && id != undefined) {
         if (userLoves[id] != undefined) {
             if (userLoves[id].lists.length == 0) {
@@ -958,57 +1367,123 @@ function removeStarList(ele) {
     }
     saveUserLoves();
 }
-function wantAddLovesToList() {
-    let elements = document.getElementById("playlist-item-head").querySelectorAll("li");
-    if (elements.length == 0) return;
+// 读取指定列表容器当前所有歌曲行数据（仅保留可播放的歌曲，跳过专辑条目）
+function readAllListLines(rootId) {
+    let elements = document.getElementById(rootId).querySelectorAll("li");
     let infos = [];
     for (let i = 0; i < elements.length; i++) {
-        let infoele = elements[i];
-        let songid = infoele.getAttribute("songid");
-        let songname = infoele.getAttribute("songname");
-        let singer = infoele.getAttribute("singer");
-        let singerid = infoele.getAttribute("singerid");
-        let album = infoele.getAttribute("album");
-        let albumid = infoele.getAttribute("albumid");
-        let picele = infoele.querySelector(".list-left-img");
-        let pic = undefined;
-        if (picele != undefined) pic = picele.src;
-        let info = { name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic };
-        infos.push(info);
+        let d = getLineData(elements[i]);
+        if (d == null || d.songid == null || d.songid == "") continue;
+        infos.push({ name: d.songname, singer: d.singer, singerid: d.singerid, album: d.album, albumid: d.albumid, id: d.songid, pic: d.pic });
     }
+    return infos;
+}
+function wantAddLovesToList() {
+    let infos = readAllListLines("playlist-item-head");
+    if (infos.length == 0) return;
     openAddStarDialog(infos, "list");
 }
 function wantPlayListAddToList(clean = false) {
-    let elements = document.getElementById("playlist-item-head").querySelectorAll("li");
-    if (elements.length == 0) return;
+    let infos = readAllListLines("playlist-item-head");
+    if (infos.length == 0) return;
     if (clean) {
         playing_list = [];
         playing_idx = -1;
         playing_id = -1;
     }
-    for (let i = 0; i < elements.length; i++) {
-        let infoele = elements[i];
-        let songid = infoele.getAttribute("songid");
-        let songname = infoele.getAttribute("songname");
-        let singer = infoele.getAttribute("singer");
-        let singerid = infoele.getAttribute("singerid");
-        let album = infoele.getAttribute("album");
-        let albumid = infoele.getAttribute("albumid");
-        let picele = infoele.querySelector(".list-left-img");
-        let pic = undefined;
-        if (picele != undefined) pic = picele.src;
-        let info = { name: songname, singer: singer, singerid: singerid, album: album, albumid: albumid, id: songid, pic: pic };
-        playing_list.push(info);
-    }
+    playing_list = playing_list.concat(infos);
     reloadPlayingList();
     show_msg("添加到播放列表成功！", 1000)
+}
+
+// 搜索结果的批量操作
+var searchBatchMode = false;
+
+// 切换批量操作模式（显示/隐藏勾选框与批量按钮）
+function toggleBatchMode(force) {
+    searchBatchMode = (force !== undefined) ? !!force : !searchBatchMode;
+    let bar = document.getElementById("search-batch-bar");
+    bar.classList.toggle("batch-mode", searchBatchMode);
+    document.getElementById("list-item-head").classList.toggle("batch-mode", searchBatchMode);
+    document.getElementById("btn-batch-toggle").style.display = searchBatchMode ? "none" : "inline-block";
+    document.getElementById("batch-actions").style.display = searchBatchMode ? "flex" : "none";
+}
+
+// 全选 / 全不选当前已加载的搜索结果
+function selectAllResults(select) {
+    let boxes = document.querySelectorAll("#list-item-head .batch-select");
+    for (let i = 0; i < boxes.length; i++) {
+        boxes[i].checked = !!select;
+        let li = boxes[i].closest("li");
+        if (li != null) li.classList.toggle("selected", !!select);
+    }
+}
+
+// 批量模式下点击条目空白区域 = 点击选择框（切换选中）
+document.getElementById("list-item-head").addEventListener("click", function (e) {
+    if (!searchBatchMode) return;
+    let li = e.target.closest("li");
+    if (li == null) return;
+    // 交互元素（按钮/链接/勾选框/歌曲名等）保持原有行为
+    if (e.target.closest("button, a, .batch-select, .song-name")) return;
+    let box = li.querySelector(".batch-select");
+    if (box == null) return;
+    box.checked = !box.checked;
+    li.classList.toggle("selected", box.checked);
+});
+
+// 读取搜索列表中被勾选的歌曲行数据（跳过专辑条目与未勾选项）
+function getSelectedSearchLines() {
+    let elements = document.getElementById("list-item-head").querySelectorAll("li");
+    let infos = [];
+    for (let i = 0; i < elements.length; i++) {
+        let li = elements[i];
+        let box = li.querySelector(".batch-select");
+        if (box != null && !box.checked) continue;
+        let d = getLineData(li);
+        if (d == null || d.songid == null || d.songid == "") continue;
+        infos.push({ name: d.songname, singer: d.singer, singerid: d.singerid, album: d.album, albumid: d.albumid, id: d.songid, pic: d.pic });
+    }
+    return infos;
+}
+
+function addSearchResultsToList(clean = false) {
+    let infos = getSelectedSearchLines();
+    if (infos.length == 0) {
+        show_msg("请先勾选要操作的歌曲", 1500);
+        return;
+    }
+    if (clean) {
+        playing_list = [];
+        playing_idx = -1;
+        playing_id = -1;
+    }
+    playing_list = playing_list.concat(infos);
+    reloadPlayingList();
+    show_msg("已添加 " + infos.length + " 首歌曲到播放列表", 1000);
+}
+function wantSearchListAddToList() {
+    addSearchResultsToList(false);
+}
+function wantSearchListPlayNow() {
+    addSearchResultsToList(true);
+}
+function wantSearchListAddToLoves() {
+    let infos = getSelectedSearchLines();
+    if (infos.length == 0) {
+        show_msg("请先勾选要操作的歌曲", 1500);
+        return;
+    }
+    openAddStarDialog(infos, "list");
 }
 function addStarListToPlaying(ele, clear = false) {
     let id = ele.parentNode.getAttribute("pid");
     if (userLoves[id] == undefined) return;
     if (userLoves[id].lists.length <= 0) return;
     if (clear) {
-        playing_list = userLoves[id].lists;
+        // 必须拷贝：直接赋值会让 playing_list 和收藏夹的数组变成同一个对象，
+        // 于是"从播放列表删一首"会真的删掉收藏里的同一首，重排也会连带重排收藏。
+        playing_list = userLoves[id].lists.slice();
     } else {
         playing_list = playing_list.concat(userLoves[id].lists);
     }
@@ -1030,6 +1505,8 @@ function show_star_detail_id(id) {
     if (namei == 'later') namei = "稍后再听";
     if (namei == 'default') namei = "默认收藏夹";
     document.getElementById("list-album-name").innerText = "收藏夹：" + namei;
+    document.getElementById("list-album-name").title = "收藏夹：" + namei;
+
     document.getElementById("list-album-singer").innerText = "上次更新：" + userLoves[id].lastUpdatedTime;
     document.getElementById("list-album-singer").onclick = function () {
 
@@ -1038,180 +1515,32 @@ function show_star_detail_id(id) {
         changeWindow("search", true);
     }
     showWindow("musiclist", false);
+    // 换收藏夹时清掉上一次的筛选与排序模式，避免状态串场
+    if (starSortMode) toggleStarSort(false);
+    let input = document.getElementById("star-filter-input");
+    if (input != null) input.value = "";
+    applyStarFilter("");
     api_list_alarm(id, "star", true, 1);
 }
 function treat_star_detail(ppid, type, clean = true, page = 1) {
-    // let clean = true;
     let listRootObj = document.getElementById("playlist-item-head");
-    // listRootObj.innerHTML = "";
     l_playlistid = ppid;
     l_type = "star";
     l_page = page;
-    // console.log(page)
+    setStarToolsVisible(true);
     try {
         let keys = userLoves[ppid].lists;
         l_total = keys.length;
         for (var i in keys) {
             if (i < (page - 1) * PAGESIZE) continue;
             if (i >= (page) * PAGESIZE) break;
-            let liele = document.createElement("li");
-            // 存储信息
-            let linedata = keys[i];
-            let id = linedata['id'];
-            let name = linedata['name'];
-            let singer = linedata['singer'];
-            let singerid = linedata['singerid'];
-            let album = linedata['album'];
-            let albumid = linedata['albumid'];
-            let releasedata = undefined;
-            let hasaudio = true;
-            let hasmv = linedata['hasMv'];
-            let addition = linedata['addition'];
-            // let warning = linedata['warning'];
-
-            let pic = linedata['pic'];
-            if (pic == null || pic == "" || SETTING_VAR.NetworkSavingMode) {
-                pic = "./static/img/default_cd.png";
-            }
-            liele.setAttribute("songid", id);
-            liele.setAttribute("songname", name);
-            liele.setAttribute("singer", singer);
-            liele.setAttribute("singerid", singerid);
-            liele.setAttribute("album", album);
-            liele.setAttribute("albumid", albumid);
-            liele.setAttribute("releasedata", releasedata);
-            liele.setAttribute("starid", ppid);
-            liele.setAttribute("hasmv", hasmv);
-
-            // 显示信息
-            // 左侧：图片
-            let leftpart = document.createElement("div");
-            leftpart.classList.add("left-part");
-
-            let imgele = document.createElement("img");
-            imgele.classList.add("list-left-img");
-            imgele.src = pic;
-            leftpart.appendChild(imgele);
-            // 右侧：信息
-
-            let rightpart = document.createElement("div");
-            rightpart.classList.add("right-part");
-            let nameele = document.createElement("div");
-            let singerele = document.createElement("div");;
-            let albumele = document.createElement("div");;
-            let dataele = document.createElement("div");;
-            let additionele = document.createElement("div");
-            nameele.classList.add("list-line-ele");
-            singerele.classList.add("list-line-ele");
-            albumele.classList.add("list-line-ele");
-            dataele.classList.add("list-line-ele");
-            additionele.classList.add("list-line-ele");
-
-            // nameele.innerHTML = `<b>歌曲名：</b>`;
-            singerele.innerHTML = `<span class='small-gray-text'>相关人员：</span>`;
-            albumele.innerHTML = `<span class='small-gray-text'>专辑：</span>`;
-            dataele.innerHTML = `<span class='small-gray-text'>出版时间：</span>`;
-            additionele.innerHTML = `<span class='small-gray-text'>附加信息：</span>`;
-            let songnameobj = document.createElement("b");
-            songnameobj.classList.add("song-name");
-            songnameobj.innerText = name;
-            songnameobj.onclick = function () {
-                if (hasaudio)
-                    btn_playMusic(this, true);
-                else
-                    if ((hasmv != "" && hasmv != null && hasmv != false)) {
-                        btn_watchVideo(this);
-                    }
-            }
-            let singernameobj = document.createElement("a");
-            singernameobj.classList.add("singer-name");
-            // singernameobj.classList.add("")
-            singernameobj.onclick = function () {
-                btn_seeSinger(this);
-            }
-            singernameobj.innerText = singer;
-            let albumobj = document.createElement("a");
-            albumobj.classList.add("album-name");
-            albumobj.innerText = album;
-            albumobj.onclick = function () {
-                btn_seeAlbum(this);
-            }
-            let dataobj = document.createElement("span");
-            dataobj.classList.add("release-date");
-            dataobj.innerText = releasedata;
-            let additionobj = document.createElement("span");
-            additionobj.classList.add("addition-msg");
-            additionobj.innerText = addition;
-            // 添加文本
-            additionele.appendChild(additionobj);
-            nameele.appendChild(songnameobj);
-            singerele.appendChild(singernameobj);
-            albumele.appendChild(albumobj);
-            dataele.appendChild(dataobj);
-            // 添加对象
-            rightpart.appendChild(nameele);
-            rightpart.appendChild(singerele);
-            rightpart.appendChild(albumele);
-            if (releasedata != undefined && releasedata != "")
-                rightpart.appendChild(dataele);
-            if (addition != undefined && addition != "")
-                rightpart.appendChild(additionele);
-
-            // 控制按钮
-            let actionbar = document.createElement("div");
-            actionbar.classList.add("action-bar");
-            let actioncode = ``;
-            if (hasaudio) {
-                actioncode += `<button title="添加到播放列表" class="button btn-add-list fa fa-plus-circle" onclick="btn_addtoList(this);"></button>`;
-                actioncode += `<button title="立即播放" class="button btn-play fa fa-play-circle" onclick="btn_playMusic(this,false);">`;
-                if ((hasmv != "" && hasmv != null && hasmv != false)) {
-                    actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
-                }
-                actioncode += `<button title="添加到其他收藏夹" class="button fa fa-star" onclick="btn_addStar(this,'music');"></button>`;
-
-            } else {
-                if ((hasmv != "" && hasmv != null && hasmv != false)) {
-                    actioncode += `<button title="观看MV" class="button btn-add-list fa fa-tv" onclick="btn_watchVideo(this);"></button>`;
-                }
-            }
-
-            actioncode += `<button title="分享" class="button btn-add-list fa fa-share" onclick="btn_shareURL(this);"></button>`;
-            actioncode += `<button title="从收藏夹删除" class="button fa fa-trash" onclick="btn_removeStar(this,'music');"></button>`;
-            actionbar.innerHTML = actioncode;
-
-            rightpart.appendChild(actionbar);
-
-            liele.appendChild(leftpart);
-            liele.appendChild(rightpart);
-            // 添加成员
-
-            listRootObj.appendChild(liele);
+            // 收藏夹数据字段名与 API 不同（singer/singerid）
+            listRootObj.appendChild(createSongListItem(keys[i], { starMode: true, starid: ppid }));
             let hr = document.createElement("div");
             hr.classList.add("pretty-hr");
             listRootObj.appendChild(hr);
         }
-        if (keys.length == 0) {
-            if (clean) {
-                let ele = document.createElement("div");
-                ele.innerHTML = `<span class="text-not-found-error">很抱歉，什么都没有找到。这个收藏夹也许是空的。</span>`
-                listRootObj.appendChild(ele);
-            } else {
-                let ele = document.createElement("div");
-                ele.classList.add("list-no-more");
-                ele.innerHTML = "<span>没有更多了。</span>"
-                listRootObj.appendChild(ele);
-            }
-
-        } else {
-            if (l_page * PAGESIZE >= l_total) {
-                let ele = document.createElement("div");
-                ele.classList.add("list-no-more");
-                ele.innerHTML = "<span>没有更多了。</span>"
-                listRootObj.appendChild(ele);
-            }
-
-        }
-        // console.log(keys)
+        appendListEndHint(listRootObj, keys.length, l_total, l_page, clean, "很抱歉，什么都没有找到。这个收藏夹也许是空的。");
     } catch (e) {
         var errele = document.createElement("div");
         errele.innerHTML = `<h1>出现错误！</h1><span>${e}</span>`;

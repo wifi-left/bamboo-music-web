@@ -7,12 +7,12 @@
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
     <title id="web-title">Bamboo Music 竹子音乐</title>
-    <script src="./static/js/kuroshiro/kuroshiro.min.js"></script>
-    <script src="./static/js/kuroshiro/kuroshiro-analyzer-kuromoji.min.js" type="text/javascript"
+    <script defer src="./static/js/kuroshiro/kuroshiro.min.js"></script>
+    <script defer src="./static/js/kuroshiro/kuroshiro-analyzer-kuromoji.min.js" type="text/javascript"
         charset="utf-8"></script>
-    <script src="./static/js/checkie.js"></script>
-    <script src="./static/js/gquery.min.js"></script>
-    <script src="./default_settings.js"></script>
+    <script defer src="./static/js/checkie.js"></script>
+    <script defer src="./static/js/gquery.min.js"></script>
+    <script defer src="./default_settings.js"></script>
     <link href="./static/css/element_style.css" rel="stylesheet" />
     <link href="./static/css/font-awesome.min.css" rel="stylesheet" />
     <link href="./static/css/base.css" rel="stylesheet" />
@@ -201,6 +201,8 @@
                     onclick="addPlaylisttoLoves(this);"></button>
                 <button class="fa fa-sort-numeric-asc button playing-list-order" id="obj-order-type"
                     onclick="changeOrder(this);"></button>
+                <button class="fa fa-arrows-v button playing-list-sort" id="obj-sort-mode" title="手动排序"
+                    onclick="togglePlaylistSort();"></button>
                 <button class="fa fa-close button playing-list-close" onclick="showPlayList(false);"></button>
                 <button class="fa fa-trash button playing-list-removeall" onclick="clear_playing_list();"></button>
                 <div class="playing-list-father">
@@ -234,6 +236,34 @@
                         <span id="list-album-singer-root" class="small-gray-text">
                             相关人员：<b id="list-album-singer"></b>
                         </span>
+                    </div>
+                    <!-- 收藏夹的工具条：与「探索」里的批量条同一套结构与样式（batch-bar / batch-actions / 全选·全不选·完成） -->
+                    <div class="batch-bar star-batch-bar" id="star-batch-bar">
+                        <button class="button" title="手动排序（仅收藏夹）" id="btn-star-sort"
+                            onclick="toggleStarSort();"><span class="fa fa-arrows-v"></span>排序</button>
+                        <button class="button" title="重命名当前收藏夹" id="btn-star-rename"
+                            onclick="loveRenameFolderById(l_playlistid);"><span class="fa fa-pencil"></span>重命名</button>
+                        <input id="star-filter-input" class="input star-filter-input" placeholder="筛选…"
+                            oninput="applyStarFilter(this.value);" />
+                        <span class="batch-bar-sep"></span>
+                        <button class="button" id="btn-star-batch-toggle" onclick="toggleStarBatchMode()"><span
+                                class="fa fa-check-square-o"></span>批量操作</button>
+                        <div class="batch-actions" id="star-batch-actions" style="display:none;">
+                            <button class="button" onclick="starSelectAll(true)"><span
+                                    class="fa fa-check-square-o"></span>全选</button>
+                            <button class="button" onclick="starSelectAll(false)"><span
+                                    class="fa fa-square-o"></span>全不选</button>
+                            <span class="batch-bar-sep"></span>
+                            <button class="button" title="将勾选的歌曲添加到播放列表"
+                                onclick="starBatchAddToPlaying()"><span class="fa fa-plus-circle"></span>添加到播放列表</button>
+                            <button class="button" title="移动到其它收藏夹" onclick="starBatchMoveTo()"><span
+                                    class="fa fa-folder-open-o"></span>移动到…</button>
+                            <button class="button" title="从收藏夹移除" onclick="starBatchDelete()"><span
+                                    class="fa fa-trash"></span>移除</button>
+                            <span class="batch-bar-sep"></span>
+                            <button class="button" onclick="toggleStarBatchMode(false)"><span
+                                    class="fa fa-times"></span>完成</button>
+                        </div>
                     </div>
                     <div class="page-musiclist-list">
                         <div id="musiclist-loading-pane" class="loading-pane">
@@ -294,6 +324,25 @@
                     </div>
                 </div>
                 <div class="page-content">
+                    <div class="batch-bar" id="search-batch-bar">
+                        <button class="button" id="btn-batch-toggle" onclick="toggleBatchMode()"><span
+                                class="fa fa-check-square-o"></span>批量操作</button>
+                        <div class="batch-actions" id="batch-actions" style="display:none;">
+                            <button class="button" onclick="selectAllResults(true)"><span
+                                    class="fa fa-check-square-o"></span>全选</button>
+                            <button class="button" onclick="selectAllResults(false)"><span
+                                    class="fa fa-square-o"></span>全不选</button>
+                            <span class="batch-bar-sep"></span>
+                            <button class="button" title="将勾选的歌曲添加到播放列表"
+                                onclick="wantSearchListAddToList()"><span class="fa fa-plus-circle"></span>添加到播放列表</button>
+                            <button class="button" title="清空播放列表并播放勾选的歌曲"
+                                onclick="wantSearchListPlayNow()"><span class="fa fa-play-circle"></span>立即播放</button>
+                            <button class="button" title="将勾选的歌曲添加到收藏"
+                                onclick="wantSearchListAddToLoves()"><span class="fa fa-star"></span>添加收藏</button>
+                            <button class="button" onclick="toggleBatchMode(false)"><span
+                                    class="fa fa-times"></span>完成</button>
+                        </div>
+                    </div>
                     <div class="list-box">
                         <div id="search-loading-pane" class="loading-pane">
                             <div class="loading-pane-middle">
@@ -320,7 +369,16 @@
             </div>
             <div id="win-account" class="app-content-window">
                 <h1 class="fa fa-address-card win-fronter">个人中心</h1><br />
-                <h2 class="fa fa-star win-subtitle">收藏列表</h2><br />
+                <h2 class="fa fa-star win-subtitle" id="love-subtitle">收藏列表</h2>
+                <button title="手动排序收藏夹" class="button fa fa-arrows-v love-sort-btn" id="btn-love-sort"
+                    onclick="toggleLoveSort();"></button><br />
+                <div class="love-tools">
+                    <button class="button" onclick="loveExportFile();">导出备份</button>
+                    <button class="button" onclick="document.getElementById('love-import-file').click();">导入备份</button>
+                    <button class="button" onclick="loveCleanStale();">清理失效</button>
+                    <input type="file" id="love-import-file" accept=".json,application/json" style="display:none"
+                        onchange="loveImportFile(this);" />
+                </div><br />
                 <ul id="lover-displayer">
                     <div class="list-item">暂无项目</div>
                     <div class="list-item">暂无项目</div>
@@ -505,13 +563,13 @@
   <input type="text" name="" id="demo" value="" />
   <div id="res">接收到的服务器端消息显示区域</div>
   <script src="/public/event.js"></script> -->
-    <script src="./static/js/utils.js"></script>
-    <script src="./static/js/ui_settings.js"></script>
-    <script src="./static/js/app_ui.js"></script>
-    <script src="./static/js/app.js"></script>
-    <script src="./static/js/api_treat.js"></script>
-    <script src="./static/js/app_mp3player.js"></script>
-    <script src="./static/js/app_lrc.js"></script>
+    <script defer src="./static/js/utils.js"></script>
+    <script defer src="./static/js/ui_settings.js"></script>
+    <script defer src="./static/js/app_ui.js"></script>
+    <script defer src="./static/js/app.js"></script>
+    <script defer src="./static/js/api_treat.js"></script>
+    <script defer src="./static/js/app_mp3player.js"></script>
+    <script defer src="./static/js/app_lrc.js"></script>
 </body>
 
 </html>

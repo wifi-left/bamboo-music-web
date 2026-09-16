@@ -1,34 +1,141 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1">
     <title>下载歌曲</title>
-    <script src="./static/js/gbk2.min.js"></script>
-    <link href="./static/css/element_style.css" rel="stylesheet" />
     <style>
-        a {
+        :root {
+            --bg: #1e1e1e;
+            --panel: #262626;
+            --border: #3c3c3c;
+            --muted: #9a9a9a;
+            --accent: #0dba64;
+            --accent-hover: #0dd26f;
+            --link: #3f9ddb;
+            --link-hover: #5fb0e6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        #url{
             word-break: break-all;
         }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: #fff;
+            font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            padding: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--muted);
+            margin: 20px 0 6px 0;
+            user-select: none;
+        }
+
+        h1:first-child {
+            margin-top: 0;
+        }
+
+        .value {
+            display: inline-block;
+            padding: 8px 14px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            word-break: break-all;
+            max-width: 100%;
+        }
+
+        a.url {
+            display: inline-block;
+            margin: 4px 0;
+            text-decoration: none;
+            border-bottom: 1px solid var(--link);
+            color: var(--link);
+            transition: color 120ms ease, border-color 120ms ease;
+        }
+
+        a.url:hover {
+            color: var(--link-hover);
+            border-bottom-color: var(--link-hover);
+        }
+
+        .separator {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 4px 0 8px 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 320px;
+            padding: 12px;
+            background: #141414;
+            color: #cfcfcf;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            outline: none;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
     </style>
+    <script src="./static/js/gbk2.min.js"></script>
+
 </head>
 
 <body>
-    <h1 style="-webkit-user-select: none; -moz-user-select: none; user-select: none;">名称：</h1>
-    <p id="d-name">
+    <div class="container">
+        <h1>名称：</h1>
+        <span class="value" id="d-name"></span>
 
-    </p>
-    <h1 style="-webkit-user-select: none; -moz-user-select: none; user-select: none;">下载地址：</h1>
-    <a class="url" target="_blank" id="url" href='#' download=".mp3">加载中</a>
-    <h1>歌词 (若开启注音会默认显示)</h1>
-    编码 UTF-8：
-    <a class="url" target="_blank" id="lrcdown" href='#' download=".lrc">暂无歌词</a><br />
-    编码 GBK（老旧设备请使用此版本歌词）：
-    <a class="url" target="_blank" id="lrcdown_gbk" href='#' download=".lrc">暂无歌词</a>
-    <br />
-    <br />
-    <textarea style="width: 100%; height:400px;" id="lrcshow"></textarea>
+        <h1>下载地址：</h1>
+        <a class="#" target="_blank" id="url" href='#' download=".mp3">加载中</a>
+
+        <div class="separator"></div>
+
+        <h1>歌词（若开启注音会默认显示）</h1>
+        <p class="note">编码 UTF-8：</p>
+        <a class="url" target="_blank" id="lrcdown" href='#' download=".lrc">暂无歌词</a><br />
+        <p class="note">编码 GBK（老旧设备请使用此版本歌词）：</p>
+        <a class="url" target="_blank" id="lrcdown_gbk" href='#' download=".lrc">暂无歌词</a>
+        <div class="separator"></div>
+        <h1>歌词预览：</h1>
+        <textarea id="lrcshow"></textarea>
+    </div>
     <script>
 
         function getQueryString(name, url = window.location.search) {
@@ -42,7 +149,6 @@
         function utf8toGbk(text) {
             return new Uint8Array(GBK.encode(text)).buffer;
         }
-        // var url = `<?php echo $url; ?>`;
         document.getElementById("url").innerHTML = url;
         document.getElementById("url").href = url;
         document.getElementById("url").download = filename + ".mp3";
@@ -52,7 +158,7 @@
             lrc = "[00:00.00] 未在缓存中找到歌词";
         } else {
             lrc = JSON.parse(lrc);
-            lrc = JsonToLrc(lrc['ms']);
+            lrc = JsonToLrc(lrc['ms'], lrc['kuroDownload']);
         }
         var aFileParts = [lrc]; // 一个包含 DOMString 的数组
 
@@ -122,12 +228,13 @@
             return result;
         }
 
-        function JsonToLrc(json) {
-            var result = "";
+        function JsonToLrc(json, kuroDownload = false) {
+            let flag = kuroDownload;
+            result = "";
             for (var i = 0; i < json.length; i++) {
                 try {
                     var nl = json[i];
-                    result += (result == "" ? "" : "\r\n") + "[" + toLrcTime(nl.t) + "]" + (nl.tkuro ? "" + nl.tc + "" : nl.c);
+                    result += (result == "" ? "" : "\r\n") + "[" + toLrcTime(nl.t) + "]" + (nl.tkuro && kuroDownload ? "" + nl.tc + "" : nl.c);
                 } catch (e) {
                     console.error(e);
                 }

@@ -203,14 +203,6 @@
     padding: 0;
 }
 
-#pane-change-lrc {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    bottom: 56px;
-    padding: 0;
-    right: 112px;
-}
 
 input[type=range] {
     margin-top: 8px;
@@ -225,7 +217,23 @@ input[type=range] {
     background-size: 0% 100%;
     /*设置左右宽度比例*/
     height: 4px;
-    border-radius: 0px;
+    border-radius: 2px;
+    cursor: pointer;
+    touch-action: none;
+}
+
+input[type=range]::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    border: solid 1px #ffffff;
+}
+
+input[type=range]::-moz-range-track {
+    background: rgba(182, 182, 182, 0.5);
+    height: 4px;
+    border-radius: 2px;
 }
 
 .pane-music-name {
@@ -300,9 +308,9 @@ input[type=range]::-webkit-slider-thumb {
     /*外观设置为圆形*/
     border: solid 1px #ffffff;
     /*设置边框*/
+    transition: transform 120ms ease;
 }
 
-/* 
 input[type=range]::-webkit-slider-thumb:hover {
     background: #cfcfcf;
     border: solid 1px #b4b4b4;
@@ -311,30 +319,9 @@ input[type=range]::-webkit-slider-thumb:hover {
 input[type=range]::-webkit-slider-thumb:active {
     background: #a3a3a3;
     border: solid 1px #aaaaaa;
-} */
-#xc-next-music {
-    position: absolute;
-    right: 60px;
-    bottom: 4px;
+    transform: scale(1.15);
 }
 
-#xc-last-music {
-    position: absolute;
-    right: 172px;
-    bottom: 4px;
-}
-
-#xc-pause-music {
-    position: absolute;
-    right: 116px;
-    bottom: 4px;
-}
-
-#xc-show-player-pane {
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-}
 
 #music-lrc-info-text-name {
     font-weight: bold;
@@ -395,7 +382,6 @@ input[type=range]::-webkit-slider-thumb:active {
 
 #lrc-show-root {
     letter-spacing: -0.5em;
-    transition: 200ms;
     line-height: 0;
     position: absolute;
     top: 0;
@@ -410,13 +396,18 @@ input[type=range]::-webkit-slider-thumb:active {
     padding-top: calc(var(--lrc-client-height) / 2);
     padding-bottom: calc(var(--lrc-client-height) / 2);
     overflow: auto;
+    /* 把布局与重绘限制在歌词容器内：切行时不再牵动页面上其它元素 */
+    contain: layout paint;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
 }
 
 #lrc-show-root .lrc {
-    transition: 200ms;
+    /* 只过渡颜色与字号。字号会动画，但盒高（height/line-height）固定不变，
+       所以字号放大时后面的歌词一行都不会移动 —— 原来这三者一起过渡，切行时整列表要重排十几帧，
+       JS 还得去读 offsetTop 做补偿（那个 shrinkComp hack）。 */
+    transition: color 200ms, font-size 200ms;
     letter-spacing: 0;
     padding: 0;
     margin: 0;
@@ -438,14 +429,16 @@ input[type=range]::-webkit-slider-thumb:active {
 }
 
 #lrc-show-root .lrc-active {
-    /* transition: 250ms; */
+    /* 高亮行允许换行：长句能看全。
+       高度由 JS 量出"最终字号下的高度"后钉死（见 lrcPinActiveHeight），
+       所以字号放大的这 200ms 里盒子高度不变，后面的歌词不会被一帧一帧地重排。 */
+    transition: color 200ms, font-size 200ms;
     line-height: var(--sellineheight);
+    height: auto;
     font-size: var(--selfontsize);
     color: var(--sellrccolor);
-    word-break: normal;
     white-space: normal;
-    overflow: hidden;
-    height: auto;
+    word-break: normal;
 }
 
 .music-player-info-root {
@@ -649,7 +642,7 @@ input[type=range]::-webkit-slider-thumb:active {
         min-width: 188px;
         max-width: calc(100% - 260px);
         width: auto;
-        height: 128px;
+        height: 132px;
         overflow: auto;
         margin-top: 0px;
         vertical-align: middle;
@@ -840,9 +833,6 @@ input[type=range]::-webkit-slider-thumb:active {
         display: inline-block;
     }
 
-    .playing-display #show-other-control {
-        display: inline-block;
-    }
 
     #win-playing-host:fullscreen .page-head-music-player {
         display: none;
@@ -950,10 +940,6 @@ input[type=range]::-webkit-slider-thumb:active {
         display: none;
     }
 
-    #repeat-mode {
-        left: 48px;
-        bottom: 32px;
-    }
 
     #volume-set {
         display: none;
