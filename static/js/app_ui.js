@@ -255,9 +255,10 @@ function refrush_detail_list() {
     api_list_alarm(l_playlistid, l_type, true, 1);
 }
 // 搜索提示词：输入防抖（原来每敲一个字符就发一次请求，后端搜索只要十几毫秒，
-// 浪费的是"每字符一次网络往返 + 一次渲染"）
-var suggestKeyDebounced = debounceByKey(function (key) {
-    api_suggestKey(key);
+// 浪费的是"每字符一次网络往返 + 一次渲染"）。
+// debounceByKey 会把所有参数原样转给回调：第一个是防抖分组用的 key，搜索词在第二个位置上。
+var suggestKeyDebounced = debounceByKey(function (source, value) {
+    api_suggestKey(value);
 }, 140);
 searchBoxObj.oninput = (function () {
     suggestKeyDebounced("main", this.value);
@@ -1167,55 +1168,6 @@ function loveImportFile(input) {
         show_msg("导入完成，现有 " + loveTotalCount() + " 首", 2500);
     };
     reader.readAsText(file);
-}
-/** 清理失效条目：逐首问一次本地接口，返回 404 的就是已经搜不到的。 */
-function loveCleanStale() {
-    let ids = [];
-    let seen = new Set();
-    for (let k in userLoves) {
-        let lists = Array.isArray(userLoves[k].lists) ? userLoves[k].lists : [];
-        for (let i = 0; i < lists.length; i++) {
-            let id = String(lists[i].id);
-            if (seen.has(id)) continue;
-            seen.add(id);
-            ids.push(id);
-        }
-    }
-    if (ids.length === 0) { show_msg("收藏是空的", 1500); return; }
-    if (!confirm("将逐首检查 " + ids.length + " 首是否还能找到（会请求本地接口）。开始？")) return;
-    show_msg("正在检查 0 / " + ids.length + " …", 2000);
-    let stale = new Set();
-    let done = 0, idx = 0, running = 0;
-    let concurrency = 8;
-    let finish = function () {
-        if (stale.size === 0) { show_msg("没有发现失效条目", 2200); return; }
-        if (!confirm("发现 " + stale.size + " 首已经搜不到了，要移除它们吗？")) { show_msg("已取消", 1200); return; }
-        for (let k in userLoves) {
-            userLoves[k].lists = (userLoves[k].lists || []).filter(function (x) { return !stale.has(String(x.id)); });
-        }
-        ReloadLoveListUI();
-        saveUserLoves();
-        show_msg("已移除 " + stale.size + " 首失效条目", 2500);
-    };
-    let pump = function () {
-        while (running < concurrency && idx < ids.length) {
-            let id = ids[idx++];
-            running++;
-            $.fetch(localUrlRoot + "local.php?type=info&value=" + encodeURIComponent(id), "json")
-                .then(function (j) {
-                    if (j == null || j.code == 404 || j.data == null || j.data.info == null) stale.add(id);
-                })
-                .catch(function () { })
-                .then(function () {
-                    running--;
-                    done++;
-                    if (done % 10 === 0 || done === ids.length) show_msg("正在检查 " + done + " / " + ids.length + " …", 1200);
-                    if (done >= ids.length) finish();
-                    else pump();
-                });
-        }
-    };
-    pump();
 }
 
 function applyStarFilter(text) {
