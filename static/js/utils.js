@@ -172,6 +172,19 @@ function debounceByKey(fn, wait) {
     };
 }
 
+/* ---------------- 拦掉浏览器原生拖放 ----------------
+   Edge / Chromium 153 的回归 bug（Chromium issue 559347435 / 560749214）：
+   选中文本后按住拖动会触发浏览器原生「拖走选中的文本」，随后整个页面输入无响应
+   （鼠标点击、滚动、快捷键全失效），只能刷新恢复。官方给的页面侧规避就是拦掉 dragstart。
+   本应用没有依赖原生拖放的控件：手动排序走 pointer 事件，图片/链接也不需要被拖走。
+   文字照旧可以选中、复制，只是选中后再拖不会触发原生拖放。
+   注意：以后若要用 HTML5 拖放，给元素显式加 draggable="true"，下面的判断会放行。 */
+document.addEventListener("dragstart", function (e) {
+    let t = e.target;
+    if (t != null && t.closest != null && t.closest('[draggable="true"]') != null) return;
+    e.preventDefault();
+}, true);
+
 /* ---------------- 手动排序（拖动） ----------------
    把一次拖动做成一小组状态，落定后由调用方重排数组并重渲染。
    几个关键取舍（都踩过坑）：

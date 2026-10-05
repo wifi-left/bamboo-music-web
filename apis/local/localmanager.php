@@ -122,25 +122,21 @@ switch ($action) {
             echo '{"code":"402","msg":"提交的别名列表为空，已忽略。"}';
             break;
         }
-        $res = "";
+        // 记录格式（>path / |名字 / <）由 alias_encode_records() 统一编码：名字里的换行是
+        // 唯一能凭空造出一条 >path 记录、把整张表写坏的输入（粘贴多行文本时会发生），
+        // 编码函数负责剔除。
+        $pairs = array();
         for ($i = 0; $i < count($d); $i++) {
             $line = $d[$i];
-            if ($line) {
-                /*
-                文件结构：
-                >path
-                |名字
-                <
-                */
-                if (empty($line->path)) continue;
-                if (empty($line->name)) continue;
-                // 规范化路径，避免把双反斜杠写进别名表后匹配不上目录
-                $apath = normalize_dir_path($line->path);
-                if ($apath == "") continue;
-                $lineres = ">" . $apath . "\r\n|" . $line->name . "\r\n<";
-                $res .= ($res == "" ? "" : "\r\n") . $lineres;
-            }
+            if (!$line) continue;
+            if (empty($line->path)) continue;
+            if (empty($line->name)) continue;
+            // 规范化路径，避免把双反斜杠写进别名表后匹配不上目录
+            $apath = normalize_dir_path($line->path);
+            if ($apath == "") continue;
+            $pairs[] = array('path' => $apath, 'name' => (string)$line->name);
         }
+        $res = alias_encode_records($pairs);
         backupNamesFile();
         $mywritefile = fopen(cache_path('names.txt'), "w") or send_error("无法写入文件。");
         fwrite($mywritefile, $res);
